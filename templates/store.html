@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<!-- ১. স্ক্রলিং নোটিশ -->
+<div class="bg-emerald-50 border border-emerald-100 text-emerald-800 p-2.5 px-4 mb-4 rounded-xl flex items-center gap-2 shadow-sm">
+    <i class="fa-solid fa-bullhorn text-xs text-emerald-500"></i>
+    <marquee class="font-semibold text-xs tracking-wide" scrollamount="3">{{ notice }}</marquee>
+</div>
+
+<!-- ২. ইউজার ব্যালেন্স কার্ড -->
+<div class="minimal-card p-5 rounded-2xl mb-4 flex justify-between items-center bg-white border border-slate-200 shadow-sm">
+    <div>
+        <div class="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
+            <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+            <span>সক্রিয় প্রোফাইল</span>
+        </div>
+        <p class="text-base font-bold text-slate-800 mt-1 flex items-center gap-1">
+            <i class="fa-regular fa-user text-slate-400 text-sm"></i> {{ user.username }}
+        </p>
+    </div>
+    
+    <div class="text-right">
+        <span class="text-[9px] text-slate-400 uppercase tracking-wider font-bold">ব্যালেন্স</span>
+        <p class="text-2xl font-extrabold text-emerald-600">৳ {{ user.balance }}</p>
+    </div>
+</div>
+
+<!-- ৩. মাইনিং কন্ট্রোলার -->
+<div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+    <div class="flex justify-between items-center border-b border-slate-100 pb-3 mb-3">
+        <div class="flex items-center gap-1.5 text-slate-700">
+            <i class="fa-solid fa-microchip text-slate-400 text-xs"></i>
+            <h3 class="text-xs font-bold uppercase tracking-wider">মাইনিং প্যানেল</h3>
+        </div>
+        <button onclick="runClaim()" class="glow-btn-light bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs px-4 py-2 rounded-xl transition flex items-center gap-1.5">
+            <i class="fa-solid fa-rotate text-[10px] animate-spin"></i> CLAIM
+        </button>
+    </div>
+
+    <div id="claim-api-message" class="hidden p-3 text-xs rounded-xl text-center font-bold mb-3 border"></div>
+
+    <h4 class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2.5">চালু ডিভাইসসমূহ:</h4>
+    <div class="space-y-2">
+        {% for item in owned_packages %}
+        <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100">
+            <div class="flex items-center gap-2.5">
+                <div class="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
+                    <i class="fa-solid fa-server text-xs"></i>
+                </div>
+                <div>
+                    <p class="font-bold text-slate-700 text-xs">{{ item.packages.name }}</p>
+                    <p class="text-[9px] text-slate-400">রিটার্ন: ৳{{ item.packages.yield_amount }} | {{ item.packages.duration_hours }}h</p>
+                </div>
+            </div>
+            <span class="text-[9px] bg-emerald-50 text-emerald-600 border border-emerald-100 px-2.5 py-0.5 rounded-full font-bold">
+                Active
+            </span>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+async function runClaim() {
+    const alertBox = document.getElementById('claim-api-message');
+    alertBox.classList.add('hidden');
+    
+    const res = await fetch('/claim-mining', { method: 'POST' });
+    const data = await res.json();
+    
+    alertBox.classList.remove('hidden', 'bg-red-50', 'text-red-600', 'border-red-100', 'bg-emerald-50', 'text-emerald-600', 'border-emerald-100');
+    
+    if (data.status === 'success') {
+        alertBox.classList.add('bg-emerald-50', 'text-emerald-600', 'border-emerald-100');
+        alertBox.innerText = data.message;
+        setTimeout(() => { location.reload(); }, 1500);
+    } else {
+        alertBox.classList.add('bg-red-50', 'text-red-600', 'border-red-100');
+        alertBox.innerText = data.message;
+    }
+}
+</script>
+
+{% endblock %}
