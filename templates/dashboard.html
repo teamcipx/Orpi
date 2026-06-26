@@ -3,127 +3,187 @@
 
 <!-- ১. স্ক্রলিং নোটিশ -->
 <div class="bg-emerald-50 border border-emerald-100 text-emerald-800 p-2.5 px-4 mb-4 rounded-xl flex items-center gap-2 shadow-sm">
-    <i class="fa-solid fa-bullhorn text-xs text-emerald-500"></i>
+    <i class="fa-solid fa-bullhorn text-xs text-emerald-500 animate-bounce"></i>
     <marquee class="font-semibold text-xs tracking-wide" scrollamount="3">{{ notice }}</marquee>
 </div>
 
-<!-- ২. হোয়াইট ইউজার ব্যালেন্স কার্ড -->
-<div class="minimal-card p-5 rounded-2xl mb-4 flex justify-between items-center bg-white border border-slate-200 shadow-sm">
-    <div>
-        <div class="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
-            <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping"></span>
-            <span>সক্রিয় প্রোফাইল</span>
+<!-- ২. ইউজার প্রোফাইল এবং ব্যালেন্স কার্ড -->
+<div class="minimal-card p-4 rounded-2xl mb-4 flex items-center justify-between bg-white border border-slate-200 shadow-sm">
+    <div class="flex items-center gap-3">
+        <img src="{{ user.avatar_url }}" alt="Profile" class="w-12 h-12 rounded-full object-cover border border-slate-200">
+        <div>
+            <h2 class="text-sm font-bold text-slate-800 flex items-center gap-1">
+                {{ user.username }}
+            </h2>
+            <span class="text-[9px] bg-emerald-50 text-emerald-600 border border-emerald-100/50 px-2 py-0.5 rounded-full font-bold">Active Profile</span>
         </div>
-        <p class="text-base font-bold text-slate-800 mt-1 flex items-center gap-1">
-            <i class="fa-regular fa-user text-slate-400 text-sm"></i> {{ user.username }}
-        </p>
     </div>
-    
     <div class="text-right">
         <span class="text-[9px] text-slate-400 uppercase tracking-wider font-bold">ব্যালেন্স</span>
-        <p class="text-2xl font-extrabold text-emerald-600">৳ {{ user.balance }}</p>
+        <p class="text-xl font-extrabold text-emerald-600">৳ {{ user.balance }}</p>
     </div>
 </div>
 
-<!-- ৩. মাইনিং অ্যানিমেশন ও কন্ট্রোলার -->
+<!-- ৩. স্টাইলিশ টাইমার সহ মাইনিং টার্মিনাল -->
 <div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-4">
-    
-    <!-- লাইভ মাইনিং ৩ডি অ্যানিমেশন গেট -->
     <div class="flex flex-col items-center justify-center py-6 bg-slate-50 rounded-2xl border border-slate-100 relative overflow-hidden">
-        <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.06),transparent_60%)]"></div>
         
-        <!-- অ্যানিমেশন চিপ -->
-        <div class="w-16 h-16 rounded-2xl bg-white border-2 border-emerald-500/20 flex items-center justify-center relative shadow-lg z-10 animate-pulse">
-            <i class="fa-solid fa-microchip text-3xl text-emerald-500"></i>
-            <span class="absolute -top-1 -right-1 flex h-3 w-3">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+        <!-- কাউন্টডাউন ও ওয়াচ আইকন উইজেট -->
+        <div class="flex items-center gap-2 bg-white border border-slate-200 px-5 py-3 rounded-2xl shadow-sm z-10">
+            <div class="text-emerald-500 text-base animate-pulse">
+                <i class="fa-regular fa-clock"></i>
+            </div>
+            
+            {% for item in owned_packages %}
+            <!-- প্রথম সক্রিয় প্যাকেজের টাইমারটি হোমে কাউন্টডাউন হবে -->
+            {% if loop.first %}
+            <span class="countdown-timer text-lg font-black font-mono text-slate-800 tracking-wider" 
+                  data-last-claimed="{{ item.last_claimed_at }}" 
+                  data-duration="{{ item.packages.duration_hours }}">
+                00:00:00
             </span>
+            {% endif %}
+            {% endfor %}
         </div>
         
-        <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mt-4 z-10 flex items-center gap-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Cloud Mining System Active
+        <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-3 z-10">
+            Cloud Computing Core Engine
         </p>
     </div>
 
-    <div class="flex justify-between items-center border-t border-slate-100 pt-4">
-        <div class="flex items-center gap-1.5 text-slate-700">
-            <i class="fa-solid fa-bolt text-slate-400 text-xs"></i>
-            <h3 class="text-xs font-bold uppercase tracking-wider">রানিং হার্ডওয়্যার</h3>
-        </div>
-        <button onclick="runClaim()" class="glow-btn-light bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs px-5 py-2.5 rounded-xl transition flex items-center gap-1.5">
-            <i class="fa-solid fa-cube text-[10px] animate-spin"></i> CLAIM YIELD
+    <div class="flex justify-between items-center border-t border-slate-100 pt-3">
+        <span class="text-xs font-bold text-slate-700">ডিভাইস প্রসেসর</span>
+        <button onclick="runClaim()" class="glow-btn-light bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs px-4 py-2 rounded-xl transition flex items-center gap-1">
+            <i class="fa-solid fa-bolt text-[10px]"></i> CLAIM
         </button>
     </div>
-
     <div id="claim-api-message" class="hidden p-3 text-xs rounded-xl text-center font-bold border"></div>
+</div>
 
-    <!-- টাইমার সহ অ্যাক্টিভ ডিভাইসসমূহ -->
-    <div class="space-y-2">
-        {% for item in owned_packages %}
-        <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100">
-            <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
-                    <i class="fa-solid fa-server text-xs"></i>
-                </div>
-                <div>
-                    <p class="font-bold text-slate-700 text-xs">{{ item.packages.name }}</p>
-                    <p class="text-[9px] text-slate-400">প্রতি ক্লেইম: ৳{{ item.packages.yield_amount }}</p>
-                </div>
+<!-- ৪. হাইলাইট কুইক নেভিগেশন গ্রিড (অন্যান্য পেজ শর্টকাট) -->
+<div class="grid grid-cols-3 gap-3 my-4">
+    <a href="/history" class="minimal-card p-3 rounded-xl flex flex-col items-center justify-center text-center hover:border-slate-300 transition">
+        <i class="fa-solid fa-clock-rotate-left text-slate-500 text-sm mb-1.5"></i>
+        <span class="text-[9px] font-bold text-slate-600 uppercase tracking-wider">History</span>
+    </a>
+    <a href="https://t.me/YOUR_CHANNEL" target="_blank" class="minimal-card p-3 rounded-xl flex flex-col items-center justify-center text-center hover:border-slate-300 transition">
+        <i class="fa-brands fa-telegram text-sky-500 text-sm mb-1.5"></i>
+        <span class="text-[9px] font-bold text-slate-600 uppercase tracking-wider">Telegram</span>
+    </a>
+    <a href="/tasks" class="minimal-card p-3 rounded-xl flex flex-col items-center justify-center text-center hover:border-slate-300 transition">
+        <i class="fa-solid fa-list-check text-slate-500 text-sm mb-1.5"></i>
+        <span class="text-[9px] font-bold text-slate-600 uppercase tracking-wider">Task</span>
+    </a>
+    <a href="/referrals" class="minimal-card p-3 rounded-xl flex flex-col items-center justify-center text-center hover:border-slate-300 transition">
+        <i class="fa-solid fa-gift text-slate-500 text-sm mb-1.5"></i>
+        <span class="text-[9px] font-bold text-slate-600 uppercase tracking-wider">Refer</span>
+    </a>
+    <a href="/profile" class="minimal-card p-3 rounded-xl flex flex-col items-center justify-center text-center hover:border-slate-300 transition">
+        <i class="fa-solid fa-circle-user text-slate-500 text-sm mb-1.5"></i>
+        <span class="text-[9px] font-bold text-slate-600 uppercase tracking-wider">Account</span>
+    </a>
+    <a href="/withdraw" class="minimal-card p-3 rounded-xl flex flex-col items-center justify-center text-center hover:border-slate-300 transition">
+        <i class="fa-solid fa-money-bill-transfer text-slate-500 text-sm mb-1.5"></i>
+        <span class="text-[9px] font-bold text-slate-600 uppercase tracking-wider">Withdraw</span>
+    </a>
+</div>
+
+<!-- ৫. ইন্টারেক্টিভ লার্নিং ও হেল্প ব্যানারস -->
+<div class="space-y-3">
+    <!-- কীভাবে কাজ করবেন? ভিডিও -->
+    <a href="https://www.youtube.com/watch?v=YOUR_VIDEO_ID" target="_blank" class="minimal-card p-4 rounded-xl flex items-center justify-between hover:border-slate-300 transition bg-white border border-slate-200">
+        <div class="flex items-center gap-3">
+            <div class="text-red-500 text-lg">
+                <i class="fa-solid fa-circle-play"></i>
             </div>
-            
-            <!-- কাউন্টডাউন টাইমার কন্টেইনার -->
-            <div class="text-right">
-                <span class="text-[9px] text-slate-400 font-bold uppercase block">পরবর্তী ক্লেইম</span>
-                <!-- ডাটা এট্রিবিউটে পরবর্তী ক্লেইম এর সময় পাঠানো হচ্ছে (UTC ফরম্যাটে) -->
-                <span class="countdown-timer text-[11px] font-mono font-bold text-slate-700" 
-                      data-last-claimed="{{ item.last_claimed_at }}" 
-                      data-duration="{{ item.packages.duration_hours }}">
-                    00:00:00
-                </span>
+            <div>
+                <p class="font-bold text-slate-800 text-xs">কীভাবে কাজ করবেন?</p>
+                <p class="text-[9px] text-slate-400">সহজ নিয়মে কাজ শিখতে ভিডিও টিউটোরিয়ালটি দেখুন</p>
             </div>
         </div>
-        {% endfor %}
+        <span class="text-[9px] bg-red-50 text-red-600 border border-red-100 px-2 py-0.5 rounded-full font-bold">ভিডিও দেখুন</span>
+    </a>
+
+    <!-- রিভিউ দেখুন -->
+    <div class="minimal-card p-4 rounded-xl flex items-center justify-between bg-white border border-slate-200">
+        <div class="flex items-center gap-3">
+            <div class="text-amber-400 text-sm">
+                <i class="fa-solid fa-star"></i>
+            </div>
+            <div>
+                <p class="font-bold text-slate-800 text-xs">আমাদের মেম্বারদের রিভিউ</p>
+                <p class="text-[9px] text-slate-400">১০০% বিশ্বস্ত এবং নিয়মিত পেমেন্টকৃত আর্নিং প্ল্যাটফর্ম</p>
+            </div>
+        </div>
+        <div class="flex gap-0.5 text-amber-400 text-[10px]">
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+        </div>
     </div>
+
+    <!-- প্যাকেজ আপগ্রেড করুন -->
+    <a href="/store" class="minimal-card p-4 rounded-xl flex items-center justify-between hover:border-slate-300 transition bg-white border border-slate-200">
+        <div class="flex items-center gap-3">
+            <div class="text-purple-500 text-sm animate-bounce">
+                <i class="fa-solid fa-circle-arrow-up"></i>
+            </div>
+            <div>
+                <p class="font-bold text-slate-800 text-xs">প্যাকেজ আপগ্রেড করুন</p>
+                <p class="text-[9px] text-slate-400">ডিভাইস আপগ্রেড করে দৈনিক ইনকাম দ্বিগুণ করুন</p>
+            </div>
+        </div>
+        <span class="text-[9px] bg-purple-50 text-purple-600 border border-purple-100 px-2 py-0.5 rounded-full font-bold">আপগ্রেড</span>
+    </a>
+
+    <!-- টেলিগ্রাম সাপোর্ট -->
+    <a href="https://t.me/YOUR_SUPPORT_USERNAME" target="_blank" class="minimal-card p-4 rounded-xl flex items-center justify-between hover:border-slate-300 transition bg-white border border-slate-200">
+        <div class="flex items-center gap-3">
+            <div class="text-sky-500 text-sm">
+                <i class="fa-solid fa-headset"></i>
+            </div>
+            <div>
+                <p class="font-bold text-slate-800 text-xs">সাপোর্ট সেন্টার (Help Desk)</p>
+                <p class="text-[9px] text-slate-400">যেকোনো সমস্যা সমাধানে আমাদের টেলিগ্রাম এজেন্টের সাহায্য নিন</p>
+            </div>
+        </div>
+        <span class="text-[9px] bg-sky-50 text-sky-600 border border-sky-100 px-2 py-0.5 rounded-full font-bold">যোগাযোগ</span>
+    </a>
 </div>
 
 <script>
-// রিয়েল-টাইম কাউন্টডাউন স্ক্রিপ্ট
-function updateTimers() {
-    const timers = document.querySelectorAll('.countdown-timer');
+// রিয়েল-টাইম টাইমার স্ক্রিপ্ট
+function updateDashboardTimer() {
+    const timer = document.querySelector('.countdown-timer');
+    if (!timer) return;
+
     const now = new Date();
+    const lastClaimedStr = timer.getAttribute('data-last-claimed');
+    const durationHours = parseInt(timer.getAttribute('data-duration'));
 
-    timers.forEach(timer => {
-        const lastClaimedStr = timer.getAttribute('data-last-claimed');
-        const durationHours = parseInt(timer.getAttribute('data-duration'));
+    const lastClaimed = new Date(lastClaimedStr.replace('Z', '+00:00'));
+    const nextClaimTime = new Date(lastClaimed.getTime() + (durationHours * 60 * 60 * 1000));
+    
+    const diffMs = nextClaimTime - now;
 
-        // UTC ডেট অবজেক্ট তৈরি করা
-        const lastClaimed = new Date(lastClaimedStr.replace('Z', '+00:00'));
-        
-        // পরবর্তী ক্লেইমের সময় নির্ধারণ করা
-        const nextClaimTime = new Date(lastClaimed.getTime() + (durationHours * 60 * 60 * 1000));
-        
-        const diffMs = nextClaimTime - now;
+    if (diffMs <= 0) {
+        timer.innerText = "READY";
+        timer.classList.remove('text-slate-800');
+        timer.classList.add('text-emerald-500', 'animate-pulse');
+    } else {
+        const hours = Math.floor(diffMs / (1000 * 60 * 60));
+        const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
 
-        if (diffMs <= 0) {
-            timer.innerText = "Ready to Claim";
-            timer.classList.remove('text-slate-700');
-            timer.classList.add('text-emerald-500', 'animate-pulse');
-        } else {
-            const hours = Math.floor(diffMs / (1000 * 60 * 60));
-            const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
-
-            // ২ ডিজিটের ফরম্যাটে আউটপুট দেওয়া
-            const pad = (num) => String(num).padStart(2, '0');
-            timer.innerText = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
-        }
-    });
+        const pad = (num) => String(num).padStart(2, '0');
+        timer.innerText = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+    }
 }
 
-// প্রতি সেকেন্ডে টাইমার আপডেট করা
-setInterval(updateTimers, 1000);
-updateTimers();
+setInterval(updateDashboardTimer, 1000);
+updateDashboardTimer();
 
 async function runClaim() {
     const alertBox = document.getElementById('claim-api-message');
