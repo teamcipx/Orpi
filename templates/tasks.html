@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="space-y-4">
+    
+    <!-- ১. ওয়ান-টাইম টাস্ক সেকশন -->
+    <div class="minimal-card p-5 rounded-2xl bg-white">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-3 border-b border-slate-50 pb-2 flex items-center gap-1.5">
+            <i class="fa-solid fa-star text-emerald-500"></i> One-Time Tasks (একবার ক্লেইমযোগ্য)
+        </h2>
+        
+        <div id="ot-message" class="hidden p-2.5 text-[10px] rounded-lg border text-center mb-3"></div>
+
+        <div class="space-y-2.5">
+            <!-- টাস্ক ১: প্রোফাইল আপডেট -->
+            <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs">
+                <div>
+                    <p class="font-bold text-slate-700">১. আপনার প্রোফাইল সম্পূর্ণ করুন</p>
+                    <p class="text-[9px] text-slate-400 mt-0.5">শর্ত: নম্বর, বয়স এবং জেলা সেভ করুন</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-emerald-600 font-bold">৳ ৫.০০</span>
+                    {% if 'profile_update' in claimed_one_times %}
+                        <span class="text-[9px] bg-slate-200 text-slate-500 px-2 py-0.5 rounded-full font-bold">Claimed</span>
+                    {% else %}
+                        <button onclick="claimOneTime('profile_update')" class="bg-slate-900 hover:bg-slate-800 text-white text-[10px] font-bold px-3 py-1 rounded-xl transition">Claim</button>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- টাস্ক ২: টেলিগ্রাম জয়েন -->
+            <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs">
+                <div>
+                    <p class="font-bold text-slate-700">২. অফিসিয়াল টেলিগ্রাম চ্যানেলে যুক্ত হন</p>
+                    <a href="https://t.me/YOUR_CHANNEL" target="_blank" class="text-[9px] text-blue-500 hover:underline font-bold mt-0.5 inline-block">চ্যানেল লিংক <i class="fa-solid fa-external-link text-[8px]"></i></a>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-emerald-600 font-bold">৳ ৫.০০</span>
+                    {% if 'join_channel' in claimed_one_times %}
+                        <span class="text-[9px] bg-slate-200 text-slate-500 px-2 py-0.5 rounded-full font-bold">Claimed</span>
+                    {% else %}
+                        <button onclick="claimOneTime('join_channel')" class="bg-slate-900 hover:bg-slate-800 text-white text-[10px] font-bold px-3 py-1 rounded-xl transition">Claim</button>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- টাস্ক ৩: টিউটোরিয়াল ভিডিও -->
+            <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs">
+                <div>
+                    <p class="font-bold text-slate-700">৩. আমাদের টিউটোরিয়াল ভিডিওটি সম্পূর্ণ দেখুন</p>
+                    <a href="https://youtube.com" target="_blank" class="text-[9px] text-red-500 hover:underline font-bold mt-0.5 inline-block">টিউটোরিয়াল লিংক <i class="fa-solid fa-external-link text-[8px]"></i></a>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-emerald-600 font-bold">৳ ৫.০০</span>
+                    {% if 'watch_tutorial' in claimed_one_times %}
+                        <span class="text-[9px] bg-slate-200 text-slate-500 px-2 py-0.5 rounded-full font-bold">Claimed</span>
+                    {% else %}
+                        <button onclick="claimOneTime('watch_tutorial')" class="bg-slate-900 hover:bg-slate-800 text-white text-[10px] font-bold px-3 py-1 rounded-xl transition">Claim</button>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- টাস্ক ৪: ৩ রেফারেল -->
+            <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs">
+                <div>
+                    <p class="font-bold text-slate-700">৪. ৩ জন মেম্বার সফলভাবে রেফার করুন</p>
+                    <p class="text-[9px] text-slate-400 mt-0.5">আপনার বর্তমান রেফারেল: {{ success_ref_count }} / 3</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-emerald-600 font-bold">৳ ৫০.০০</span>
+                    {% if 'refer_3' in claimed_one_times %}
+                        <span class="text-[9px] bg-slate-200 text-slate-500 px-2 py-0.5 rounded-full font-bold">Claimed</span>
+                    {% else %}
+                        <button onclick="claimOneTime('refer_3')" class="bg-slate-900 hover:bg-slate-800 text-white text-[10px] font-bold px-3 py-1 rounded-xl transition">Claim</button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ২. নরমাল টাস্ক সেকশন (এডমিনের প্যানেল থেকে প্রাপ্ত) -->
+    <div class="minimal-card p-5 rounded-2xl bg-white">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-3 border-b border-slate-50 pb-2 flex items-center gap-1.5">
+            <i class="fa-solid fa-list-check text-slate-500"></i> Daily Task Pool (নরমাল টাস্কসমূহ)
+        </h2>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="p-2.5 mb-3 text-[10px] rounded-lg border text-center {% if category == 'success' %}bg-emerald-50 text-emerald-600 border-emerald-100{% else %}bg-red-50 text-red-600 border-red-100{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="space-y-4">
+            {% for task in all_normal_tasks %}
+            <div class="border border-slate-100 p-4 rounded-xl bg-slate-50/50 space-y-3">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="text-xs font-bold text-slate-800">{{ task.title }}</h3>
+                        <p class="text-[10px] text-slate-400 mt-0.5">{{ task.description }}</p>
+                    </div>
+                    <span class="text-xs font-bold text-emerald-600">৳ {{ task.reward }}</span>
+                </div>
+                
+                <a href="{{ task.link }}" target="_blank" class="text-[10px] text-blue-500 hover:underline font-bold inline-block">কাজের লিংকটি খুলুন <i class="fa-solid fa-external-link text-[8px]"></i></a>
+                
+                <!-- প্রুফ সাবমিশন স্ট্যাটাস অনুযায়ী ভিউ পরিবর্তন -->
+                {% if task.id in submission_map %}
+                    <div class="text-center py-2">
+                        <span class="text-[9px] uppercase font-bold px-3 py-1 rounded-full {% if submission_map[task.id] == 'Pending' %}bg-yellow-50 text-yellow-600 border border-yellow-100{% elif submission_map[task.id] == 'Approved' %}bg-emerald-50 text-emerald-600 border border-emerald-100{% else %}bg-red-50 text-red-600 border-red-100{% endif %}">
+                            Status: {{ submission_map[task.id] }}
+                        </span>
+                    </div>
+                {% else %}
+                    <!-- প্রুফ স্ক্রিনশট আপলোড ফরম -->
+                    <form action="/tasks/submit-normal" method="POST" class="pt-2 border-t border-slate-100 space-y-2">
+                        <input type="hidden" name="task_id" value="{{ task.id }}">
+                        <input type="hidden" name="proof_image_url" id="proof-input-{{ task.id }}">
+                        
+                        <div class="flex items-center gap-3">
+                            <label for="file-{{ task.id }}" class="cursor-pointer bg-slate-200 hover:bg-slate-300 text-slate-700 text-[10px] font-bold px-3 py-1.5 rounded-lg transition flex items-center gap-1">
+                                <i class="fa-solid fa-image"></i> Screenshot Upload
+                            </label>
+                            <input type="file" id="file-{{ task.id }}" class="hidden" accept="image/*" onchange="uploadProof(this, '{{ task.id }}')">
+                            
+                            <span id="label-{{ task.id }}" class="text-[9px] text-slate-400 font-medium">প্রুফ আপলোড করা হয়নি</span>
+                        </div>
+                        
+                        <button type="submit" id="submit-{{ task.id }}" disabled class="w-full bg-slate-300 cursor-not-allowed text-white text-[10px] font-bold py-2 rounded-xl transition">কাজটি জমা দিন</button>
+                    </form>
+                {% endif %}
+            </div>
+            {% else %}
+            <p class="text-xs text-slate-400 text-center py-4">এই মুহূর্তে কোনো কাজ উপলব্ধ নেই।</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+// ১. ওয়ান-টাইম ক্লেইম স্ক্রিপ্ট
+async function claimOneTime(taskName) {
+    const msg = document.getElementById('ot-message');
+    msg.classList.add('hidden');
+    
+    const res = await fetch('/tasks/claim-one-time', {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ task_name: taskName })
+    });
+    const data = await res.json();
+    
+    msg.classList.remove('hidden', 'bg-red-50', 'text-red-600', 'border-red-100', 'bg-emerald-50', 'text-emerald-600', 'border-emerald-100');
+    
+    if (data.status === 'success') {
+        msg.classList.add('bg-emerald-50', 'text-emerald-600', 'border-emerald-100');
+        msg.innerText = data.message;
+        setTimeout(() => { location.reload(); }, 1500);
+    } else {
+        msg.classList.add('bg-red-50', 'text-red-600', 'border-red-100');
+        msg.innerText = data.message;
+    }
+}
+
+// ২. নরমাল টাস্কের জন্য ImgBB প্রুফ আপলোড স্ক্রিপ্ট
+async function uploadProof(input, taskId) {
+    const file = input.files[0];
+    if (!file) return;
+
+    // আপনার ImgBB API Key টি নিচে বসিয়ে দিন
+    const IMGBB_API_KEY = "YOUR_IMGBB_API_KEY"; 
+
+    if (IMGBB_API_KEY === "1cb6f7d4b65dfd982d0435de86bb8aff") {
+        alert("দয়া করে কোডের IMGBB_API_KEY পরিবর্তন করুন।");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const label = document.getElementById(`label-${taskId}`);
+    const submitBtn = document.getElementById(`submit-${taskId}`);
+    label.innerText = "আপলোড হচ্ছে...";
+
+    try {
+        const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+            method: "POST",
+            body: formData
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            document.getElementById(`proof-input-${taskId}`).value = data.data.url;
+            label.innerText = "সফলভাবে আপলোড হয়েছে! ✓";
+            label.className = "text-[9px] text-emerald-500 font-bold";
+            
+            // সাবমিট বাটন সক্রিয় করা
+            submitBtn.removeAttribute('disabled');
+            submitBtn.className = "w-full bg-slate-950 hover:bg-slate-800 text-white text-[10px] font-bold py-2 rounded-xl transition cursor-pointer";
+        } else {
+            label.innerText = "আপলোড ব্যর্থ হয়েছে।";
+            label.className = "text-[9px] text-red-500 font-bold";
+        }
+    } catch (e) {
+        label.innerText = "কানেকশন ত্রুটি!";
+    }
+}
+</script>
+
+{% endblock %}
