@@ -51,8 +51,8 @@ def login():
             
         flash("ভুল ইমেইল অথবা পাসওয়ার্ড।", "danger")
     return render_template('login.html')
+# (অন্যান্য রাউট ও কনফিগারেশন অপরিবর্তিত থাকবে, কেবল /register রাউটটি নিচে আপডেট করা হলো)
 
-# ২. রেজিস্ট্রেশন রাউট
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     ref_by = request.args.get('ref', '')
@@ -64,11 +64,22 @@ def register():
 
         hashed_password = generate_password_hash(password)
         
+        # ডিফল্ট ব্যালেন্স ০ টাকা (যদি কোনো রেফারেল না থাকে)
+        initial_balance = 0.00
+        referrer_id = None
+
+        # রেফারার ইউজারনেম ডাটাবেজে সঠিক কিনা তা যাচাই করা
+        if referrer_name:
+            referrer_res = supabase.table("users").select("id").eq("username", referrer_name).execute()
+            if referrer_res.data:
+                referrer_id = referrer_res.data[0]['id']
+                initial_balance = 100.00  # রেফারেল লিংকে আসলে কেবল ১০০ টাকা বোনাস পাবেন
+        
         user_data = {
             "username": username,
             "email": email,
             "password_hash": hashed_password,
-            "balance": 100.00  # জয়েনিং বোনাস ১০০ টাকা
+            "balance": initial_balance
         }
         
         try:
@@ -76,28 +87,23 @@ def register():
             if new_user_res.data:
                 new_user_id = new_user_res.data[0]['id']
                 
-                # রেজিস্ট্রেশন করার সাথে সাথে ডিফল্ট ফ্রি প্যাকেজ অ্যাসাইন করা
+                # ডিফল্ট ফ্রি প্যাকেজ অ্যাসাইন করা
                 supabase.table("user_packages").insert({
                     "user_id": new_user_id,
                     "package_id": 1
                 }).execute()
                 
-                # রেফারেল ট্র্যাকিং প্রসেস
-                if referrer_name:
-                    referrer_res = supabase.table("users").select("id").eq("username", referrer_name).execute()
-                    if referrer_res.data:
-                        referrer_id = referrer_res.data[0]['id']
-                        
-                        # ৪৮ থেকে ৬২ ঘণ্টার মধ্যে যেকোনো র্যান্ডম পেমেন্ট টাইম নির্ধারণ
-                        random_hours = random.randint(48, 62)
-                        scheduled_time = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=random_hours)
-                        
-                        supabase.table("referrals").insert({
-                            "referrer_id": referrer_id,
-                            "referred_id": new_user_id,
-                            "status": "Processing",
-                            "scheduled_payout_at": scheduled_time.isoformat()
-                        }).execute()
+                # যদি রেফারার আইডি ভ্যালিড থাকে, তবে রেফারেল ট্র্যাকিং টেবিল আপডেট করা
+                if referrer_id:
+                    random_hours = random.randint(48, 62)
+                    scheduled_time = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=random_hours)
+                    
+                    supabase.table("referrals").insert({
+                        "referrer_id": referrer_id,
+                        "referred_id": new_user_id,
+                        "status": "Processing",
+                        "scheduled_payout_at": scheduled_time.isoformat()
+                    }).execute()
                         
                 flash("নিবন্ধন সফল হয়েছে। লগইন করুন।", "success")
                 return redirect(url_for('login'))
@@ -105,7 +111,7 @@ def register():
             flash("ইউজারনেম অথবা ইমেইলটি ইতিমধ্যে ব্যবহৃত হয়েছে।", "danger")
             
     return render_template('register.html', ref_by=ref_by)
-
+    
 # ৩. ড্যাশবোর্ড রাউট
 @app.route('/dashboard')
 def dashboard():
