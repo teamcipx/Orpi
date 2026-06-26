@@ -118,6 +118,20 @@ def admin_dashboard():
                            users_list=users_list,
                            search_query=search_query)
 
+# (অন্যান্য রাউটের সাথে নিচের নতুন রাউটটি যুক্ত করুন)
+
+@app.route('/history')
+def history():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+        
+    # ডিপোজিট এবং উইথড্রয়াল ডাটা রিট্রিভ করা
+    deposits = supabase.table("deposits").select("*").eq("user_id", user_id).order("created_at", desc=True).execute().data
+    withdrawals = supabase.table("withdrawals").select("*").eq("user_id", user_id).order("created_at", desc=True).execute().data
+    
+    return render_template('history.html', deposits=deposits, withdrawals=withdrawals)
+    
 
 @app.route('/admin/user-action', methods=['POST'])
 def admin_user_action():
