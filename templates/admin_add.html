@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Task Management</title>
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #F8FAFC; }
+        .minimal-card {
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+        }
+    </style>
+</head>
+<body class="text-[#0F172A] min-h-screen">
+
+    <nav class="bg-white border-b border-slate-100 py-3.5 px-4 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <span class="text-sm font-extrabold tracking-wider text-slate-800">
+                <i class="fa-solid fa-list-check text-emerald-500 mr-1"></i> OPTIWORK TASK MANAGEMENT
+            </span>
+            <div class="flex space-x-4">
+                <a href="/admin" class="text-xs font-bold text-slate-500 hover:text-slate-900"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+                <a href="/dashboard" class="text-xs font-bold text-slate-500 hover:text-slate-900"><i class="fa-solid fa-home"></i> App</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto p-4 space-y-6">
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="p-3 text-xs text-center rounded-xl border {% if category == 'success' %}bg-emerald-50 text-emerald-600 border-emerald-100{% else %}bg-red-50 text-red-600 border-red-100{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- ১. নতুন নরমাল টাস্ক অ্যাড ফরম -->
+        <div class="minimal-card p-6 rounded-2xl bg-white">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-4 border-b border-slate-50 pb-2 flex items-center gap-1.5">
+                <i class="fa-solid fa-circle-plus text-slate-400"></i> নতুন নরমাল টাস্ক যুক্ত করুন
+            </h2>
+            <form action="/admin/add" method="POST" class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">টাস্ক টাইটেল</label>
+                        <input type="text" name="title" required placeholder="যেমন: টেলিগ্রাম চ্যানেলে জয়েন করুন" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-slate-300">
+                    </div>
+                    <div>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">রিওয়ার্ড অ্যামাউন্ট (৳)</label>
+                        <input type="number" step="0.1" name="reward" required placeholder="5.0" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-slate-300">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">লিংক</label>
+                    <input type="url" name="link" required placeholder="https://example.com" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-slate-300">
+                </div>
+                <div>
+                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">ডেসক্রিপশন / নির্দেশাবলী</label>
+                    <textarea name="description" required placeholder="যেমন: জয়েন করার পর কাজের প্রুফ হিসেবে স্ক্রিনশট দিন..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-slate-300 h-20"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-slate-950 hover:bg-slate-800 text-white font-extrabold text-xs py-2.5 rounded-xl transition">
+                    টাস্কটি সেভ করুন
+                </button>
+            </form>
+        </div>
+
+        <!-- ২. পেন্ডিং প্রুফ ভেরিফিকেশন প্যানেল -->
+        <div class="minimal-card p-6 rounded-2xl bg-white">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-4 border-b border-slate-50 pb-2 flex items-center gap-1.5">
+                <i class="fa-solid fa-clock-rotate-left text-slate-400"></i> পেন্ডিং টাস্ক ভেরিফিকেশন প্যানেল
+            </h2>
+            <div class="space-y-4">
+                {% for sub in pending_submissions %}
+                <div class="border border-slate-100 p-4 rounded-xl bg-slate-50/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-xs">
+                    <div class="space-y-1.5">
+                        <p class="font-bold text-slate-800 text-xs">{{ sub.tasks.title }}</p>
+                        <p class="text-[9px] text-slate-500">ইউজার: <span class="font-bold">{{ sub.users.username }}</span> ({{ sub.users.email }})</p>
+                        <p class="text-[9px] text-emerald-600 font-bold">রিওয়ার্ড: ৳ {{ sub.tasks.reward }}</p>
+                        <!-- প্রুফ ইমেজ লিংক এবং ক্লিক টু ভিউ -->
+                        <a href="{{ sub.proof_image_url }}" target="_blank" class="text-[10px] text-blue-500 font-bold hover:underline inline-block mt-1">প্রুফ স্ক্রিনশট দেখুন (Click to View) <i class="fa-solid fa-external-link text-[8px]"></i></a>
+                    </div>
+                    
+                    <div class="flex gap-2 w-full sm:w-auto">
+                        <!-- এপ্রুভ ফর্ম -->
+                        <form action="/admin/task-action" method="POST" class="w-full sm:w-auto">
+                            <input type="hidden" name="submission_id" value="{{ sub.id }}">
+                            <input type="hidden" name="action" value="approve">
+                            <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-[10px] px-4 py-2 rounded-lg transition">Approve</button>
+                        </form>
+                        <!-- রিজেক্ট ফর্ম -->
+                        <form action="/admin/task-action" method="POST" class="w-full sm:w-auto">
+                            <input type="hidden" name="submission_id" value="{{ sub.id }}">
+                            <input type="hidden" name="action" value="reject">
+                            <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold text-[10px] px-4 py-2 rounded-lg transition">Reject</button>
+                        </form>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-xs text-slate-400 text-center py-4">বর্তমানে কোনো টাস্ক ভেরিফিকেশন পেন্ডিং নেই।</p>
+                {% endfor %}
+            </div>
+        </div>
+
+    </main>
+
+</body>
+</html>
