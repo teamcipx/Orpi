@@ -53,6 +53,71 @@ def login():
     return render_template('login.html')
 # (অন্যান্য রাউট ও কনফিগারেশন অপরিবর্তিত থাকবে, কেবল /register রাউটটি নিচে আপডেট করা হলো)
 
+
+# (অন্যান্য কোড অপরিবর্তিত থাকবে, উইথড্রয়াল সম্পর্কিত নতুন রাউটটি নিচে যুক্ত করুন)
+
+@app.route('/withdraw', methods=['GET', 'POST'])
+def withdraw():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+        
+    # ১. ইউজারের ব্যালেন্স এবং তথ্য নেওয়া
+    user = supabase.table("users").select("*").eq("id", user_id).execute().data[0]
+    balance = float(user['balance'])
+    
+    # ২. সফল রেফারেলের সংখ্যা বের করা (status = 'Success')
+    success_refs_query = supabase.table("referrals") \
+        .select("id") \
+        .eq("referrer_id", user_id) \
+        .eq("status", "Success") \
+        .execute().data
+    success_ref_count = len(success_refs_query)
+    
+    # ৩. শর্তসমূহ পরীক্ষা
+    meets_referral_cond = (success_ref_count >= 3)
+    meets_balance_cond = (balance >= 400.00)
+    can_withdraw = (meets_referral_cond and meets_balance_cond)
+    
+    if request.method == 'POST':
+        amount = float(request.form.get('amount'))
+        method = request.form.get('method')
+        number = request.form.get('number')
+        
+        if not can_withdraw:
+            flash("উইথড্র করার শর্তসমূহ পূরণ হয়নি।", "danger")
+        elif amount < 400.00:
+            flash("সর্বনিম্ন উইথড্রয়াল পরিমাণ ৪০০ টাকা।", "danger")
+        elif amount > balance:
+            flash("আপনার অ্যাকাউন্টে পর্যাপ্ত ব্যালেন্স নেই।", "danger")
+        else:
+            # ব্যালেন্স বিয়োগ করা
+            supabase.rpc("increment_balance", {"user_id": user_id, "amount": -amount}).execute()
+            
+            # উইথড্রয়াল রিকোয়েস্ট তৈরি
+            supabase.table("withdrawals").insert({
+                "user_id": user_id,
+                "amount": amount,
+                "payment_method": method,
+                "payment_number": number,
+                "status": "Pending"
+            }).execute()
+            
+            flash("উইথড্রয়াল অনুরোধ সফলভাবে সাবমিট হয়েছে।", "success")
+            return redirect(url_for('withdraw'))
+            
+    # ইউজারের নিজস্ব উইথড্রয়াল হিস্ট্রি রিট্রিভ করা
+    history = supabase.table("withdrawals").select("*").eq("user_id", user_id).order("created_at", desc=True).execute().data
+    
+    return render_template('withdrawal.html', 
+                           user=user, 
+                           balance=balance,
+                           success_ref_count=success_ref_count,
+                           meets_referral_cond=meets_referral_cond,
+                           meets_balance_cond=meets_balance_cond,
+                           can_withdraw=can_withdraw,
+                           history=history)
+    
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     ref_by = request.args.get('ref', '')
