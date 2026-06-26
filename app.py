@@ -174,16 +174,176 @@ def admin_user_action():
 
 
 # (অন্যান্য কোডের সাথে নিচের নতুন রাউটগুলো যুক্ত করুন)
+# (অন্যান্য কোডের সাথে নিচের নতুন রাউটগুলো যুক্ত করুন)
 
-# ১. টাস্ক পেজ রাউট
+# ১. টাস্ক পেজ ভিউ রাউট
 @app.route('/tasks')
 def tasks():
     user_id = session.get('user_id')
     if not user_id:
         return redirect(url_for('login'))
-    return render_template('tasks.html')
+        
+    user = supabase.table("users").select("*").eq("id", user_id).execute().data[0]
+    
+    # ইউজার ইতিমধ্যে ক্লেইম করা ওয়ান-টাইম টাস্কগুলোর তালিকা
+    completed_one_times = supabase.table("user_one_time_tasks") \
+        .select("task_name").eq("user_id", user_id).execute().data
+    claimed_one_times = [t['task_name'] for t in completed_one_times]
+    
+    # সফল রেফারেল সংখ্যা যাচাই
+    success_refs_query = supabase.table("referrals").select("id").eq("referrer_id", user_id).eq("status", "Success").execute().data
+    success_ref_count = len(success_refs_query)
+    
+    # প্রোফাইল সম্পূর্ণ করা হয়েছে কিনা যাচাই করা (নম্বর, বয়স, জেলা খালি না থাকলে True)
+    is_profile_complete = bool(user.get('phone_number') and user.get('age') and user.get('district'))
+    
+    # এডমিনের তৈরি সমস্ত অ্যাক্টিভ নরমাল টাস্কসমূহ
+    all_normal_tasks = supabase.table("tasks").select("*").order("created_at", desc=True).execute().data
+    
+    # ইউজারের সাবমিট করা পূর্ববর্তী নরমাল টাস্কের ডাটা
+    submissions = supabase.table("task_submissions").select("task_id, status").eq("user_id", user_id).execute().data
+    submission_map = {s['task_id']: s['status'] for s in submissions}
+
+    return render_template('tasks.html', 
+                           claimed_one_times=claimed_one_times,
+                           success_ref_count=success_ref_count,
+                           is_profile_complete=is_profile_complete,
+                           all_normal_tasks=all_normal_tasks,
+                           submission_map=submission_map)
 
 
+# ২. ওয়ান-টাইম টাস্ক ক্লেইম এপিআই
+@app.route('/tasks/claim-one-time', methods=['POST'])
+def claim_one_time():
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"status": "error", "message": "Unauthorized"}), 401
+        
+    task_name = request.json.get('task_name')
+    user = supabase.table("users").select("*").eq("id", user_id).execute().data[0]
+    
+    # ইতিমধ্যে ক্লেইম করা হয়েছে কিনা যাচাই
+    exists = supabase.table("user_one_time_tasks").select("id").eq("user_id", user_id).eq("task_name", task_name).execute().data
+    if exists:
+        return jsonify({"status": "error", "message": "এই টাস্কটি ইতিমধ্যে ক্লেইম করা হয়েছে।"})
+        
+    reward = 0.00
+    
+    if task_name == 'profile_update':
+        if user.get('phone_number') and user.get('age') and user.get('district'):
+            reward = 5.00
+        else:
+            return jsonify({"status": "error", "message": "আপনার প্রোফাইলের সব তথ্য এখনও পূর্ণ করা হয়নি।"})
+            
+    elif task_name == 'join_channel':
+        reward = 5.00 # ডিরেক্ট ক্লিক ক্লেইম
+        
+    elif task_name == 'watch_tutorial':
+        reward = 5.00 # ডিরেক্ট ক্লিক ক্লেইম
+        
+    elif task_name == 'refer_3':
+        success_refs_query = supabase.table("referrals").select("id").eq("referrer_id", user_id).eq("status", "Success").execute().data
+        if len(success_refs_query) >= 3:
+            reward = 50.00
+        else:
+            return jsonify({"status": "error", "message": "আপনার এখনো ৩টি সফল রেফারেল সম্পন্ন হয়নি।"})
+    else:
+        return jsonify({"status": "error", "message": "অবৈধ টাস্ক রিকোয়েস্ট। "})
+        
+    # বোনাস যোগ করা এবং ট্র্যাক করা
+    supabase.rpc("increment_balance", {"user_id": user_id, "amount": reward}).execute()
+    supabase.table("user_one_time_tasks").insert({"user_id": user_id, "task_name": task_name}).execute()
+    
+    return jsonify({"status": "success", "message": f"সফলভাবে ক্লেইমড! আপনার ব্যালেন্সে ৳ {reward} যোগ করা হয়েছে। "})
+
+
+# ৩. নরমাল টাস্ক সাবমিট এপিআই
+@app.route('/tasks/submit-normal', methods=['POST'])
+def submit_normal():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+        
+    task_id = request.form.get('task_id')
+    proof_url = request.form.get('proof_image_url')
+    
+    if not proof_url:
+        flash("দয়া করে কাজের প্রুফ (স্ক্রিনশট) আপলোড করুন।", "danger")
+        return redirect(url_for('tasks'))
+        
+    try:
+        supabase.table("task_submissions").insert({
+            "user_id": user_id,
+            "task_id": task_id,
+            "proof_image_url": proof_url,
+            "status": "Pending"
+        }).execute()
+        flash("কাজের প্রুফ সফলভাবে জমা দেওয়া হয়েছে। এডমিন ভেরিফাই করবে।", "success")
+    except Exception:
+        flash("এই কাজটি আপনি ইতিমধ্যে একবার জমা দিয়েছেন।", "danger")
+        
+    return redirect(url_for('tasks'))
+
+
+# ৪. এডমিন টাস্ক প্যানেল (/admin/add)
+@app.route('/admin/add', methods=['GET', 'POST'])
+def admin_add_task():
+    if not check_admin_auth():
+        return "Unauthorized Access", 403
+        
+    if request.method == 'POST':
+        title = request.form.get('title')
+        description = request.form.get('description')
+        link = request.form.get('link')
+        reward = float(request.form.get('reward'))
+        
+        supabase.table("tasks").insert({
+            "title": title,
+            "description": description,
+            "link": link,
+            "reward": reward
+        }).execute()
+        flash("নতুন নরমাল টাস্কটি সফলভাবে ডাটাবেজে যুক্ত হয়েছে।", "success")
+        return redirect(url_for('admin_add_task'))
+        
+    # পেন্ডিং প্রুফ সাবমিশনসমূহ রিট্রিভ করা (ভেরিফিকেশনের জন্য)
+    pending_submissions = supabase.table("task_submissions") \
+        .select("id, proof_image_url, status, created_at, users(username, email), tasks(title, reward)") \
+        .eq("status", "Pending").execute().data
+        
+    return render_template('admin_add.html', pending_submissions=pending_submissions)
+
+
+# ৫. এডমিন সাবমিশন এপ্রুভ/রিজেক্ট অ্যাকশন
+@app.route('/admin/task-action', methods=['POST'])
+def admin_task_action():
+    if not check_admin_auth():
+        return "Unauthorized Action", 403
+        
+    submission_id = request.form.get('submission_id')
+    action = request.form.get('action') # 'approve' or 'reject'
+    
+    submission = supabase.table("task_submissions").select("*, tasks(reward)").eq("id", submission_id).execute().data
+    if not submission:
+        flash("সাবমিশন ডাটা পাওয়া যায়নি।", "danger")
+        return redirect(url_for('admin_add_task'))
+        
+    sub = submission[0]
+    user_id = sub['user_id']
+    reward = float(sub['tasks']['reward'])
+    
+    if action == 'approve':
+        # স্ট্যাটাস Approved করা এবং ব্যালেন্স যোগ করা
+        supabase.table("task_submissions").update({"status": "Approved"}).eq("id", submission_id).execute()
+        supabase.rpc("increment_balance", {"user_id": user_id, "amount": reward}).execute()
+        flash("টাস্ক সাবমিশন এপ্রুভ এবং ইউজারকে রিওয়ার্ড দেওয়া হয়েছে।", "success")
+    elif action == 'reject':
+        # স্ট্যাটাস Rejected করা
+        supabase.table("task_submissions").update({"status": "Rejected"}).eq("id", submission_id).execute()
+        flash("টাস্ক সাবমিশন বাতিল (Rejected) করা হয়েছে।", "success")
+        
+    return redirect(url_for('admin_add_task'))
+    
 # ২. প্রোফাইল/অ্যাকাউন্ট পেজ রাউট
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
