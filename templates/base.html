@@ -29,60 +29,58 @@
         }
         .minimal-card {
             background: #FFFFFF;
-            border: 1px solid #F1F5F9;
-            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.015);
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
         }
         .glow-btn-light {
-            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.12);
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.15);
         }
     </style>
 </head>
-<body class="text-[#0F172A] min-h-screen flex flex-col pb-24">
+<body class="text-[#0F172A] min-h-screen flex flex-col pb-20">
 
     <!-- টপ নেভিগেশন বার -->
     <nav class="bg-white border-b border-slate-100 sticky top-0 z-50">
-        <div class="max-w-md mx-auto px-4 py-3 flex justify-between items-center">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
             <a href="/dashboard" class="flex items-center space-x-2">
                 <span class="text-base font-extrabold tracking-tight text-slate-900">
                     OPTI<span class="text-emerald-500">WORK</span>
                 </span>
             </a>
             
-            <!-- হ্যামবার্গার টগল বাটন -->
-            <button onclick="toggleTopMenu()" class="text-slate-500 focus:outline-none p-1 hover:text-slate-900 transition">
+            <button onclick="toggleTopMenu()" class="text-slate-600 focus:outline-none p-1 hover:text-slate-900 transition">
                 <i id="menu-icon" class="fa-solid fa-bars text-lg"></i>
             </button>
         </div>
 
-        <!-- টগল ড্রপডাউন মেনু -->
-        <div id="top-dropdown-menu" class="hidden border-b border-slate-100 bg-white px-4 py-3 space-y-2 text-[10px] font-bold uppercase tracking-wider text-slate-500 max-w-md mx-auto">
-            <a href="/dashboard" class="block py-2 hover:text-emerald-500 transition"><i class="fa-solid fa-chart-line mr-2"></i> Dashboard</a>
-            <a href="/store" class="block py-2 hover:text-emerald-500 transition"><i class="fa-solid fa-store mr-2"></i> Store</a>
-            <a href="/add-money" class="block py-2 hover:text-emerald-500 transition"><i class="fa-solid fa-wallet mr-2"></i> Add Money</a>
-            <a href="/referrals" class="block py-2 hover:text-emerald-500 transition"><i class="fa-solid fa-users mr-2"></i> Referrals</a>
-            <a href="/logout" class="block py-2 text-red-500 hover:text-red-600 transition"><i class="fa-solid fa-sign-out-alt mr-2"></i> Logout</a>
+        <!-- টগল ড্রপডাউন মেনু (Withdrawal সংযুক্ত) -->
+        <div id="top-dropdown-menu" class="hidden border-b border-slate-100 bg-white px-4 py-3 space-y-2 text-xs font-semibold uppercase tracking-wider text-slate-500 max-w-4xl mx-auto">
+            <a href="/dashboard" class="block py-2 hover:text-emerald-500"><i class="fa-solid fa-chart-line mr-2"></i> Dashboard</a>
+            <a href="/store" class="block py-2 hover:text-emerald-500"><i class="fa-solid fa-store mr-2"></i> Store</a>
+            <a href="/withdraw" class="block py-2 hover:text-emerald-500"><i class="fa-solid fa-money-bill-transfer mr-2"></i> Withdrawal</a>
+            <a href="/referrals" class="block py-2 hover:text-emerald-500"><i class="fa-solid fa-users mr-2"></i> Referrals</a>
+            <a href="/logout" class="block py-2 text-red-500 hover:text-red-600"><i class="fa-solid fa-sign-out-alt mr-2"></i> Logout</a>
         </div>
     </nav>
 
-    <!-- বটম নেভিগেশন বার -->
-    <div class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-100 py-3 z-40 shadow-sm">
-        <div class="max-w-md mx-auto flex justify-around text-[9px] uppercase font-bold text-slate-400">
+    <!-- বটম নেভিগেশন বার (Withdrawal সংযুক্ত) -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-slate-100 py-2.5 z-40 shadow-lg">
+        <div class="max-w-md mx-auto flex justify-around text-[10px] uppercase font-bold text-slate-400">
             <a href="/dashboard" class="flex flex-col items-center gap-1 hover:text-emerald-500 transition">
-                <i class="fa-solid fa-chart-line text-sm text-slate-500 hover:text-emerald-500"></i> Home
+                <i class="fa-solid fa-chart-line text-base text-slate-600 hover:text-emerald-500"></i> Home
             </a>
             <a href="/store" class="flex flex-col items-center gap-1 hover:text-emerald-500 transition">
-                <i class="fa-solid fa-store text-sm text-slate-500 hover:text-emerald-500"></i> Store
+                <i class="fa-solid fa-store text-base text-slate-600 hover:text-emerald-500"></i> Store
             </a>
-            <a href="/add-money" class="flex flex-col items-center gap-1 hover:text-emerald-500 transition">
-                <i class="fa-solid fa-wallet text-sm text-slate-500 hover:text-emerald-500"></i> Deposit
+            <a href="/withdraw" class="flex flex-col items-center gap-1 hover:text-emerald-500 transition">
+                <i class="fa-solid fa-money-bill-transfer text-base text-slate-600 hover:text-emerald-500"></i> Withdraw
             </a>
             <a href="/referrals" class="flex flex-col items-center gap-1 hover:text-emerald-500 transition">
-                <i class="fa-solid fa-users text-sm text-slate-500 hover:text-emerald-500"></i> Invite
+                <i class="fa-solid fa-users text-base text-slate-600 hover:text-emerald-500"></i> Invite
             </a>
         </div>
     </div>
 
-    <!-- মেইন কন্টেন্ট উইন্ডো -->
     <main class="max-w-md mx-auto p-4 mt-2 w-full flex-grow">
         {% block content %}{% endblock %}
     </main>
