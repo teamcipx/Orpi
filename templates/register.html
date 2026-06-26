@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Opti Work - Register</title>
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-[#F8FAFC] text-[#0F172A] flex items-center justify-center min-h-screen px-4 py-8">
+
+    <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-xl max-w-sm w-full relative overflow-hidden">
+        
+        <!-- লোগো ও বোনাস অফার এরিয়া -->
+        <div class="text-center mb-5">
+            <span class="text-xl font-extrabold tracking-tight text-slate-900">
+                OPTI<span class="text-emerald-500">WORK</span>
+            </span>
+            <p class="text-[10px] text-emerald-500 font-bold uppercase mt-1 tracking-wider bg-emerald-50 border border-emerald-100/50 inline-block px-3 py-1 rounded-full">
+                🎁 ১০০ টাকা সাইন-আপ বোনাস
+            </p>
+        </div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="p-3 mb-4 text-xs text-center text-red-600 bg-red-50 border border-red-100 rounded-xl font-semibold">
+                        <i class="fa-solid fa-triangle-exclamation mr-1"></i> {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form action="/register" method="POST" class="space-y-3.5">
+            <div>
+                <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1 tracking-wider">ইউজারনেম</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                        <i class="fa-regular fa-user text-xs"></i>
+                    </span>
+                    <input type="text" name="username" required placeholder="username123" class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-300">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1 tracking-wider">ইমেইল এড্রেস</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                        <i class="fa-regular fa-envelope text-xs"></i>
+                    </span>
+                    <input type="email" name="email" required placeholder="name@domain.com" class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-300">
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1 tracking-wider">পাসওয়ার্ড</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                        <i class="fa-solid fa-lock text-xs"></i>
+                    </span>
+                    <input type="password" name="password" required placeholder="••••••••" class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-300">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1 tracking-wider">ইনভাইটেশন কোড (ঐচ্ছিক)</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                        <i class="fa-solid fa-ticket text-xs"></i>
+                    </span>
+                    <input type="text" name="referrer" value="{{ ref_by }}" class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-300">
+                </div>
+            </div>
+
+            <button type="submit" class="w-full bg-slate-950 hover:bg-slate-800 text-white font-extrabold text-xs py-3 rounded-xl transition tracking-wider uppercase">
+                অ্যাকাউন্ট তৈরি করুন
+            </button>
+        </form>
+
+        <p class="text-center text-[11px] text-slate-500 mt-5">
+            ইতিমধ্যে একটি অ্যাকাউন্ট আছে? <a href="/login" class="text-emerald-500 font-bold hover:underline">লগইন করুন</a>
+        </p>
+    </div>
+
+</body>
+</html>
