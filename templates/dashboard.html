@@ -7,11 +7,11 @@
     <marquee class="font-semibold text-xs tracking-wide" scrollamount="3">{{ notice }}</marquee>
 </div>
 
-<!-- ২. ইউজার ব্যালেন্স কার্ড -->
+<!-- ২. হোয়াইট ইউজার ব্যালেন্স কার্ড -->
 <div class="minimal-card p-5 rounded-2xl mb-4 flex justify-between items-center bg-white border border-slate-200 shadow-sm">
     <div>
         <div class="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
-            <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+            <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping"></span>
             <span>সক্রিয় প্রোফাইল</span>
         </div>
         <p class="text-base font-bold text-slate-800 mt-1 flex items-center gap-1">
@@ -25,42 +25,106 @@
     </div>
 </div>
 
-<!-- ৩. মাইনিং কন্ট্রোলার -->
-<div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
-    <div class="flex justify-between items-center border-b border-slate-100 pb-3 mb-3">
-        <div class="flex items-center gap-1.5 text-slate-700">
-            <i class="fa-solid fa-microchip text-slate-400 text-xs"></i>
-            <h3 class="text-xs font-bold uppercase tracking-wider">মাইনিং প্যানেল</h3>
+<!-- ৩. মাইনিং অ্যানিমেশন ও কন্ট্রোলার -->
+<div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-4">
+    
+    <!-- লাইভ মাইনিং ৩ডি অ্যানিমেশন গেট -->
+    <div class="flex flex-col items-center justify-center py-6 bg-slate-50 rounded-2xl border border-slate-100 relative overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.06),transparent_60%)]"></div>
+        
+        <!-- অ্যানিমেশন চিপ -->
+        <div class="w-16 h-16 rounded-2xl bg-white border-2 border-emerald-500/20 flex items-center justify-center relative shadow-lg z-10 animate-pulse">
+            <i class="fa-solid fa-microchip text-3xl text-emerald-500"></i>
+            <span class="absolute -top-1 -right-1 flex h-3 w-3">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+            </span>
         </div>
-        <button onclick="runClaim()" class="glow-btn-light bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs px-4 py-2 rounded-xl transition flex items-center gap-1.5">
-            <i class="fa-solid fa-rotate text-[10px] animate-spin"></i> CLAIM
+        
+        <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mt-4 z-10 flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Cloud Mining System Active
+        </p>
+    </div>
+
+    <div class="flex justify-between items-center border-t border-slate-100 pt-4">
+        <div class="flex items-center gap-1.5 text-slate-700">
+            <i class="fa-solid fa-bolt text-slate-400 text-xs"></i>
+            <h3 class="text-xs font-bold uppercase tracking-wider">রানিং হার্ডওয়্যার</h3>
+        </div>
+        <button onclick="runClaim()" class="glow-btn-light bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs px-5 py-2.5 rounded-xl transition flex items-center gap-1.5">
+            <i class="fa-solid fa-cube text-[10px] animate-spin"></i> CLAIM YIELD
         </button>
     </div>
 
-    <div id="claim-api-message" class="hidden p-3 text-xs rounded-xl text-center font-bold mb-3 border"></div>
+    <div id="claim-api-message" class="hidden p-3 text-xs rounded-xl text-center font-bold border"></div>
 
-    <h4 class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2.5">চালু ডিভাইসসমূহ:</h4>
+    <!-- টাইমার সহ অ্যাক্টিভ ডিভাইসসমূহ -->
     <div class="space-y-2">
         {% for item in owned_packages %}
         <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100">
             <div class="flex items-center gap-2.5">
-                <div class="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
+                <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
                     <i class="fa-solid fa-server text-xs"></i>
                 </div>
                 <div>
                     <p class="font-bold text-slate-700 text-xs">{{ item.packages.name }}</p>
-                    <p class="text-[9px] text-slate-400">রিটার্ন: ৳{{ item.packages.yield_amount }} | {{ item.packages.duration_hours }}h</p>
+                    <p class="text-[9px] text-slate-400">প্রতি ক্লেইম: ৳{{ item.packages.yield_amount }}</p>
                 </div>
             </div>
-            <span class="text-[9px] bg-emerald-50 text-emerald-600 border border-emerald-100 px-2.5 py-0.5 rounded-full font-bold">
-                Active
-            </span>
+            
+            <!-- কাউন্টডাউন টাইমার কন্টেইনার -->
+            <div class="text-right">
+                <span class="text-[9px] text-slate-400 font-bold uppercase block">পরবর্তী ক্লেইম</span>
+                <!-- ডাটা এট্রিবিউটে পরবর্তী ক্লেইম এর সময় পাঠানো হচ্ছে (UTC ফরম্যাটে) -->
+                <span class="countdown-timer text-[11px] font-mono font-bold text-slate-700" 
+                      data-last-claimed="{{ item.last_claimed_at }}" 
+                      data-duration="{{ item.packages.duration_hours }}">
+                    00:00:00
+                </span>
+            </div>
         </div>
         {% endfor %}
     </div>
 </div>
 
 <script>
+// রিয়েল-টাইম কাউন্টডাউন স্ক্রিপ্ট
+function updateTimers() {
+    const timers = document.querySelectorAll('.countdown-timer');
+    const now = new Date();
+
+    timers.forEach(timer => {
+        const lastClaimedStr = timer.getAttribute('data-last-claimed');
+        const durationHours = parseInt(timer.getAttribute('data-duration'));
+
+        // UTC ডেট অবজেক্ট তৈরি করা
+        const lastClaimed = new Date(lastClaimedStr.replace('Z', '+00:00'));
+        
+        // পরবর্তী ক্লেইমের সময় নির্ধারণ করা
+        const nextClaimTime = new Date(lastClaimed.getTime() + (durationHours * 60 * 60 * 1000));
+        
+        const diffMs = nextClaimTime - now;
+
+        if (diffMs <= 0) {
+            timer.innerText = "Ready to Claim";
+            timer.classList.remove('text-slate-700');
+            timer.classList.add('text-emerald-500', 'animate-pulse');
+        } else {
+            const hours = Math.floor(diffMs / (1000 * 60 * 60));
+            const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
+
+            // ২ ডিজিটের ফরম্যাটে আউটপুট দেওয়া
+            const pad = (num) => String(num).padStart(2, '0');
+            timer.innerText = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+        }
+    });
+}
+
+// প্রতি সেকেন্ডে টাইমার আপডেট করা
+setInterval(updateTimers, 1000);
+updateTimers();
+
 async function runClaim() {
     const alertBox = document.getElementById('claim-api-message');
     alertBox.classList.add('hidden');
