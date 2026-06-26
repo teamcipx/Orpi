@@ -2,41 +2,49 @@
 {% block content %}
 
 <!-- ১. স্ক্রলিং নোটিশ -->
-<div class="bg-emerald-50 border border-emerald-100 text-emerald-800 p-2.5 px-4 mb-4 rounded-xl flex items-center gap-2 shadow-sm">
+<div class="bg-slate-100 border border-slate-200 text-slate-700 p-2.5 px-4 mb-4 rounded-xl flex items-center gap-2 shadow-sm">
     <i class="fa-solid fa-bullhorn text-xs text-emerald-500 animate-bounce"></i>
     <marquee class="font-semibold text-xs tracking-wide" scrollamount="3">{{ notice }}</marquee>
 </div>
 
-<!-- ২. ইউজার প্রোফাইল এবং ব্যালেন্স কার্ড -->
-<div class="minimal-card p-4 rounded-2xl mb-4 flex items-center justify-between bg-white border border-slate-200 shadow-sm">
-    <div class="flex items-center gap-3">
-        <img src="{{ user.avatar_url }}" alt="Profile" class="w-12 h-12 rounded-full object-cover border border-slate-200">
+<!-- ২. প্রিমিয়াম মিনিমাল ইউজার কার্ড -->
+<div class="minimal-card p-5 rounded-2xl mb-4 bg-white border border-slate-200 shadow-sm flex items-center justify-between relative overflow-hidden">
+    <!-- ব্যাকগ্রাউন্ডে খুব হালকা ওয়াটারমার্ক গ্লো -->
+    <div class="absolute -right-8 -top-8 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl"></div>
+    
+    <div class="flex items-center gap-3.5 z-10">
+        <div class="relative">
+            <img src="{{ user.avatar_url }}" alt="Profile" class="w-12 h-12 rounded-full object-cover border-2 border-emerald-100 shadow-sm">
+            <span class="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full"></span>
+        </div>
         <div>
-            <h2 class="text-sm font-bold text-slate-800 flex items-center gap-1">
+            <h2 class="text-sm font-extrabold text-slate-800 flex items-center gap-1">
                 {{ user.username }}
             </h2>
-            <span class="text-[9px] bg-emerald-50 text-emerald-600 border border-emerald-100/50 px-2 py-0.5 rounded-full font-bold">Active Profile</span>
+            <span class="text-[9px] bg-slate-100 text-slate-500 font-bold uppercase tracking-wider px-2 py-0.5 rounded-full">Verified Miner</span>
         </div>
     </div>
-    <div class="text-right">
+    <div class="text-right z-10">
         <span class="text-[9px] text-slate-400 uppercase tracking-wider font-bold">ব্যালেন্স</span>
-        <p class="text-xl font-extrabold text-emerald-600">৳ {{ user.balance }}</p>
+        <p class="text-2xl font-black text-emerald-600">৳ {{ user.balance }}</p>
     </div>
 </div>
 
-<!-- ৩. স্টাইলিশ টাইমার সহ মাইনিং টার্মিনাল -->
+<!-- ৩. টাইমার ভিত্তিক মাইনিং টার্মিনাল -->
 <div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-4">
+    
+    <!-- মাইনিং অ্যানিমেশন ও স্টাইলিশ ঘড়ি উইজেট -->
     <div class="flex flex-col items-center justify-center py-6 bg-slate-50 rounded-2xl border border-slate-100 relative overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.04),transparent_60%)]"></div>
         
-        <!-- কাউন্টডাউন ও ওয়াচ আইকন উইজেট -->
-        <div class="flex items-center gap-2 bg-white border border-slate-200 px-5 py-3 rounded-2xl shadow-sm z-10">
-            <div class="text-emerald-500 text-base animate-pulse">
+        <div class="flex items-center gap-2.5 bg-white border border-slate-200 px-5 py-2.5 rounded-2xl shadow-sm z-10">
+            <div id="clock-icon" class="text-slate-400 text-sm">
                 <i class="fa-regular fa-clock"></i>
             </div>
             
             {% for item in owned_packages %}
-            <!-- প্রথম সক্রিয় প্যাকেজের টাইমারটি হোমে কাউন্টডাউন হবে -->
             {% if loop.first %}
+            <!-- লাইভ কাউন্টডাউন টাইমার -->
             <span class="countdown-timer text-lg font-black font-mono text-slate-800 tracking-wider" 
                   data-last-claimed="{{ item.last_claimed_at }}" 
                   data-duration="{{ item.packages.duration_hours }}">
@@ -46,73 +54,84 @@
             {% endfor %}
         </div>
         
-        <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-3 z-10">
-            Cloud Computing Core Engine
+        <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-3 z-10 flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Network Node Connected
         </p>
     </div>
 
+    <!-- মাইনিং ক্লেইম এরিয়া (ডিভাইস প্রসেসর বাদ দিয়ে ডাইনামিক নাম ও বাটন লক) -->
     <div class="flex justify-between items-center border-t border-slate-100 pt-3">
-        <span class="text-xs font-bold text-slate-700">ডিভাইস প্রসেসর</span>
-        <button onclick="runClaim()" class="glow-btn-light bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs px-4 py-2 rounded-xl transition flex items-center gap-1">
-            <i class="fa-solid fa-bolt text-[10px]"></i> CLAIM
+        {% for item in owned_packages %}
+        {% if loop.first %}
+        <div>
+            <span class="text-[9px] text-slate-400 uppercase font-extrabold tracking-wider block">সক্রিয় মাইনিং হার্ডওয়্যার</span>
+            <p class="text-xs font-bold text-slate-700 flex items-center gap-1">
+                <i class="fa-solid fa-server text-emerald-500 text-[10px]"></i> {{ item.packages.name }} (৳ {{ item.packages.yield_amount }})
+            </p>
+        </div>
+        {% endif %}
+        {% endfor %}
+        
+        <!-- ক্লেইম বাটন (ডিফল্টভাবে লকড বা ডিজেবল অবস্থায় থাকবে) -->
+        <button id="claim-btn" onclick="runClaim()" disabled class="bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed font-extrabold text-xs px-5 py-2.5 rounded-xl transition flex items-center gap-1.5 shadow-none">
+            <i class="fa-solid fa-lock text-[10px]"></i> CLAIM
         </button>
     </div>
+    
     <div id="claim-api-message" class="hidden p-3 text-xs rounded-xl text-center font-bold border"></div>
 </div>
 
-<!-- ৪. হাইলাইট কুইক নেভিগেশন গ্রিড (অন্যান্য পেজ শর্টকাট) -->
+<!-- ৪. কুইক নেভিগেশন গ্রিড (অন্যান্য পেজ শর্টকাট) -->
 <div class="grid grid-cols-3 gap-3 my-4">
-    <a href="/history" class="minimal-card p-3 rounded-xl flex flex-col items-center justify-center text-center hover:border-slate-300 transition">
+    <a href="/history" class="minimal-card p-3 rounded-xl flex flex-col items-center justify-center text-center hover:border-slate-300 transition bg-white border border-slate-200 shadow-sm">
         <i class="fa-solid fa-clock-rotate-left text-slate-500 text-sm mb-1.5"></i>
         <span class="text-[9px] font-bold text-slate-600 uppercase tracking-wider">History</span>
     </a>
-    <a href="https://t.me/YOUR_CHANNEL" target="_blank" class="minimal-card p-3 rounded-xl flex flex-col items-center justify-center text-center hover:border-slate-300 transition">
+    <a href="https://t.me/YOUR_CHANNEL" target="_blank" class="minimal-card p-3 rounded-xl flex flex-col items-center justify-center text-center hover:border-slate-300 transition bg-white border border-slate-200 shadow-sm">
         <i class="fa-brands fa-telegram text-sky-500 text-sm mb-1.5"></i>
         <span class="text-[9px] font-bold text-slate-600 uppercase tracking-wider">Telegram</span>
     </a>
-    <a href="/tasks" class="minimal-card p-3 rounded-xl flex flex-col items-center justify-center text-center hover:border-slate-300 transition">
+    <a href="/tasks" class="minimal-card p-3 rounded-xl flex flex-col items-center justify-center text-center hover:border-slate-300 transition bg-white border border-slate-200 shadow-sm">
         <i class="fa-solid fa-list-check text-slate-500 text-sm mb-1.5"></i>
         <span class="text-[9px] font-bold text-slate-600 uppercase tracking-wider">Task</span>
     </a>
-    <a href="/referrals" class="minimal-card p-3 rounded-xl flex flex-col items-center justify-center text-center hover:border-slate-300 transition">
+    <a href="/referrals" class="minimal-card p-3 rounded-xl flex flex-col items-center justify-center text-center hover:border-slate-300 transition bg-white border border-slate-200 shadow-sm">
         <i class="fa-solid fa-gift text-slate-500 text-sm mb-1.5"></i>
         <span class="text-[9px] font-bold text-slate-600 uppercase tracking-wider">Refer</span>
     </a>
-    <a href="/profile" class="minimal-card p-3 rounded-xl flex flex-col items-center justify-center text-center hover:border-slate-300 transition">
+    <a href="/profile" class="minimal-card p-3 rounded-xl flex flex-col items-center justify-center text-center hover:border-slate-300 transition bg-white border border-slate-200 shadow-sm">
         <i class="fa-solid fa-circle-user text-slate-500 text-sm mb-1.5"></i>
         <span class="text-[9px] font-bold text-slate-600 uppercase tracking-wider">Account</span>
     </a>
-    <a href="/withdraw" class="minimal-card p-3 rounded-xl flex flex-col items-center justify-center text-center hover:border-slate-300 transition">
+    <a href="/withdraw" class="minimal-card p-3 rounded-xl flex flex-col items-center justify-center text-center hover:border-slate-300 transition bg-white border border-slate-200 shadow-sm">
         <i class="fa-solid fa-money-bill-transfer text-slate-500 text-sm mb-1.5"></i>
         <span class="text-[9px] font-bold text-slate-600 uppercase tracking-wider">Withdraw</span>
     </a>
 </div>
 
-<!-- ৫. ইন্টারেক্টিভ লার্নিং ও হেল্প ব্যানারস -->
+<!-- ৫. হেল্প ও সাপোর্ট সেকশন -->
 <div class="space-y-3">
-    <!-- কীভাবে কাজ করবেন? ভিডিও -->
-    <a href="https://www.youtube.com/watch?v=YOUR_VIDEO_ID" target="_blank" class="minimal-card p-4 rounded-xl flex items-center justify-between hover:border-slate-300 transition bg-white border border-slate-200">
+    <a href="https://www.youtube.com/watch?v=YOUR_VIDEO_ID" target="_blank" class="minimal-card p-4 rounded-xl flex items-center justify-between hover:border-slate-300 transition bg-white border border-slate-200 shadow-sm">
         <div class="flex items-center gap-3">
             <div class="text-red-500 text-lg">
-                <i class="fa-solid fa-circle-play"></i>
+                <i class="fa-solid fa-circle-play animate-pulse"></i>
             </div>
             <div>
-                <p class="font-bold text-slate-800 text-xs">কীভাবে কাজ করবেন?</p>
-                <p class="text-[9px] text-slate-400">সহজ নিয়মে কাজ শিখতে ভিডিও টিউটোরিয়ালটি দেখুন</p>
+                <p class="font-bold text-slate-800 text-xs">কীভাবে কাজ করবেন? ভিডিও দেখুন!</p>
+                <p class="text-[9px] text-slate-400">সহজ উপায়ে কাজ শিখে ইনকাম শুরু করুন</p>
             </div>
         </div>
-        <span class="text-[9px] bg-red-50 text-red-600 border border-red-100 px-2 py-0.5 rounded-full font-bold">ভিডিও দেখুন</span>
+        <span class="text-[9px] bg-red-50 text-red-600 border border-red-100 px-2.5 py-0.5 rounded-full font-bold">ভিডিও</span>
     </a>
 
-    <!-- রিভিউ দেখুন -->
-    <div class="minimal-card p-4 rounded-xl flex items-center justify-between bg-white border border-slate-200">
+    <div class="minimal-card p-4 rounded-xl flex items-center justify-between bg-white border border-slate-200 shadow-sm">
         <div class="flex items-center gap-3">
             <div class="text-amber-400 text-sm">
-                <i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star animate-spin-slow"></i>
             </div>
             <div>
-                <p class="font-bold text-slate-800 text-xs">আমাদের মেম্বারদের রিভিউ</p>
-                <p class="text-[9px] text-slate-400">১০০% বিশ্বস্ত এবং নিয়মিত পেমেন্টকৃত আর্নিং প্ল্যাটফর্ম</p>
+                <p class="font-bold text-slate-800 text-xs">আমাদের রিভিউ দেখুন</p>
+                <p class="text-[9px] text-slate-400">১০০% বিশ্বস্ত এবং নিয়মিত পেমেন্ট করা হয়</p>
             </div>
         </div>
         <div class="flex gap-0.5 text-amber-400 text-[10px]">
@@ -124,39 +143,39 @@
         </div>
     </div>
 
-    <!-- প্যাকেজ আপগ্রেড করুন -->
-    <a href="/store" class="minimal-card p-4 rounded-xl flex items-center justify-between hover:border-slate-300 transition bg-white border border-slate-200">
+    <a href="/store" class="minimal-card p-4 rounded-xl flex items-center justify-between hover:border-slate-300 transition bg-white border border-slate-200 shadow-sm">
         <div class="flex items-center gap-3">
-            <div class="text-purple-500 text-sm animate-bounce">
-                <i class="fa-solid fa-circle-arrow-up"></i>
+            <div class="text-purple-500 text-sm">
+                <i class="fa-solid fa-circle-arrow-up animate-bounce"></i>
             </div>
             <div>
                 <p class="font-bold text-slate-800 text-xs">প্যাকেজ আপগ্রেড করুন</p>
-                <p class="text-[9px] text-slate-400">ডিভাইস আপগ্রেড করে দৈনিক ইনকাম দ্বিগুণ করুন</p>
+                <p class="text-[9px] text-slate-400">পছন্দের মাইনিং স্পিড বাড়াতে প্যাকেজ কিনুন</p>
             </div>
         </div>
         <span class="text-[9px] bg-purple-50 text-purple-600 border border-purple-100 px-2 py-0.5 rounded-full font-bold">আপগ্রেড</span>
     </a>
 
-    <!-- টেলিগ্রাম সাপোর্ট -->
-    <a href="https://t.me/YOUR_SUPPORT_USERNAME" target="_blank" class="minimal-card p-4 rounded-xl flex items-center justify-between hover:border-slate-300 transition bg-white border border-slate-200">
+    <a href="https://t.me/YOUR_SUPPORT_USERNAME" target="_blank" class="minimal-card p-4 rounded-xl flex items-center justify-between hover:border-slate-300 transition bg-white border border-slate-200 shadow-sm">
         <div class="flex items-center gap-3">
             <div class="text-sky-500 text-sm">
-                <i class="fa-solid fa-headset"></i>
+                <i class="fa-solid fa-headset text-base"></i>
             </div>
             <div>
-                <p class="font-bold text-slate-800 text-xs">সাপোর্ট সেন্টার (Help Desk)</p>
-                <p class="text-[9px] text-slate-400">যেকোনো সমস্যা সমাধানে আমাদের টেলিগ্রাম এজেন্টের সাহায্য নিন</p>
+                <p class="font-bold text-slate-800 text-xs">সাপোর্ট চ্যানেল</p>
+                <p class="text-[9px] text-slate-400">২৪ ঘণ্টা যেকোনো সমস্যায় আমাদের সাপোর্ট এজেন্ট রয়েছে</p>
             </div>
         </div>
-        <span class="text-[9px] bg-sky-50 text-sky-600 border border-sky-100 px-2 py-0.5 rounded-full font-bold">যোগাযোগ</span>
+        <span class="text-[9px] bg-sky-50 text-sky-600 border border-sky-100 px-2 py-0.5 rounded-full font-bold">হেল্পডেস্ক</span>
     </a>
 </div>
 
 <script>
-// রিয়েল-টাইম টাইমার স্ক্রিপ্ট
+// রিয়েল-টাইম টাইমার এবং বাটন আনলক স্ক্রিপ্ট
 function updateDashboardTimer() {
     const timer = document.querySelector('.countdown-timer');
+    const claimBtn = document.getElementById('claim-btn');
+    const clockIcon = document.getElementById('clock-icon');
     if (!timer) return;
 
     const now = new Date();
@@ -169,9 +188,18 @@ function updateDashboardTimer() {
     const diffMs = nextClaimTime - now;
 
     if (diffMs <= 0) {
+        // ১. টাইমার লেখা পরিবর্তন
         timer.innerText = "READY";
         timer.classList.remove('text-slate-800');
         timer.classList.add('text-emerald-500', 'animate-pulse');
+        
+        // ২. ঘড়ির আইকন স্পিন অ্যানিমেশন দেওয়া
+        clockIcon.className = "text-emerald-500 animate-spin";
+
+        // ৩. ক্লেইম বাটন আনলক করা (সবুজ গ্লোয়িং মোড)
+        claimBtn.removeAttribute('disabled');
+        claimBtn.className = "glow-btn-light bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs px-5 py-2.5 rounded-xl transition flex items-center gap-1.5 shadow cursor-pointer";
+        claimBtn.innerHTML = '<i class="fa-solid fa-bolt text-[10px]"></i> CLAIM';
     } else {
         const hours = Math.floor(diffMs / (1000 * 60 * 60));
         const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
@@ -179,9 +207,16 @@ function updateDashboardTimer() {
 
         const pad = (num) => String(num).padStart(2, '0');
         timer.innerText = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+
+        // ৪. ঘড়ি এবং ক্লেইম বাটন ডিজেবল বা লকড স্টাইলে রাখা
+        clockIcon.className = "text-slate-400";
+        claimBtn.setAttribute('disabled', 'true');
+        claimBtn.className = "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed font-extrabold text-xs px-5 py-2.5 rounded-xl transition flex items-center gap-1.5 shadow-none";
+        claimBtn.innerHTML = '<i class="fa-solid fa-lock text-[10px]"></i> CLAIM';
     }
 }
 
+// প্রতি সেকেন্ডে চেক করা হবে
 setInterval(updateDashboardTimer, 1000);
 updateDashboardTimer();
 
