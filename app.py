@@ -27,8 +27,8 @@ def mask_email(email):
 
 app.jinja_env.filters['mask_email'] = mask_email
 
-# ১. লগইন রাউট
-@app.route('/')
+# (লগইন রাউটে নিচের মতো ব্যানড চেক যুক্ত করুন)
+@app.route('/', methods=['GET', 'POST'])
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -39,11 +39,16 @@ def login():
         
         if user_query.data:
             user = user_query.data[0]
+            
+            # অ্যাকাউন্ট ব্যানড করা আছে কিনা যাচাই করা
+            if user.get('is_banned'):
+                flash("আপনার অ্যাকাউন্টটি সাময়িকভাবে স্থগিত (Banned) করা হয়েছে।", "danger")
+                return render_template('login.html')
+                
             if check_password_hash(user['password_hash'], password):
                 session['user_id'] = user['id']
                 session['username'] = user['username']
                 
-                # শেষ লগইন টাইমস্ট্যাম্প আপডেট (১২ ঘণ্টা অ্যাক্টিভ ভ্যালিডেশনের জন্য এটি জরুরি)
                 now = datetime.datetime.now(datetime.timezone.utc).isoformat()
                 supabase.table("users").update({"last_login": now}).eq("id", user['id']).execute()
                 
@@ -51,9 +56,108 @@ def login():
             
         flash("ভুল ইমেইল অথবা পাসওয়ার্ড।", "danger")
     return render_template('login.html')
-# (অন্যান্য রাউট ও কনফিগারেশন অপরিবর্তিত থাকবে, কেবল /register রাউটটি নিচে আপডেট করা হলো)
 
 
+# ------------------ এডমিন প্যানেল রাউটসমূহ ------------------
+
+# এডমিন ভেরিফিকেশন হেল্পার
+def check_admin_auth():
+    user_id = session.get('user_id')
+    if not user_id:
+        return None
+    user = supabase.table("users").select("is_admin, is_banned").eq("id", user_id).execute().data
+    if user and user[0]['is_admin'] and not user[0]['is_banned']:
+        return user_id
+    return None
+
+@app.route('/admin', methods=['GET', 'POST'])
+def admin_dashboard():
+    if not check_admin_auth():
+        return "Unauthorized Access", 403
+        
+    now = datetime.datetime.now(datetime.timezone.utc)
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0).isoformat()
+    
+    # ১. মেট্রিক্স বা স্ট্যাটিস্টিকস হিসাব করা
+    # মোট ইউজার সংখ্যা
+    all_users = supabase.table("users").select("id", count="exact").execute()
+    total_users = all_users.count if all_users.count is not None else 0
+    
+    # আজকের নতুন ইউজার সংখ্যা
+    today_users_query = supabase.table("users").select("id", count="exact").gte("created_at", today_start).execute()
+    today_users = today_users_query.count if today_users_query.count is not None else 0
+    
+    # মোট ডিপোজিট (অনুমোদিত/Approved)
+    total_dep_query = supabase.table("deposits").select("amount").eq("status", "Approved").execute().data
+    total_deposits = sum(float(d['amount']) for d in total_dep_query)
+    
+    # আজকের মোট ডিপোজিট
+    today_dep_query = supabase.table("deposits").select("amount").eq("status", "Approved").gte("created_at", today_start).execute().data
+    today_deposits = sum(float(d['amount']) for d in today_dep_query)
+    
+    # ২. ইউজার সার্চ ইঞ্জিন
+    search_query = request.args.get('search', '').strip()
+    users_list = []
+    
+    if search_query:
+        # ইমেইল অথবা ইউজারনেম দিয়ে সার্চ
+        u_data = supabase.table("users").select("id, username, email, balance, is_banned") \
+            .or_(f"email.ilike.%{search_query}%,username.ilike.%{search_query}%").execute().data
+        users_list = u_data
+    else:
+        # ডিফল্টভাবে শেষ ১০ জন ইউজার প্রদর্শন করা
+        u_data = supabase.table("users").select("id, username, email, balance, is_banned") \
+            .order("created_at", desc=True).limit(10).execute().data
+        users_list = u_data
+
+    return render_template('admin.html', 
+                           total_users=total_users, 
+                           today_users=today_users, 
+                           total_deposits=total_deposits, 
+                           today_deposits=today_deposits, 
+                           users_list=users_list,
+                           search_query=search_query)
+
+
+@app.route('/admin/user-action', methods=['POST'])
+def admin_user_action():
+    if not check_admin_auth():
+        return "Unauthorized Action", 403
+        
+    target_id = request.form.get('user_id')
+    action = request.form.get('action')
+    
+    if action == 'ban':
+        supabase.table("users").update({"is_banned": True}).eq("id", target_id).execute()
+        flash("ইউজার অ্যাকাউন্ট সাময়িকভাবে স্থগিত (Banned) করা হয়েছে।", "success")
+        
+    elif action == 'unban':
+        supabase.table("users").update({"is_banned": False}).eq("id", target_id).execute()
+        flash("ইউজার অ্যাকাউন্ট পুনরায় সক্রিয় (Unbanned) করা হয়েছে।", "success")
+        
+    elif action == 'delete':
+        supabase.table("users").delete().eq("id", target_id).execute()
+        flash("ইউজার ডাটাবেজ থেকে সম্পূর্ণ মুছে ফেলা হয়েছে।", "success")
+        
+    elif action == 'add_balance':
+        amount = float(request.form.get('amount', 0))
+        supabase.rpc("increment_balance", {"user_id": target_id, "amount": amount}).execute()
+        flash(f"সফলভাবে {amount} টাকা যোগ করা হয়েছে।", "success")
+        
+    elif action == 'add_referral':
+        # একটি ডামি রেফারেল যুক্ত করা যা সরাসরি 'Success' স্ট্যাটাস পাবে (রেফারেল বাড়ানোর জন্য)
+        supabase.table("referrals").insert({
+            "referrer_id": target_id,
+            "status": "Success",
+            "scheduled_payout_at": datetime.datetime.now(datetime.timezone.utc).isoformat()
+        }).execute()
+        
+        # সফল রেফারেল এর জন্য ৩০ টাকা বোনাস দেওয়া
+        supabase.rpc("increment_balance", {"user_id": target_id, "amount": 30.00}).execute()
+        flash("ম্যানুয়ালি ১টি সফল রেফারেল এবং ৩০ টাকা যোগ করা হয়েছে।", "success")
+        
+    return redirect(url_for('admin_dashboard'))
+    
 # (অন্যান্য কোড অপরিবর্তিত থাকবে, উইথড্রয়াল সম্পর্কিত নতুন রাউটটি নিচে যুক্ত করুন)
 
 @app.route('/withdraw', methods=['GET', 'POST'])
