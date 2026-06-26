@@ -157,6 +157,60 @@ def admin_user_action():
         flash("ম্যানুয়ালি ১টি সফল রেফারেল এবং ৩০ টাকা যোগ করা হয়েছে।", "success")
         
     return redirect(url_for('admin_dashboard'))
+
+
+# (অন্যান্য কোডের সাথে নিচের নতুন রাউটগুলো যুক্ত করুন)
+
+# ১. টাস্ক পেজ রাউট
+@app.route('/tasks')
+def tasks():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+    return render_template('tasks.html')
+
+
+# ২. প্রোফাইল/অ্যাকাউন্ট পেজ রাউট
+@app.route('/profile', methods=['GET', 'POST'])
+def profile():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+        
+    user = supabase.table("users").select("*").eq("id", user_id).execute().data[0]
+    
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        phone = request.form.get('phone')
+        age = request.form.get('age')
+        district = request.form.get('district')
+        avatar_url = request.form.get('avatar_url') # ক্লায়েন্ট সাইড ImgBB থেকে আপলোড হয়ে আসবে
+        
+        update_data = {
+            "username": username,
+            "phone_number": phone,
+            "age": int(age) if age else None,
+            "district": district
+        }
+        
+        # যদি ইউজার নতুন ছবি আপলোড করে লিংক পাঠায়
+        if avatar_url:
+            update_data["avatar_url"] = avatar_url
+            
+        # যদি পাসওয়ার্ড পরিবর্তন করতে চান
+        if password and password.strip() != "":
+            update_data["password_hash"] = generate_password_hash(password)
+            
+        try:
+            supabase.table("users").update(update_data).eq("id", user_id).execute()
+            session['username'] = username # সেশন ইউজারনেম আপডেট
+            flash("প্রোফাইল তথ্য সফলভাবে আপডেট করা হয়েছে।", "success")
+            return redirect(url_for('profile'))
+        except Exception:
+            flash("ইউজারনেমটি ইতিমধ্যে ব্যবহৃত হচ্ছে বা ত্রুটি ঘটেছে।", "danger")
+            
+    return render_template('profile.html', user=user)
     
 # (অন্যান্য কোড অপরিবর্তিত থাকবে, উইথড্রয়াল সম্পর্কিত নতুন রাউটটি নিচে যুক্ত করুন)
 
