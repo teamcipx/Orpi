@@ -8,12 +8,16 @@
     
     <!-- ১. প্রিমিয়াম প্রোফাইল পিকচার এবং আইডি ইনফো কার্ড -->
     <div class="minimal-card p-6 rounded-3xl bg-white text-center flex flex-col items-center border border-slate-200 shadow-sm relative overflow-hidden">
-        <!-- ব্যাকগ্রাউন্ডে খুব হালকা ওয়াটারমার্ক নিয়ন গ্লো -->
         <div class="absolute -right-8 -top-8 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl"></div>
         
         <div class="relative w-20 h-20 mb-3.5 z-10">
-            <!-- প্রোফাইল ছবি -->
-            <img id="profile-pic-preview" src="{{ user.avatar_url }}" crossorigin="anonymous" alt="Profile" class="w-full h-full rounded-full object-cover border-2 border-slate-100 shadow-sm">
+            <!-- প্রোফাইল ছবি (CORS পলিসি হ্যান্ডেল করার জন্য সঠিক ফরম্যাট) -->
+            <img id="profile-pic-preview" 
+                 src="{% if user.avatar_url and 'http' in user.avatar_url %}{{ user.avatar_url }}{% else %}data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23cbd5e1'><circle cx='12' cy='8' r='5'/><path d='M12 14c-6.1 0-10 4-10 10h20c0-6-3.9-10-10-10z'/></svg>{% endif %}" 
+                 crossorigin="anonymous" 
+                 alt="Profile" 
+                 class="w-full h-full rounded-full object-cover border-2 border-slate-100 shadow-sm">
+                 
             <label for="image-upload" class="absolute bottom-0 right-0 bg-slate-950 text-white rounded-full p-2 cursor-pointer hover:bg-slate-800 transition shadow">
                 <i class="fa-solid fa-camera text-[10px]"></i>
             </label>
@@ -22,7 +26,6 @@
         
         <h2 class="text-base font-extrabold text-slate-800 z-10">{{ user.username }}</h2>
         
-        <!-- ইউজার ইউনিক আইডি (UID) স্পষ্টভাবে প্রদর্শন -->
         <div class="mt-2 bg-slate-100 border border-slate-200/60 px-3 py-1 rounded-full text-[10px] font-extrabold text-slate-600 inline-flex items-center gap-1 z-10">
             <i class="fa-solid fa-id-card text-emerald-500"></i> UID: {{ user.uid }}
         </div>
@@ -47,7 +50,7 @@
             {% endif %}
         {% endwith %}
 
-        <!-- ১. রিড-অনলি ভিউ মোড (Default State) -->
+        <!-- ১. রিড-অনলি ভিউ মোড -->
         <div id="profile-view-mode" class="space-y-3.5">
             <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 border-b border-slate-50 pb-2 flex justify-between items-center">
                 <span>ব্যক্তিগত তথ্য তালিকা</span>
@@ -72,7 +75,7 @@
             </div>
         </div>
 
-        <!-- ২. ডাইনামিক এডিট মোড (Hidden by Default) -->
+        <!-- ২. ডাইনামিক এডিট মোড -->
         <div id="profile-edit-mode" class="hidden space-y-4">
             <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 border-b border-slate-50 pb-2">
                 সম্পাদনা করুন (Edit Mode)
@@ -111,7 +114,7 @@
         </div>
     </div>
 
-    <!-- ৩. আমন্ত্রণ লিংক উইজেট (প্রোফাইল পেজে) -->
+    <!-- ৩. আমন্ত্রণ লিংক উইজেট -->
     <div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
         <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-2.5 flex items-center gap-1.5">
             <i class="fa-solid fa-gift text-emerald-500"></i> আপনার রেফারেল লিংক
@@ -150,7 +153,7 @@
     </div>
 </div>
 
-<!-- ================= শেয়ার করার জন্য হিডেন প্রিমিয়াম ইমেজ কার্ড ================= -->
+<!-- ================= শেয়ার করার জন্য হিডেন ইমেজ কার্ড ================= -->
 <div class="absolute -top-[9999px] -left-[9999px]">
     <div id="capture-share-card" class="w-[350px] bg-white border border-slate-100 p-6 rounded-3xl flex flex-col items-center justify-between shadow-2xl relative" style="font-family: 'Plus Jakarta Sans', sans-serif;">
         <!-- নিয়ন ও ওয়াটারমার্ক ইফেক্ট -->
@@ -158,9 +161,13 @@
         <div class="absolute -left-12 -bottom-12 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl"></div>
         
         <div class="flex flex-col items-center mt-6">
-            <img src="{{ user.avatar_url }}" crossorigin="anonymous" class="w-20 h-20 rounded-full object-cover border-2 border-emerald-500/20 shadow-md">
+            <!-- জেনারেটেড কার্ডের ইমেজ যাতে ডেটা সহ রেন্ডার হয় -->
+            <img id="card-avatar" 
+                 src="{% if user.avatar_url and 'http' in user.avatar_url %}{{ user.avatar_url }}{% else %}data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23cbd5e1'><circle cx='12' cy='8' r='5'/><path d='M12 14c-6.1 0-10 4-10 10h20c0-6-3.9-10-10-10z'/></svg>{% endif %}" 
+                 crossorigin="anonymous" 
+                 class="w-20 h-20 rounded-full object-cover border-2 border-emerald-500/20 shadow-md">
+                 
             <h3 class="text-base font-extrabold text-slate-800 mt-3">{{ user.username }}</h3>
-            <!-- UID সুন্দরভাবে কার্ডে প্রদর্শন -->
             <span class="mt-1 bg-slate-100 text-slate-500 text-[8px] font-bold px-2 py-0.5 rounded-full">UID: {{ user.uid }}</span>
         </div>
 
@@ -187,12 +194,11 @@ function toggleEditMode(enable) {
     }
 }
 
-// ২. ImgBB সরাসরি ইমেজ আপলোডিং স্ক্রিপ্ট (উন্নত CORS সাপোর্ট সহ)
+// ২. ImgBB সরাসরি ইমেজ আপলোডিং স্ক্রিপ্ট
 function uploadToImgBB(input) {
     const file = input.files[0];
     if (!file) return;
 
-    // আপনার দেওয়া ImgBB API Key
     const IMGBB_API_KEY = "1cb6f7d4b65dfd982d0435de86bb8aff"; 
 
     const formData = new FormData();
@@ -200,6 +206,7 @@ function uploadToImgBB(input) {
 
     const preview = document.getElementById('profile-pic-preview');
     const avatarInput = document.getElementById('avatar-url-input');
+    const cardAvatar = document.getElementById('card-avatar');
     
     preview.style.opacity = "0.5";
 
@@ -215,9 +222,10 @@ function uploadToImgBB(input) {
                 preview.src = imageUrl;
                 avatarInput.value = imageUrl;
                 
-                // শেয়ার কার্ডের ডামি ইমেজ ট্যাগও আপডেট করে দেওয়া হচ্ছে যাতে জেনারেশনে সঠিক ছবি আসে
-                const cardImg = document.querySelector('#capture-share-card img');
-                if (cardImg) cardImg.src = imageUrl;
+                // শেয়ার করার হিডেন কার্ডটির ছবিও সাথে সাথে আপডেট করা হচ্ছে
+                if (cardAvatar) {
+                    cardAvatar.src = imageUrl;
+                }
 
                 alert("ছবি সফলভাবে আপলোড হয়েছে। পরিবর্তনটি চূড়ান্ত করতে নিচে Save Info বাটনে ক্লিক করুন।");
             } else {
@@ -260,22 +268,31 @@ function copyLink() {
     }, 1500);
 }
 
-// ৪. প্রোফাইল শেয়ার কার্ড জেনারেটর (CORS এবং প্রুফ পিকচার সাপোর্ট সহ)
+// ৪. প্রোফাইল শেয়ার কার্ড জেনারেটর (Cache-Busting লজিক সহ যা CORS বাইপাস নিশ্চিত করবে)
 function generateShareCard() {
     const card = document.getElementById('capture-share-card');
+    const cardImg = document.getElementById('card-avatar');
     
-    // html2canvas কনফিগারেশন যা ব্রাউজার ক্র্যাশ বা ছবি মিসিং হওয়া রোধ করবে
-    html2canvas(card, { 
-        useCORS: true,
-        allowTaint: false,
-        logging: false,
-        scale: 2 // হাই রেজোলিউশন ডাউনলোডের জন্য
-    }).then(canvas => {
-        const link = document.createElement('a');
-        link.download = `OptiWork-Profile-${Date.now()}.png`;
-        link.href = canvas.toDataURL();
-        link.click();
-    });
+    // ক্যাশ থেকে নন-CORS ইমেজ রেন্ডার হওয়া ঠেকাতে ডাইনামিক টাইমস্ট্যাম্প প্যারামিটার যুক্ত করা হচ্ছে
+    if (cardImg && cardImg.src && !cardImg.src.startsWith('data:')) {
+        const originalSrc = cardImg.src.split('?')[0]; // পূর্বের কোয়েরি প্যারামিটার বাদ দেওয়া হচ্ছে
+        cardImg.src = originalSrc + "?t=" + new Date().getTime();
+    }
+
+    // ইমেজ পুরোপুরি রেন্ডার হওয়ার জন্য ৫০ মিলি-সেকেন্ড অপেক্ষা করে html2canvas ট্রিগার করা হচ্ছে
+    setTimeout(() => {
+        html2canvas(card, { 
+            useCORS: true,
+            allowTaint: false,
+            logging: false,
+            scale: 2 
+        }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = `OptiWork-Profile-${Date.now()}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+        });
+    }, 50);
 }
 </script>
 
