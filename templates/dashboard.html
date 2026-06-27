@@ -2,12 +2,12 @@
 {% block content %}
 
 <!-- ১. স্ক্রলিং নোটিশ -->
-<div class="bg-[#F1F5F9] border border-slate-200 text-slate-700 p-2.5 px-4 mb-4 rounded-xl flex items-center gap-2 shadow-sm">
+<div class="bg-slate-100 border border-slate-200 text-slate-700 p-2.5 px-4 mb-4 rounded-xl flex items-center gap-2 shadow-sm">
     <i class="fa-solid fa-bullhorn text-xs text-emerald-500 animate-bounce"></i>
     <marquee class="font-semibold text-xs tracking-wide" scrollamount="3">{{ notice }}</marquee>
 </div>
 
-<!-- ২. ইউজার ব্যালেন্স কার্ড -->
+<!-- ২. হোয়াইট ইউজার ব্যালেন্স কার্ড -->
 <div class="minimal-card p-5 rounded-2xl mb-4 bg-white border border-slate-200 shadow-sm flex items-center justify-between">
     <div class="flex items-center gap-3.5">
         <div class="relative">
@@ -35,61 +35,71 @@
             <i class="fa-solid fa-gift"></i>
         </div>
         <div>
-            <h4 class="text-xs font-bold text-slate-700">ডেইলি চেক-ইন বোনাস</h4>
+            <h4 class="text-xs font-bold text-slate-700">데일리 চেক-ইন বোনাস</h4>
             <p class="text-[9px] text-slate-400 mt-0.5">প্রতিদিন লগইন করে ৳ ৫.০০ বোনাস নিন</p>
         </div>
     </div>
-    
     <button id="daily-btn" onclick="runDailyCheckin()" class="glow-btn-light bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-extrabold px-4 py-2 rounded-xl transition shadow">
         CLAIM ৳৫
     </button>
 </div>
 {% endif %}
 
-<!-- ৪. টাইমার ভিত্তিক মাইনিং টার্মিনাল -->
+<!-- ৪. বহুমাত্রিক মাইনিং টার্মিনাল (মাল্টি-প্যাকেজ ও টাইমার কন্ডিশন সহ) -->
 <div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-4">
-    <div class="flex flex-col items-center justify-center py-6 bg-slate-50 rounded-2xl border border-slate-100 relative overflow-hidden">
-        <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.04),transparent_60%)]"></div>
-        
-        <div class="flex items-center gap-2.5 bg-white border border-slate-200 px-5 py-2.5 rounded-2xl shadow-sm z-10">
-            <div id="clock-icon" class="text-slate-400 text-sm">
-                <i class="fa-regular fa-clock"></i>
-            </div>
-            
-            {% for item in owned_packages %}
-            {% if loop.first %}
-            <span class="countdown-timer text-lg font-black font-mono text-slate-800 tracking-wider" 
-                  data-last-claimed="{{ item.last_claimed_at }}" 
-                  data-duration="{{ item.packages.duration_hours }}">
-                00:00:00
-            </span>
-            {% endif %}
-            {% endfor %}
-        </div>
-        
-        <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-3 z-10 flex items-center gap-1.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Network Node Connected
-        </p>
+    <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
+        <i class="fa-solid fa-server text-emerald-500"></i>
+        <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-700">সক্রিয় মাইনিং ডিভাইসসমূহ</h3>
     </div>
 
-    <div class="flex justify-between items-center border-t border-slate-100 pt-3">
-        {% for item in owned_packages %}
-        {% if loop.first %}
-        <div>
-            <span class="text-[9px] text-slate-400 uppercase font-extrabold tracking-wider block">সক্রিয় মাইনিং হার্ডওয়্যার</span>
-            <p class="text-xs font-bold text-slate-700 flex items-center gap-1">
-                <i class="fa-solid fa-server text-emerald-500 text-[10px]"></i> {{ item.packages.name }} (৳ {{ item.packages.yield_amount }})
-            </p>
-        </div>
-        {% endif %}
-        {% endfor %}
-        
-        <button id="claim-btn" onclick="runClaim()" disabled class="bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed font-extrabold text-xs px-5 py-2.5 rounded-xl transition flex items-center gap-1.5 shadow-none">
-            <i class="fa-solid fa-lock text-[10px]"></i> CLAIM
-        </button>
-    </div>
-    
     <div id="claim-api-message" class="hidden p-3 text-xs rounded-xl text-center font-bold border"></div>
+
+    <div class="space-y-4">
+        {% for item in owned_packages %}
+        <div class="bg-slate-50 border border-slate-100 p-4 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative overflow-hidden">
+            
+            <div class="flex items-center gap-3 z-10">
+                <div class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-emerald-500 shadow-sm">
+                    <i class="fa-solid fa-microchip text-base"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-slate-800 text-xs">{{ item.packages.name }} (৳ {{ item.packages.yield_amount }})</h4>
+                    <!-- মেয়াদ বা মেয়াদ শেষ হওয়ার কাস্টম ডেট -->
+                    <p class="text-[9px] text-slate-400 font-semibold mt-0.5 uppercase tracking-wide">
+                        {% if item.packages.is_premium %}
+                            মেয়াদ শেষ হবে: {{ item.expires_at[:10] }} (৩০ দিন)
+                        {% else %}
+                            মেয়াদ শেষ হবে: {{ item.expires_at[:10] }} (১ বছর)
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <!-- ডাইনামিক লাইভ টাইমার এবং পৃথক ক্লেইম বাটন গ্রুপ -->
+            <div class="flex items-center justify-between w-full md:w-auto gap-4 pt-3 md:pt-0 border-t md:border-t-0 border-slate-200/50 z-10">
+                <div class="flex items-center gap-1.5 bg-white border border-slate-200 px-3 py-1.5 rounded-xl shadow-inner font-mono text-xs font-black">
+                    <i id="clock-{{ item.id }}" class="fa-regular fa-clock text-slate-400"></i>
+                    <!-- টাইমার ডাটা এট্রিবিউটে নির্দিষ্ট প্যাকেজের সময় পাঠানো হচ্ছে -->
+                    <span class="countdown-timer text-slate-800" 
+                          id="timer-{{ item.id }}"
+                          data-last-claimed="{{ item.last_claimed_at }}" 
+                          data-duration="{{ item.packages.duration_hours }}"
+                          data-id="{{ item.id }}">
+                        00:00:00
+                    </span>
+                </div>
+
+                <!-- এই নির্দিষ্ট প্যাকেজের জন্য ডেডিকেটেড ক্লেইম বাটন (লক/আনলকড) -->
+                <button id="claim-btn-{{ item.id }}" onclick="runClaim('{{ item.id }}')" disabled 
+                        class="bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed font-extrabold text-[10px] px-4 py-2 rounded-xl transition shadow-none flex items-center gap-1">
+                    <i class="fa-solid fa-lock text-[9px]"></i> CLAIM
+                </button>
+            </div>
+        </div>
+        {% else %}
+        <p class="text-xs text-slate-400 text-center py-4">বর্তমানে কোনো অ্যাক্টিভ মাইনিং নোড পাওয়া যায়নি।</p>
+        {% endfor %}
+    </div>
 </div>
 
 <!-- ৫. কুইক নেভিগেশন গ্রিড -->
@@ -120,9 +130,8 @@
     </a>
 </div>
 
-<!-- ৬. হেল্প ও সাপোর্ট সেকশন -->
+<!-- ৬. লার্নিং ও হেল্প ব্যানারস -->
 <div class="space-y-3">
-    <!-- আমরা কীভাবে আপনাদেরকে টাকা দিবো? ভিডিও লিংক -->
     <a href="/about" class="minimal-card p-4 rounded-xl flex items-center justify-between hover:border-slate-300 transition bg-white border border-slate-200 shadow-sm">
         <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-500 text-sm shadow-sm">
@@ -136,7 +145,6 @@
         <i class="fa-solid fa-chevron-right text-slate-300 text-xs"></i>
     </a>
 
-    <!-- ইউটিউব ভিডিও টিউটোরিয়াল -->
     <a href="https://www.youtube.com/watch?v=YOUR_VIDEO_ID" target="_blank" class="minimal-card p-4 rounded-xl flex items-center justify-between hover:border-slate-300 transition bg-white border border-slate-200 shadow-sm">
         <div class="flex items-center gap-3">
             <div class="text-red-500 text-lg">
@@ -150,7 +158,6 @@
         <span class="text-[9px] bg-red-50 text-red-600 border border-red-100 px-2.5 py-0.5 rounded-full font-bold">ভিডিও</span>
     </a>
 
-    <!-- রিভিউ পেজ লিংক -->
     <a href="/reviews" class="minimal-card p-4 rounded-xl flex items-center justify-between bg-white border border-slate-200 shadow-sm hover:border-slate-300 transition">
         <div class="flex items-center gap-3">
             <div class="text-amber-400 text-sm">
@@ -170,7 +177,6 @@
         </div>
     </a>
 
-    <!-- ডেডিকেটেড প্যাকেজ স্টোর লিংক -->
     <a href="/store" class="minimal-card p-4 rounded-xl flex items-center justify-between hover:border-slate-300 transition bg-white border border-slate-200 shadow-sm">
         <div class="flex items-center gap-3">
             <div class="text-purple-500 text-sm">
@@ -181,10 +187,9 @@
                 <p class="text-[9px] text-slate-400">পছন্দের মাইনিং স্পিড বাড়াতে প্যাকেজ কিনুন</p>
             </div>
         </div>
-        <span class="text-[9px] bg-purple-50 text-purple-600 border border-purple-100 px-2.5 py-0.5 rounded-full font-bold">আপগ্রেড</span>
+        <span class="text-[9px] bg-purple-50 text-purple-600 border border-purple-100 px-2 py-0.5 rounded-full font-bold">আপগ্রেড</span>
     </a>
 
-    <!-- রিয়েল টেলিগ্রাম সাপোর্ট এজেন্ট লিংক -->
     <a href="https://t.me/optiwork_help" target="_blank" class="minimal-card p-4 rounded-xl flex items-center justify-between hover:border-slate-300 transition bg-white border border-slate-200 shadow-sm">
         <div class="flex items-center gap-3">
             <div class="text-sky-500 text-sm">
@@ -195,7 +200,7 @@
                 <p class="text-[9px] text-slate-400">২৪ ঘণ্টা যেকোনো সমস্যায় আমাদের সাপোর্ট এজেন্ট রয়েছে</p>
             </div>
         </div>
-        <span class="text-[9px] bg-sky-50 text-sky-600 border border-sky-100 px-2.5 py-0.5 rounded-full font-bold">হেল্পডেস্ক</span>
+        <span class="text-[9px] bg-sky-50 text-sky-600 border border-sky-100 px-2 py-0.5 rounded-full font-bold">হেল্পডেস্ক</span>
     </a>
 </div>
 
@@ -225,67 +230,80 @@ async function runDailyCheckin() {
     }
 }
 
-// ২. রিয়েল-টাইম টাইমার এবং ক্লেইম বাটন আনলক স্ক্রিপ্ট
-function updateDashboardTimer() {
-    const timer = document.querySelector('.countdown-timer');
-    const claimBtn = document.getElementById('claim-btn');
-    const clockIcon = document.getElementById('clock-icon');
-    if (!timer) return;
-
+// ২. একাধিক রানিং প্যাকেজের জন্য ডাইনামিক মাল্টি-টাইমার এবং আলাদা বাটন আনলক স্ক্রিপ্ট
+function updateDashboardTimers() {
+    const timers = document.querySelectorAll('.countdown-timer');
     const now = new Date();
-    const lastClaimedStr = timer.getAttribute('data-last-claimed');
-    const durationHours = parseInt(timer.getAttribute('data-duration'));
 
-    const lastClaimed = new Date(lastClaimedStr.replace('Z', '+00:00'));
-    const nextClaimTime = new Date(lastClaimed.getTime() + (durationHours * 60 * 60 * 1000));
-    
-    const diffMs = nextClaimTime - now;
-
-    if (diffMs <= 0) {
-        timer.innerText = "READY";
-        timer.classList.remove('text-slate-800');
-        timer.classList.add('text-emerald-500', 'animate-pulse');
+    timers.forEach(timer => {
+        const id = timer.getAttribute('data-id');
+        const lastClaimedStr = timer.getAttribute('data-last-claimed');
+        const durationHours = parseInt(timer.getAttribute('data-duration'));
         
-        clockIcon.className = "text-emerald-500 animate-spin";
+        const claimBtn = document.getElementById(`claim-btn-${id}`);
+        const clockIcon = document.getElementById(`clock-${id}`);
 
-        claimBtn.removeAttribute('disabled');
-        claimBtn.className = "glow-btn-light bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs px-5 py-2.5 rounded-xl transition flex items-center gap-1.5 shadow cursor-pointer";
-        claimBtn.innerHTML = '<i class="fa-solid fa-bolt text-[10px]"></i> CLAIM';
-    } else {
-        const hours = Math.floor(diffMs / (1000 * 60 * 60));
-        const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
+        const lastClaimed = new Date(lastClaimedStr.replace('Z', '+00:00'));
+        const nextClaimTime = new Date(lastClaimed.getTime() + (durationHours * 60 * 60 * 1000));
+        
+        const diffMs = nextClaimTime - now;
 
-        const pad = (num) => String(num).padStart(2, '0');
-        timer.innerText = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+        if (diffMs <= 0) {
+            // এই নির্দিষ্ট বাটনটির টাইমার READY করা
+            timer.innerText = "READY";
+            timer.className = "countdown-timer text-emerald-500 animate-pulse";
+            clockIcon.className = "text-emerald-500 animate-spin text-[10px]";
 
-        clockIcon.className = "text-slate-400";
-        claimBtn.setAttribute('disabled', 'true');
-        claimBtn.className = "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed font-extrabold text-xs px-5 py-2.5 rounded-xl transition flex items-center gap-1.5 shadow-none";
-        claimBtn.innerHTML = '<i class="fa-solid fa-lock text-[10px]"></i> CLAIM';
-    }
+            // এই নির্দিষ্ট বাটনটি ক্লিকেবল করা
+            claimBtn.removeAttribute('disabled');
+            claimBtn.className = "glow-btn-light bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-[10px] px-4 py-2 rounded-xl transition flex items-center gap-1 shadow cursor-pointer";
+            claimBtn.innerHTML = '<i class="fa-solid fa-bolt text-[9px]"></i> CLAIM';
+        } else {
+            const hours = Math.floor(diffMs / (1000 * 60 * 60));
+            const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
+
+            const pad = (num) => String(num).padStart(2, '0');
+            timer.innerText = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+            timer.className = "countdown-timer text-slate-800";
+
+            clockIcon.className = "text-slate-400";
+            claimBtn.setAttribute('disabled', 'true');
+            claimBtn.className = "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed font-extrabold text-[10px] px-4 py-2 rounded-xl transition flex items-center gap-1 shadow-none";
+            claimBtn.innerHTML = '<i class="fa-solid fa-lock text-[9px]"></i> CLAIM';
+        }
+    });
 }
 
-setInterval(updateDashboardTimer, 1000);
-updateDashboardTimer();
+setInterval(updateDashboardTimers, 1000);
+updateDashboardTimers();
 
-// ৩. ক্লেইম মাইনিং রিকোয়েস্ট
-async function runClaim() {
+// ৩. কাস্টম ইন্ডিভিজুয়াল প্যাকেজ ক্লেইম করার স্ক্রিপ্ট (AJAX)
+async function runClaim(userPackageId) {
     const alertBox = document.getElementById('claim-api-message');
     alertBox.classList.add('hidden');
     
-    const res = await fetch('/claim-mining', { method: 'POST' });
-    const data = await res.json();
-    
-    alertBox.classList.remove('hidden', 'bg-red-50', 'text-red-600', 'border-red-100', 'bg-emerald-50', 'text-emerald-600', 'border-emerald-100');
-    
-    if (data.status === 'success') {
-        alertBox.classList.add('bg-emerald-50', 'text-emerald-600', 'border-emerald-100');
-        alertBox.innerText = data.message;
-        setTimeout(() => { location.reload(); }, 1500);
-    } else {
-        alertBox.classList.add('bg-red-50', 'text-red-600', 'border-red-100');
-        alertBox.innerText = data.message;
+    try {
+        const res = await fetch('/claim-mining', { 
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_package_id: userPackageId })
+        });
+        const data = await res.json();
+        
+        alertBox.classList.remove('hidden', 'bg-red-50', 'text-red-600', 'border-red-100', 'bg-emerald-50', 'text-emerald-600', 'border-emerald-100');
+        alertBox.classList.add('border');
+        
+        if (data.status === 'success') {
+            alertBox.classList.add('bg-emerald-50', 'text-emerald-600', 'border-emerald-100');
+            alertBox.innerText = data.message;
+            setTimeout(() => { location.reload(); }, 1500);
+        } else {
+            alertBox.classList.add('bg-red-50', 'text-red-600', 'border-red-100');
+            alertBox.innerText = data.message;
+        }
+    } catch (e) {
+        alert("কানেকশন ত্রুটি!");
     }
 }
 </script>
