@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="space-y-5">
+    
+    <!-- হেডার কার্ড -->
+    <div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm relative overflow-hidden">
+        <div class="absolute -right-8 -top-8 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl"></div>
+        <h2 class="text-sm font-extrabold uppercase tracking-wider text-slate-800 flex items-center gap-1.5 z-10 relative">
+            <i class="fa-solid fa-circle-info text-emerald-500"></i> আমাদের টেকনোলজি ও ব্যবসায়িক মডেল
+        </h2>
+        <p class="text-[10px] text-slate-400 font-bold uppercase mt-1 tracking-wider z-10 relative">Opti Work - Cloud Mining & Infrastructure</p>
+    </div>
+
+    <!-- সেকশন ১: ক্লাউড কম্পিউটিং এবং হার্ডওয়্যার ভাড়া কী? -->
+    <div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-2">
+        <h3 class="text-xs font-bold text-slate-800 flex items-center gap-1.5 border-b border-slate-50 pb-2">
+            <i class="fa-solid fa-server text-slate-400"></i> ১. ক্লাউড কম্পিউটিং ও হার্ডওয়্যার ভাড়া কী?
+        </h3>
+        <p class="text-xs text-slate-500 leading-relaxed text-justify">
+            উচ্চ ক্ষমতাসম্পন্ন সুপার-কম্পিউটার বা প্রসেসিং সার্ভারগুলো (ASIC/GPU) অত্যন্ত ব্যয়বহুল হয়ে থাকে, যা সাধারণ মানুষের পক্ষে এককভাবে কেনা বা রক্ষণাবেক্ষণ করা সম্ভব নয়। **হার্ডওয়্যার রেন্টাল** হলো এমন একটি আধুনিক ব্যবস্থা, যেখানে আমাদের ডাটা সেন্টারে অবস্থিত শক্তিশালী সার্ভারগুলোর কম্পিউটিং পাওয়ার বা ক্ষমতাকে ছোট ছোট ভাগে বিভক্ত করে ব্যবহারকারীদের কাছে অনলাইনে নির্দিষ্ট ফি-এর বিনিময়ে ভাড়া দেওয়া হয়। একেই **ক্লাউড কম্পিউটিং** বলে।
+        </p>
+    </div>
+
+    <!-- সেকশন ২: আমরা যেভাবে ক্রিপ্টোকারেন্সি মাইনিং করি -->
+    <div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-2">
+        <h3 class="text-xs font-bold text-slate-800 flex items-center gap-1.5 border-b border-slate-50 pb-2">
+            <i class="fa-solid fa-cubes text-slate-400"></i> ২. ক্রিপ্টোকারেন্সি (Bitcoin, Litecoin) মাইনিং প্রসেস
+        </h3>
+        <p class="text-xs text-slate-500 leading-relaxed text-justify">
+            আপনার ভাড়াকৃত প্রসেসিং ইউনিট বা সার্ভারগুলো আমাদের সিস্টেমে যুক্ত হওয়ার পর বিশ্বব্যাপী ব্লকচেন নেটওয়ার্কে ২৪ ঘণ্টা সক্রিয় থাকে। এই সার্ভারগুলো ব্লকচেন নেটওয়ার্কের জটিল গাণিতিক হিসাব এবং লেনদেনের সত্যতা (Transaction Verification) যাচাই করার কাজ করে। এর বিনিময়ে আন্তর্জাতিক ব্লকচেন প্রোটোকল আমাদের কোম্পানিকে নতুন **Bitcoin (BTC)**, **Litecoin (LTC)** বা প্রসেসিং গ্যাস ফি প্রদান করে থাকে।
+        </p>
+    </div>
+
+    <!-- সেকশন ৩: আপনাদের আমরা কীভাবে লভ্যাংশ দিচ্ছি? -->
+    <div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-2">
+        <h3 class="text-xs font-bold text-slate-800 flex items-center gap-1.5 border-b border-slate-50 pb-2">
+            <i class="fa-solid fa-hand-holding-dollar text-slate-400"></i> ৩. আপনাদের কীভাবে মুনাফা বা লভ্যাংশ দেওয়া হয়?
+        </h3>
+        <p class="text-xs text-slate-500 leading-relaxed text-justify">
+            প্রিমিয়াম প্যাকেজ ক্রয়ের মাধ্যমে প্রাপ্ত ভাড়ার টাকা আমরা আমাদের ডাটা সেন্টারের হার্ডওয়্যার সম্প্রসারণে ব্যয় করি। এই হার্ডওয়্যারগুলো যে আন্তর্জাতিক ক্রিপ্টোকারেন্সি মাইনিং প্রফিট বা রেভিনিউ তৈরি করে, তার **প্রধান অংশটি (৳ Yield Amount)** চুক্তি অনুযায়ী প্রতি ৮ ঘণ্টা পর পর ক্লেইম করার মাধ্যমে আপনার ব্যালেন্সে যোগ করে দেওয়া হয়। বাকি একটি ক্ষুদ্র অংশ সার্ভার বিদ্যুৎ বিল এবং রক্ষণাবেক্ষণ ফি হিসেবে কোম্পানির ফান্ডে জমা থাকে। এটি একটি সম্পূর্ণ স্বয়ংক্রিয় এবং রিয়েল-টাইম আয়ের প্রফেশনাল মডেল।
+        </p>
+    </div>
+
+    <!-- সেকশন ৪: ফ্রি মেম্বার এবং কন্ডিশন পলিসি -->
+    <div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-3">
+        <h3 class="text-xs font-bold text-slate-800 flex items-center gap-1.5 border-b border-slate-50 pb-2">
+            <i class="fa-solid fa-shield-halved text-slate-400"></i> ৪. ফ্রি ট্রায়াল ও ভেরিফিকেশন পলিসি
+        </h3>
+        
+        <div class="space-y-2.5 text-xs text-slate-500">
+            <div class="p-2.5 bg-slate-50 border border-slate-100 rounded-xl leading-relaxed">
+                <span class="font-bold text-slate-800 block mb-0.5">• ফ্রি ৭ টাকা দেওয়ার কারণ:</span>
+                আমাদের ক্লাউড নেটওয়ার্কের কার্যকারিতা ও গতি পরীক্ষা করার জন্য নতুন ইউজারদের একটি ফ্রি ডেমো টেস্ট সার্ভার দেওয়া হয়, যা প্রতি ৮ ঘণ্টায় ৭ টাকা ব্লকচেন গ্যাস ফি প্রস্তুত করে। এটি সম্পূর্ণ আমাদের কোম্পানির প্রচার ও বিপণন (Marketing Budget) ফান্ড থেকে বহন করা হয়।
+            </div>
+            
+            <div class="p-2.5 bg-slate-50 border border-slate-100 rounded-xl leading-relaxed">
+                <span class="font-bold text-slate-800 block mb-0.5">• ৩ দিন ও রেফারেল শর্তের কারণ:</span>
+                ফ্রি নোডগুলো পাবলিক রিসোর্স ব্যবহার করায় ফেক অ্যাকাউন্ট ও ডাবল-স্পেন্ডিং রোধ করতে সিকিউরিটি সিস্টেম ফ্রি অ্যাকাউন্টগুলোর ক্ষেত্রে ৩ দিন ভেরিফিকেশন পিরিয়ড এবং ৩টি সফল রেফারেল কন্ডিশন কার্যকর রাখে। পক্ষান্তরে, প্রিমিয়াম প্রসেসর ব্যবহারকারীরা ডেডিকেটেড নোড ভাড়ায় সংযুক্ত থাকায় তাদের পরিচয় পূর্বেই ভেরিফাইড থাকে এবং তারা কোনো রেফারেল ছাড়াই উইথড্রয়াল সুবিধা লাভ করেন।
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
