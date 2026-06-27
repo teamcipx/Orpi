@@ -664,7 +664,7 @@ def claim_daily():
         "status": "success", 
         "message": f"ডেইলি চেক-ইন সফল! আপনার ব্যালেন্সে ৳ {reward_amount} যোগ করা হয়েছে।"
     })
-    # ৪. স্টোর রাউট (প্যাকেজ শপ)
+    # ৪. স্টোর রাউট (প্যাকেজ শপ)# ৩. স্টোর এবং ক্রয় হিস্ট্রি রাউট
 @app.route('/store')
 def store():
     user_id = session.get('user_id')
@@ -672,10 +672,23 @@ def store():
         return redirect(url_for('login'))
         
     user = supabase.table("users").select("balance").eq("id", user_id).execute().data[0]
-    premium_pkgs = supabase.table("packages").select("*").eq("is_premium", True).execute().data
+    premium_pkgs = supabase.table("packages").select("*").eq("is_premium", True).order("cost", desc=False).execute().data
     
-    return render_template('store.html', balance=user['balance'], premium_packages=premium_pkgs)
+    # কাস্টম হিস্ট্রি লোড (স্টোরের নিচে দেখানোর জন্য)
+    deposit_history = supabase.table("deposits").select("*").eq("user_id", user_id).order("created_at", desc=True).execute().data
+    
+    purchase_history = supabase.table("user_packages") \
+        .select("bought_at, packages(name, cost, is_premium)") \
+        .eq("user_id", user_id).order("bought_at", desc=True).execute().data
+    
+    return render_template('store.html', 
+                           balance=user['balance'], 
+                           premium_packages=premium_pkgs,
+                           deposit_history=deposit_history,
+                           purchase_history=purchase_history)
 
+
+# ৪. ডাইনামিক ব্যালেন্স শর্টেজ অ্যালার্ট সহ প্যাকেজ বাই রাউট
 @app.route('/buy-package', methods=['POST'])
 def buy_package():
     user_id = session.get('user_id')
@@ -685,30 +698,32 @@ def buy_package():
         
     pkg = supabase.table("packages").select("*").eq("id", package_id).execute()
     if not pkg.data:
-        flash("প্যাকেজটি পাওয়া যায়নি।", "danger")
+        flash("প্যাকেজ পাওয়া যায়নি।", "danger")
         return redirect(url_for('store'))
         
     cost = float(pkg.data[0]['cost'])
+    pkg_name = pkg.data[0]['name']
+    
     user = supabase.table("users").select("balance").eq("id", user_id).execute().data[0]
     balance = float(user['balance'])
     
     if balance >= cost:
-        # ব্যালেন্স কর্তন করা
         supabase.rpc("increment_balance", {"user_id": user_id, "amount": -cost}).execute()
         
-        # ইউজার প্যাকেজ যুক্ত করা
         supabase.table("user_packages").insert({
             "user_id": user_id,
             "package_id": package_id,
             "last_claimed_at": datetime.datetime.now(datetime.timezone.utc).isoformat()
         }).execute()
         
-        flash("প্যাকেজটি সফলভাবে সক্রিয় করা হয়েছে।", "success")
+        flash(f"{pkg_name} প্যাকেজটি সফলভাবে সক্রিয় করা হয়েছে।", "success")
     else:
-        flash("আপনার অ্যাকাউন্টে পর্যাপ্ত ব্যালেন্স নেই।", "danger")
+        # কত টাকা কম পড়ছে তা চমৎকারভাবে হিসাব করা হচ্ছে
+        shortage = cost - balance
+        flash(f"ব্যালেন্স অপর্যাপ্ত! {pkg_name} প্যাকেজটি কিনতে আপনার আরও ৳ {shortage:.2f} লাগবে। দয়া করে এড মানি করুন।", "danger")
         
     return redirect(url_for('store'))
-
+    
 # ৫. রিচার্জ বা অ্যাড মানি রাউট
 @app.route('/add-money', methods=['GET', 'POST'])
 def add_money():
