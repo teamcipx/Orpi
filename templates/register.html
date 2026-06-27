@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Opti Work - Register</title>
+    <title>Opti Work - Create Account</title>
     <!-- Google Fonts: Plus Jakarta Sans -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Font Awesome Icons -->
@@ -24,16 +24,23 @@
 </head>
 <body class="bg-[#F8FAFC] text-[#0F172A] flex items-center justify-center min-h-screen px-4 py-8">
 
-    <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-xl max-w-sm w-full relative overflow-hidden">
+    <!-- প্রিমিয়াম মিনিমাল কার্ড -->
+    <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/60 shadow-xl max-w-sm w-full relative overflow-hidden">
+        <!-- আলংকারিক ব্যাকগ্রাউন্ড গ্লো ডট -->
+        <div class="absolute -right-10 -top-10 w-28 h-28 bg-emerald-500/5 rounded-full blur-3xl"></div>
         
-        <!-- লোগো ও বোনাস অফার এরিয়া -->
-        <div class="text-center mb-5">
+        <!-- লোগো এবং রেফারে বোনাস মেসেজ -->
+        <div class="text-center mb-6">
             <span class="text-xl font-extrabold tracking-tight text-slate-900">
                 OPTI<span class="text-emerald-500">WORK</span>
             </span>
-            <p class="text-[10px] text-emerald-500 font-bold uppercase mt-1 tracking-wider bg-emerald-50 border border-emerald-100/50 inline-block px-3 py-1 rounded-full">
-                🎁 ১০০ টাকা সাইন-আপ বোনাস
-            </p>
+            <p class="text-[10px] text-slate-400 font-bold uppercase mt-1 tracking-wider">Cloud Hardware Terminal</p>
+            
+            <!-- ১০০ টাকা রেফারেল বোনাস নোটিশ -->
+            <div class="mt-3.5 bg-emerald-50 border border-emerald-100 text-emerald-700 text-[10px] font-extrabold px-3.5 py-1.5 rounded-full inline-flex items-center gap-1 shadow-sm">
+                <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping"></span>
+                <span>রেফারেল লিংকে জয়েন করলেই ৳১০০ বোনাস!</span>
+            </div>
         </div>
         
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -46,48 +53,58 @@
             {% endif %}
         {% endwith %}
 
-        <form action="/register" method="POST" class="space-y-3.5">
+        <!-- রেজিষ্ট্রেশন ফর্ম -->
+        <form action="/register" method="POST" class="space-y-4">
+            <!-- ইউজারনেম ইনপুট -->
             <div>
-                <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1 tracking-wider">ইউজারনেম</label>
+                <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1 tracking-wider">ইউজারনেম (Username)</label>
                 <div class="relative">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
                         <i class="fa-regular fa-user text-xs"></i>
                     </span>
-                    <input type="text" name="username" required placeholder="username123" class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-300">
+                    <input type="text" name="username" required placeholder="rahim78" 
+                           class="w-full pl-10 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-300">
                 </div>
             </div>
 
+            <!-- ইমেইল ইনপুট -->
             <div>
                 <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1 tracking-wider">ইমেইল এড্রেস</label>
                 <div class="relative">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
                         <i class="fa-regular fa-envelope text-xs"></i>
                     </span>
-                    <input type="email" name="email" required placeholder="name@domain.com" class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-300">
+                    <input type="email" name="email" required placeholder="name@domain.com" 
+                           class="w-full pl-10 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-300">
                 </div>
             </div>
             
+            <!-- পাসওয়ার্ড ইনপুট -->
             <div>
                 <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1 tracking-wider">পাসওয়ার্ড</label>
                 <div class="relative">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
                         <i class="fa-solid fa-lock text-xs"></i>
                     </span>
-                    <input type="password" name="password" required placeholder="••••••••" class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-300">
+                    <input type="password" name="password" required placeholder="••••••••" 
+                           class="w-full pl-10 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-300">
                 </div>
             </div>
 
+            <!-- ইনভাইটেশন কোড (UID) ইনপুট -->
             <div>
-                <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1 tracking-wider">ইনভাইটেশন কোড (ঐচ্ছিক)</label>
+                <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1 tracking-wider">আমন্ত্রণ কোড (Referral Code / UID)</label>
                 <div class="relative">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
                         <i class="fa-solid fa-ticket text-xs"></i>
                     </span>
-                    <input type="text" name="referrer" value="{{ ref_by }}" class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-300">
+                    <input type="text" name="referrer" value="{{ ref_by }}" placeholder="6892 (ঐচ্ছিক)" 
+                           class="w-full pl-10 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-300 font-mono">
                 </div>
             </div>
 
-            <button type="submit" class="w-full bg-slate-950 hover:bg-slate-800 text-white font-extrabold text-xs py-3 rounded-xl transition tracking-wider uppercase">
+            <!-- সাবমিট বাটন -->
+            <button type="submit" class="w-full bg-slate-950 hover:bg-slate-800 text-white font-extrabold text-xs py-3 rounded-xl transition tracking-wider uppercase shadow-sm">
                 অ্যাকাউন্ট তৈরি করুন
             </button>
         </form>
