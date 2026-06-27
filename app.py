@@ -509,7 +509,8 @@ def register():
             
     return render_template('register.html', ref_by=ref_by)
     
-# ৩. ড্যাশবোর্ড রাউট
+# (অন্যান্য কোডের সাথে নিচের ড্যাশবোর্ড আপডেট ও নতুন এপিআই রাউটটি যুক্ত করুন)
+
 @app.route('/dashboard')
 def dashboard():
     user_id = session.get('user_id')
@@ -517,17 +518,67 @@ def dashboard():
         return redirect(url_for('login'))
         
     user = supabase.table("users").select("*").eq("id", user_id).execute().data[0]
+    balance = float(user['balance'])
     
-    # সক্রিয় প্যাকেজ রিট্রিভ
+    # ১. সফল রেফারেল সংখ্যা বের করা
+    success_refs_query = supabase.table("referrals").select("id").eq("referrer_id", user_id).eq("status", "Success").execute().data
+    success_ref_count = len(success_refs_query)
+    
+    # ২. উইথড্রয়াল প্রগ্রেস বার হিসাব করা (৩ রেফারেল = ৫০%, ৪০০ ব্যালেন্স = ৫০%)
+    ref_progress = min(success_ref_count / 3, 1.0) * 50
+    bal_progress = min(balance / 400, 1.0) * 50
+    progress_percent = int(ref_progress + bal_progress)
+    
+    # ইউজার প্যাকেজসমূহ
     owned_pkgs = supabase.table("user_packages") \
         .select("last_claimed_at, packages(name, duration_hours, yield_amount)") \
         .eq("user_id", user_id).execute().data
 
     notice = "Opti Work এ আপনাকে স্বাগতম! ফ্রি মাইনিং চালু করে প্রতি ৮ ঘণ্টায় ৭ টাকা ক্লেইম করুন। প্রিমিয়াম প্যাকেজ কিনলে আয় আরও বৃদ্ধি পাবে।"
 
-    return render_template('dashboard.html', user=user, owned_packages=owned_pkgs, notice=notice)
+    return render_template('dashboard.html', 
+                           user=user, 
+                           owned_packages=owned_pkgs, 
+                           notice=notice,
+                           progress_percent=progress_percent)
 
-# ৪. স্টোর রাউট (প্যাকেজ শপ)
+
+# --- ডেইলি চেক-ইন ক্লেইম এপিআই ---
+@app.route('/claim-daily', methods=['POST'])
+def claim_daily():
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"status": "error", "message": "Unauthorized"}), 401
+        
+    user = supabase.table("users").select("last_daily_checkin").eq("id", user_id).execute().data[0]
+    last_checkin_str = user.get('last_daily_checkin')
+    
+    now = datetime.datetime.now(datetime.timezone.utc)
+    reward_amount = 5.00  # ডেইলি বোনাস ৫ টাকা
+    
+    if last_checkin_str:
+        last_checkin = datetime.datetime.fromisoformat(last_checkin_str.replace('Z', '+00:00'))
+        cooldown = datetime.timedelta(hours=24)
+        
+        # ২৪ ঘণ্টা পার হয়েছে কিনা যাচাই করা
+        if now < last_checkin + cooldown:
+            time_left = (last_checkin + cooldown) - now
+            seconds_left = int(time_left.total_seconds())
+            return jsonify({
+                "status": "error", 
+                "message": "আপনি ইতিমধ্যে আজকের বোনাস নিয়েছেন।", 
+                "seconds_left": seconds_left
+            }), 400
+
+    # ডাটাবেজ আপডেট এবং ব্যালেন্স যোগ
+    supabase.table("users").update({"last_daily_checkin": now.isoformat()}).eq("id", user_id).execute()
+    supabase.rpc("increment_balance", {"user_id": user_id, "amount": reward_amount}).execute()
+    
+    return jsonify({
+        "status": "success", 
+        "message": f"ডেইলি চেক-ইন সফল! আপনার ব্যালেন্সে ৳ {reward_amount} যোগ করা হয়েছে।"
+    })
+    # ৪. স্টোর রাউট (প্যাকেজ শপ)
 @app.route('/store')
 def store():
     user_id = session.get('user_id')
