@@ -3,10 +3,11 @@
 
 <div class="space-y-4">
     
-    <!-- ১. ওয়ান-টাইম টাস্ক সেকশন -->
+    <!-- ১. ওয়ান-টাইম টাস্ক সেকশন (৫টি পূর্ণ হলে সম্পূর্ণ হাইড হবে) -->
+    {% if claimed_one_times|length < 5 %}
     <div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
         <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-4 border-b border-slate-100 pb-2 flex items-center gap-1.5">
-            <i class="fa-solid fa-award text-emerald-500 text-sm"></i> One-Time Tasks (বোনাস সেন্টার)
+            <i class="fa-solid fa-award text-emerald-500 text-sm"></i> One-Time Tasks (ওয়ান-টাইম বোনাস)
         </h2>
         
         <div id="ot-message" class="hidden p-3 text-xs rounded-xl border text-center mb-4"></div>
@@ -16,7 +17,7 @@
             <!-- টাস্ক ১: প্রোফাইল আপডেট -->
             <div class="flex justify-between items-center bg-slate-50/50 p-4 rounded-xl border border-slate-100 text-xs">
                 <div class="space-y-0.5">
-                    <p class="font-bold text-slate-800">১. প্রোফাইল আপডেট করুন</p>
+                    <p class="font-bold text-slate-800">১. প্রোফাইল ইনফো আপডেট করুন</p>
                     <p class="text-[9px] text-slate-400">শর্ত: সেটিংসে গিয়ে মোবাইল, বয়স এবং জেলা সেভ করুন</p>
                 </div>
                 <div class="flex items-center gap-3">
@@ -73,15 +74,13 @@
                             <i class="fa-solid fa-circle-check text-emerald-500"></i> Claimed
                         </span>
                     {% else %}
-                        <button id="claim-watch_tutorial" disabled data-claimed="false" onclick="claimOneTime('watch_tutorial', this)" class="bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed text-[10px] font-bold px-4 py-1.5 rounded-xl transition">
-                            Claim
-                        </button>
+                        <button onclick="claimOneTime('watch_tutorial', this)" class="bg-slate-950 hover:bg-slate-800 text-white text-[10px] font-bold px-4 py-1.5 rounded-xl transition">Claim</button>
                     {% endif %}
                 </div>
             </div>
 
-            <!-- টাস্ক ৪: ৩ সফল রেফারেল -->
-            <div class="flex justify-between items-center bg-slate-50/50 p-4 rounded-xl border border-slate-100 text-xs">
+            <!-- টাস্ক ৪: ৩ রেফারেল সম্পন্ন করা -->
+            <div class="flex justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-100 text-xs">
                 <div class="space-y-0.5">
                     <p class="font-bold text-slate-800">৪. ৩ জন সফল রেফারেল সম্পন্ন করুন</p>
                     <p class="text-[9px] text-slate-400">আপনার রেফারেল অগ্রগতি: {{ success_ref_count }} / 3</p>
@@ -131,8 +130,9 @@
             </div>
         </div>
     </div>
+    {% endif %}
 
-    <!-- ২. নরমাল টাস্ক পুল সেকশন -->
+    <!-- ২. নরমাল টাস্ক পুল সেকশন (পেন্ডিং ও এপ্রুভড গুলো এখানে স্বয়ংক্রিয়ভাবে হাইড থাকবে) -->
     <div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
         <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-4 border-b border-slate-100 pb-2 flex items-center gap-1.5">
             <i class="fa-solid fa-list-check text-slate-400"></i> Daily Task Pool (নরমাল টাস্কসমূহ)
@@ -153,45 +153,42 @@
             <div class="border border-slate-200 p-4 rounded-2xl bg-slate-50/40 space-y-3">
                 <div class="flex justify-between items-start">
                     <div>
-                        <h3 class="text-xs font-bold text-slate-800">{{ task.title }}</h3>
+                        <h3 class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                            {{ task.title }}
+                            {% if task.id in submission_map and submission_map[task.id] == 'Rejected' %}
+                                <span class="bg-red-100 text-red-600 text-[8px] font-bold px-1.5 py-0.5 rounded">Rejected / Resubmit</span>
+                            {% endif %}
+                        </h3>
                         <p class="text-[10px] text-slate-400 mt-0.5">{{ task.description }}</p>
                     </div>
                     <span class="text-xs font-black text-emerald-600">৳ {{ task.reward }}</span>
                 </div>
                 
-                <a href="{{ task.link }}" target="_blank" class="text-[10px] text-blue-500 hover:underline font-bold inline-block">কাজের লিংকটি খুলুন <i class="fa-solid fa-external-link text-[8px] ml-0.5"></i></a>
+                <a href="{{ task.link }}" target="_blank" class="text-[10px] text-blue-500 hover:underline font-bold inline-block font-sans">কাজের লিংকটি খুলুন <i class="fa-solid fa-external-link text-[8px] ml-0.5"></i></a>
                 
-                {% if task.id in submission_map %}
-                    <div class="text-center py-1.5">
-                        <span class="text-[8px] uppercase font-bold tracking-wider px-3 py-1 rounded-full border {% if submission_map[task.id] == 'Pending' %}bg-yellow-50 text-yellow-600 border-yellow-100{% elif submission_map[task.id] == 'Approved' %}bg-emerald-50 text-emerald-600 border-emerald-100{% else %}bg-red-50 text-red-600 border-red-100{% endif %}">
-                            Status: {{ submission_map[task.id] }}
-                        </span>
-                    </div>
-                {% else %}
-                    <!-- প্রুফ সাবমিশন ফর্ম -->
-                    <form action="/tasks/submit-normal" method="POST" class="pt-3 border-t border-slate-100 space-y-3">
-                        <input type="hidden" name="task_id" value="{{ task.id }}">
-                        <input type="hidden" name="proof_image_url" id="proof-input-{{ task.id }}">
-                        
-                        <div class="flex flex-col gap-2">
-                            <div class="flex items-center gap-3">
-                                <label for="file-{{ task.id }}" class="cursor-pointer bg-slate-200 hover:bg-slate-300 text-slate-700 text-[10px] font-bold px-3.5 py-2 rounded-xl transition flex items-center gap-1 shadow-sm">
-                                    <i class="fa-solid fa-cloud-arrow-up"></i> Select Proof Screenshot
-                                </label>
-                                <input type="file" id="file-{{ task.id }}" class="hidden" accept="image/*" onchange="uploadProof(this, '{{ task.id }}')">
-                                
-                                <span id="label-{{ task.id }}" class="text-[9px] text-slate-400 font-bold">স্ক্রিনশট সিলেক্ট করা হয়নি</span>
-                            </div>
-
-                            <!-- রিয়েল-টাইম আপলোড প্রোগ্রেস বার -->
-                            <div id="progress-container-{{ task.id }}" class="hidden w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mt-1">
-                                <div id="progress-bar-{{ task.id }}" class="bg-emerald-500 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
-                            </div>
+                <!-- প্রুফ সাবমিশন ফর্ম -->
+                <form action="/tasks/submit-normal" method="POST" class="pt-3 border-t border-slate-100 space-y-3">
+                    <input type="hidden" name="task_id" value="{{ task.id }}">
+                    <input type="hidden" name="proof_image_url" id="proof-input-{{ task.id }}">
+                    
+                    <div class="flex flex-col gap-2">
+                        <div class="flex items-center gap-3">
+                            <label for="file-{{ task.id }}" class="cursor-pointer bg-slate-200 hover:bg-slate-300 text-slate-700 text-[10px] font-bold px-3.5 py-2 rounded-xl transition flex items-center gap-1 shadow-sm">
+                                <i class="fa-solid fa-cloud-arrow-up"></i> Upload Screenshot Proof
+                            </label>
+                            <input type="file" id="file-{{ task.id }}" class="hidden" accept="image/*" onchange="uploadProof(this, '{{ task.id }}')">
+                            
+                            <span id="label-{{ task.id }}" class="text-[9px] text-slate-400 font-bold">স্ক্রিনশট সিলেক্ট করা হয়নি</span>
                         </div>
-                        
-                        <button type="submit" id="submit-{{ task.id }}" disabled class="w-full bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed text-[10px] font-extrabold py-2 rounded-xl transition shadow-none">জমা দিন</button>
-                    </form>
-                {% endif %}
+
+                        <!-- রিয়েল-টাইম আপলোড প্রোগ্রেস বার -->
+                        <div id="progress-container-{{ task.id }}" class="hidden w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mt-1">
+                            <div id="progress-bar-{{ task.id }}" class="bg-emerald-500 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" id="submit-{{ task.id }}" disabled class="w-full bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed text-[10px] font-extrabold py-2 rounded-xl transition shadow-none">জমা দিন</button>
+                </form>
             </div>
             {% else %}
             <p class="text-xs text-slate-400 text-center py-4">বর্তমানে কোনো নরমাল টাস্ক উপলব্ধ নেই।</p>
@@ -247,7 +244,6 @@ function uploadProof(input, taskId) {
     const file = input.files[0];
     if (!file) return;
 
-    // আপনার দেওয়া ImgBB API Key
     const IMGBB_API_KEY = "1cb6f7d4b65dfd982d0435de86bb8aff"; 
 
     const formData = new FormData();
@@ -258,17 +254,14 @@ function uploadProof(input, taskId) {
     const progressContainer = document.getElementById(`progress-container-${taskId}`);
     const progressBar = document.getElementById(`progress-bar-${taskId}`);
     
-    // প্রোগ্রেস বার সক্রিয় করা
     progressContainer.classList.remove('hidden');
     progressBar.style.width = '0%';
     
     label.innerText = "Uploading: 0%";
     label.className = "text-[9px] text-slate-500 font-bold";
 
-    // XMLHttpRequest দিয়ে আপলোড করা হচ্ছে (মোবাইল ব্রাউজার ফ্রেন্ডলি)
     const xhr = new XMLHttpRequest();
     
-    // আপলোড প্রোগ্রেস ট্র্যাকিং লুপ
     xhr.upload.addEventListener("progress", function(e) {
         if (e.lengthComputable) {
             const percentComplete = Math.round((e.loaded / e.total) * 100);
@@ -287,7 +280,6 @@ function uploadProof(input, taskId) {
                 label.innerText = "Screenshot Uploaded Successfully! ✓";
                 label.className = "text-[9px] text-emerald-500 font-extrabold";
                 
-                // বাটন সাকসেসফুলি এক্টিভেট করা
                 submitBtn.removeAttribute('disabled');
                 submitBtn.className = "w-full bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] font-extrabold py-2 rounded-xl transition cursor-pointer shadow";
             } else {
