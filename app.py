@@ -211,8 +211,8 @@ def tasks():
                            all_normal_tasks=all_normal_tasks,
                            submission_map=submission_map)
 
-# (অন্যান্য কোড অপরিবর্তিত থাকবে, কেবল claim_one_time ফাংশনটি নিচে দেওয়া কোড দ্বারা প্রতিস্থাপন করুন)
 
+# ২. ওয়ান-টাইম টাস্ক ক্লেইম এপিআই
 @app.route('/tasks/claim-one-time', methods=['POST'])
 def claim_one_time():
     user_id = session.get('user_id')
@@ -229,10 +229,6 @@ def claim_one_time():
         
     reward = 0.00
     
-    # ইউজারনেম দিয়ে সফল রেফারের মোট সংখ্যা বের করা
-    success_refs_query = supabase.table("referrals").select("id").eq("referrer_id", user_id).eq("status", "Success").execute().data
-    success_ref_count = len(success_refs_query)
-    
     if task_name == 'profile_update':
         if user.get('phone_number') and user.get('age') and user.get('district'):
             reward = 5.00
@@ -246,16 +242,11 @@ def claim_one_time():
         reward = 5.00 # ডিরেক্ট ক্লিক ক্লেইম
         
     elif task_name == 'refer_3':
-        if success_ref_count >= 3:
+        success_refs_query = supabase.table("referrals").select("id").eq("referrer_id", user_id).eq("status", "Success").execute().data
+        if len(success_refs_query) >= 3:
             reward = 50.00
         else:
             return jsonify({"status": "error", "message": "আপনার এখনো ৩টি সফল রেফারেল সম্পন্ন হয়নি।"})
-            
-    elif task_name == 'refer_10':
-        if success_ref_count >= 10:
-            reward = 150.00
-        else:
-            return jsonify({"status": "error", "message": "আপনার এখনো ১০টি সফল রেফারেল সম্পন্ন হয়নি।"})
     else:
         return jsonify({"status": "error", "message": "অবৈধ টাস্ক রিকোয়েস্ট। "})
         
@@ -264,7 +255,8 @@ def claim_one_time():
     supabase.table("user_one_time_tasks").insert({"user_id": user_id, "task_name": task_name}).execute()
     
     return jsonify({"status": "success", "message": f"সফলভাবে ক্লেইমড! আপনার ব্যালেন্সে ৳ {reward} যোগ করা হয়েছে। "})
-    
+
+
 # ৩. নরমাল টাস্ক সাবমিট এপিআই
 @app.route('/tasks/submit-normal', methods=['POST'])
 def submit_normal():
