@@ -9,6 +9,7 @@ app = Flask(__name__)
 # প্রোডাকশনে ব্যবহারের জন্য সেশন সিক্রেট কি পরিবর্তন করুন
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "super_secret_key_change_me")
 
+app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(days=30)
 # Supabase API কানেকশন সেটিংস
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "YOUR_SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "YOUR_SUPABASE_KEY")
@@ -470,8 +471,6 @@ def admin_task_action():
     
 # (অন্যান্য কোড অপরিবর্তিত থাকবে, নিম্নলিখিত রাউটগুলো আপডেট করুন)
 
-# ১. লগইন রাউট (সেশনে UID সংরক্ষণসহ)
-@app.route('/')
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -488,9 +487,12 @@ def login():
                 return render_template('login.html')
                 
             if check_password_hash(user['password_hash'], password):
+                # সেশন স্থায়ী বা পারমানেন্ট হিসেবে সেট করা হচ্ছে (৩০ দিন মেয়াদে লক থাকবে)
+                session.permanent = True
+                
                 session['user_id'] = user['id']
                 session['username'] = user['username']
-                session['uid'] = user['uid'] # সেশনে ইউনিক আইডি সংরক্ষণ
+                session['uid'] = user['uid']
                 
                 now = datetime.datetime.now(datetime.timezone.utc).isoformat()
                 supabase.table("users").update({"last_login": now}).eq("id", user['id']).execute()
@@ -499,7 +501,7 @@ def login():
             
         flash("ভুল ইমেইল অথবা পাসওয়ার্ড।", "danger")
     return render_template('login.html')
-
+    
 
 # ৩. রেফারেল রাউট (ইউনিক আইডি দিয়ে রেফারেল লিংক তৈরি)
 @app.route('/referrals')
