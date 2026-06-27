@@ -27,36 +27,6 @@ def mask_email(email):
 
 app.jinja_env.filters['mask_email'] = mask_email
 
-# (লগইন রাউটে নিচের মতো ব্যানড চেক যুক্ত করুন)
-@app.route('/', methods=['GET', 'POST'])
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
-        
-        user_query = supabase.table("users").select("*").eq("email", email).execute()
-        
-        if user_query.data:
-            user = user_query.data[0]
-            
-            # অ্যাকাউন্ট ব্যানড করা আছে কিনা যাচাই করা
-            if user.get('is_banned'):
-                flash("আপনার অ্যাকাউন্টটি সাময়িকভাবে স্থগিত (Banned) করা হয়েছে।", "danger")
-                return render_template('login.html')
-                
-            if check_password_hash(user['password_hash'], password):
-                session['user_id'] = user['id']
-                session['username'] = user['username']
-                
-                now = datetime.datetime.now(datetime.timezone.utc).isoformat()
-                supabase.table("users").update({"last_login": now}).eq("id", user['id']).execute()
-                
-                return redirect(url_for('dashboard'))
-            
-        flash("ভুল ইমেইল অথবা পাসওয়ার্ড।", "danger")
-    return render_template('login.html')
-
 
 # ------------------ এডমিন প্যানেল রাউটসমূহ ------------------
 
@@ -369,7 +339,199 @@ def admin_task_action():
         
     return redirect(url_for('admin_add_task'))
     
+# (অন্যান্য কোড অপরিবর্তিত থাকবে, নিম্নলিখিত রাউটগুলো আপডেট করুন)
 
+# ১. লগইন রাউট (সেশনে UID সংরক্ষণসহ)
+@app.route('/')
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+        
+        user_query = supabase.table("users").select("*").eq("email", email).execute()
+        
+        if user_query.data:
+            user = user_query.data[0]
+            
+            if user.get('is_banned'):
+                flash("আপনার অ্যাকাউন্টটি সাময়িকভাবে স্থগিত (Banned) করা হয়েছে।", "danger")
+                return render_template('login.html')
+                
+            if check_password_hash(user['password_hash'], password):
+                session['user_id'] = user['id']
+                session['username'] = user['username']
+                session['uid'] = user['uid'] # সেশনে ইউনিক আইডি সংরক্ষণ
+                
+                now = datetime.datetime.now(datetime.timezone.utc).isoformat()
+                supabase.table("users").update({"last_login": now}).eq("id", user['id']).execute()
+                
+                return redirect(url_for('dashboard'))
+            
+        flash("ভুল ইমেইল অথবা পাসওয়ার্ড।", "danger")
+    return render_template('login.html')
+
+
+# ২. রেজিস্ট্রেশন রাউট (ইউনিক আইডি/রেফার কোড দিয়ে রেফারার অনুসন্ধান)
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    ref_by = request.args.get('ref', '') # এটি এখন ইউনিক আইডি সংখ্যা (যেমন: 6892)
+    if request.method == 'POST':
+        username = request.form.get('username')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        referrer_code = request.form.get('referrer') # ইউজার ইনপুট করা ইউনিক আইডি কোড
+
+        hashed_password = generate_password_hash(password)
+        
+        initial_balance = 0.00
+        referrer_id = None
+
+        # ইউনিক আইডি বা রেফার কোড দিয়ে রেফারার ভ্যালিডেশন
+        if referrer_code and referrer_code.isdigit():
+            ref_uid = int(referrer_code)
+            referrer_res = supabase.table("users").select("id").eq("uid", ref_uid).execute()
+            if referrer_res.data:
+                referrer_id = referrer_res.data[0]['id']
+                initial_balance = 100.00 # সঠিক রেফারেল কোডে ১০০ টাকা বোনাস
+        
+        user_data = {
+            "username": username,
+            "email": email,
+            "password_hash": hashed_password,
+            "balance": initial_balance
+        }
+        
+        try:
+            new_user_res = supabase.table("users").insert(user_data).execute()
+            if new_user_res.data:
+                new_user_id = new_user_res.data[0]['id']
+                
+                # ফ্রি প্যাকেজ এক্টিভ করা
+                supabase.table("user_packages").insert({
+                    "user_id": new_user_id,
+                    "package_id": 1
+                }).execute()
+                
+                if referrer_id:
+                    # এই রেফারারের পূর্ববর্তী রেফারেল ট্র্যাকিং
+                    existing_refs = supabase.table("referrals").select("id").eq("referrer_id", referrer_id).execute().data
+                    ref_count = len(existing_refs)
+                    
+                    if ref_count == 0:
+                        delay_hours = 1
+                    elif ref_count == 1:
+                        delay_hours = 24
+                    elif ref_count == 2:
+                        delay_hours = 40
+                    else:
+                        delay_hours = 42
+                        
+                    scheduled_time = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=delay_hours)
+                    
+                    supabase.table("referrals").insert({
+                        "referrer_id": referrer_id,
+                        "referred_id": new_user_id,
+                        "status": "Processing",
+                        "scheduled_payout_at": scheduled_time.isoformat()
+                    }).execute()
+                        
+                flash("নিবন্ধন সফল হয়েছে। লগইন করুন।", "success")
+                return redirect(url_for('login'))
+        except Exception:
+            flash("ইউজারনেম অথবা ইমেইলটি ইতিমধ্যে ব্যবহৃত হয়েছে।", "danger")
+            
+    return render_template('register.html', ref_by=ref_by)
+
+
+# ৩. রেফারেল রাউট (ইউনিক আইডি দিয়ে রেফারেল লিংক তৈরি)
+@app.route('/referrals')
+def referrals():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+        
+    now = datetime.datetime.now(datetime.timezone.utc)
+    user = supabase.table("users").select("uid").eq("id", user_id).execute().data[0]
+    
+    # অন-ডিমান্ড রেফারেল সময় ও শর্ত পরীক্ষা
+    due_referrals = supabase.table("referrals") \
+        .select("id, referred_id") \
+        .eq("referrer_id", user_id) \
+        .eq("status", "Processing") \
+        .lte("scheduled_payout_at", now.isoformat()) \
+        .execute().data
+
+    for ref in due_referrals:
+        referred_id = ref['referred_id']
+        ref_user = supabase.table("users").select("last_login").eq("id", referred_id).execute().data
+        
+        if ref_user:
+            last_login_str = ref_user[0]['last_login']
+            last_login = datetime.datetime.fromisoformat(last_login_str.replace('Z', '+00:00'))
+            twelve_hours_ago = now - datetime.timedelta(hours=12)
+            
+            new_status = "Success" if last_login >= twelve_hours_ago else "Failed"
+            
+            supabase.rpc("process_referral_payout", {
+                "p_referral_id": ref['id'],
+                "p_referrer_id": user_id,
+                "p_new_status": new_status,
+                "p_reward_amount": 30.00
+            }).execute()
+            
+    referrals_data = supabase.table("referrals") \
+        .select("status, created_at, users:referred_id(username, email)") \
+        .eq("referrer_id", user_id).execute().data
+        
+    success_count = sum(1 for r in referrals_data if r['status'] == 'Success')
+    processing_count = sum(1 for r in referrals_data if r['status'] == 'Processing')
+    failed_count = sum(1 for r in referrals_data if r['status'] == 'Failed')
+    total_earnings = success_count * 30.00
+        
+    # ইউজারনেমের পরিবর্তে UID ব্যবহার করে রেফারেল লিংক জেনারেট
+    ref_link = request.url_root + "register?ref=" + str(user['uid'])
+    
+    return render_template('referrals.html', 
+                           referrals=referrals_data, 
+                           ref_link=ref_link,
+                           success_count=success_count,
+                           processing_count=processing_count,
+                           failed_count=failed_count,
+                           total_earnings=total_earnings)
+
+
+# ৪. প্রোফাইল রাউট (ইউনিক আইডি রেফারেল লিংক জেনারেট)
+@app.route('/profile', methods=['GET', 'POST'])
+def profile():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+        
+    if request.method == 'POST':
+        phone = request.form.get('phone_number')
+        age = request.form.get('age')
+        district = request.form.get('district')
+        proof_url = request.form.get('avatar_url')
+        
+        update_data = {}
+        if phone: update_data['phone_number'] = phone
+        if age: update_data['age'] = int(age) if age.isdigit() else None
+        if district: update_data['district'] = district
+        if proof_url: update_data['avatar_url'] = proof_url
+        
+        if update_data:
+            supabase.table("users").update(update_data).eq("id", user_id).execute()
+            flash("প্রোফাইল তথ্য সফলভাবে আপডেট করা হয়েছে।", "success")
+            return redirect(url_for('profile'))
+            
+    user = supabase.table("users").select("*").eq("id", user_id).execute().data[0]
+    
+    # ইউজারনেমের পরিবর্তে UID ব্যবহার করে রেফারেল লিংক জেনারেট
+    ref_link = request.url_root + "register?ref=" + str(user['uid'])
+    
+    return render_template('profile.html', user=user, ref_link=ref_link)
+    
 @app.route('/withdraw', methods=['GET', 'POST'])
 def withdraw():
     user_id = session.get('user_id')
@@ -432,81 +594,6 @@ def withdraw():
                            can_withdraw=can_withdraw,
                            history=history)
     
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    ref_by = request.args.get('ref', '')
-    if request.method == 'POST':
-        username = request.form.get('username')
-        email = request.form.get('email')
-        password = request.form.get('password')
-        referrer_name = request.form.get('referrer')
-
-        hashed_password = generate_password_hash(password)
-        
-        # ডিফল্ট ব্যালেন্স ০ টাকা (যদি কোনো রেফারেল না থাকে)
-        initial_balance = 0.00
-        referrer_id = None
-
-        # রেফারার ইউজারনেম ডাটাবেজে সঠিক কিনা তা যাচাই করা
-        if referrer_name:
-            referrer_res = supabase.table("users").select("id").eq("username", referrer_name).execute()
-            if referrer_res.data:
-                referrer_id = referrer_res.data[0]['id']
-                initial_balance = 100.00  # রেফারেল লিংকে আসলে কেবল ১০০ টাকা বোনাস পাবেন
-        
-        user_data = {
-            "username": username,
-            "email": email,
-            "password_hash": hashed_password,
-            "balance": initial_balance
-        }
-        
-        try:
-            new_user_res = supabase.table("users").insert(user_data).execute()
-            if new_user_res.data:
-                new_user_id = new_user_res.data[0]['id']
-                
-                # ডিফল্ট ফ্রি মাইনিং প্যাকেজ এক্টিভ করা
-                supabase.table("user_packages").insert({
-                    "user_id": new_user_id,
-                    "package_id": 1
-                }).execute()
-                
-                # যদি রেফারার আইডি ভ্যালিড থাকে, তবে ডাইনামিক সময়কাল নির্ধারণ করা
-                if referrer_id:
-                    # এই রেফারারের পূর্ববর্তী রেফারের সংখ্যা কত তা চেক করা হচ্ছে
-                    existing_refs = supabase.table("referrals") \
-                        .select("id") \
-                        .eq("referrer_id", referrer_id) \
-                        .execute().data
-                    
-                    ref_count = len(existing_refs) # বর্তমান রেফারের পূর্ববর্তী মোট সংখ্যা
-                    
-                    # শর্ত অনুযায়ী সময়কাল (delay_hours) নির্ধারণ
-                    if ref_count == 0:
-                        delay_hours = 1      # ১ম রেফারেল ১ ঘণ্টা পর সফল হবে
-                    elif ref_count == 1:
-                        delay_hours = 24     # ২য় রেফারেল ২৪ ঘণ্টা পর সফল হবে
-                    elif ref_count == 2:
-                        delay_hours = 40     # ৩য় রেফারেল ৪০ ঘণ্টা পর সফল হবে
-                    else:
-                        delay_hours = 42     # পরবর্তী সকল রেফারেল ৪২ ঘণ্টা পর সফল হবে
-                        
-                    scheduled_time = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=delay_hours)
-                    
-                    supabase.table("referrals").insert({
-                        "referrer_id": referrer_id,
-                        "referred_id": new_user_id,
-                        "status": "Processing",
-                        "scheduled_payout_at": scheduled_time.isoformat()
-                    }).execute()
-                        
-                flash("নিবন্ধন সফল হয়েছে। লগইন করুন।", "success")
-                return redirect(url_for('login'))
-        except Exception:
-            flash("ইউজারনেম অথবা ইমেইলটি ইতিমধ্যে ব্যবহৃত হয়েছে।", "danger")
-            
-    return render_template('register.html', ref_by=ref_by)
     
 # (অন্যান্য কোডের সাথে নিচের ড্যাশবোর্ড আপডেট ও নতুন এপিআই রাউটটি যুক্ত করুন)
 
@@ -651,102 +738,6 @@ def add_money():
 
 # (অন্যান্য কোড অপরিবর্তিত থাকবে, /referrals এবং /profile রাউট দুটি প্রতিস্থাপন করুন)
 
-# ১. রেফারেল হিস্ট্রি ও স্ট্যাটস রাউট (সম্পূর্ণ নিরাপদ জয়েনিং সহ)
-@app.route('/referrals')
-def referrals():
-    user_id = session.get('user_id')
-    if not user_id:
-        return redirect(url_for('login'))
-        
-    now = datetime.datetime.now(datetime.timezone.utc)
-    user = supabase.table("users").select("username").eq("id", user_id).execute().data[0]
-    
-    # অন-ডিমান্ড রেফারেল সময় ও শর্ত পরীক্ষা
-    due_referrals = supabase.table("referrals") \
-        .select("id, referred_id") \
-        .eq("referrer_id", user_id) \
-        .eq("status", "Processing") \
-        .lte("scheduled_payout_at", now.isoformat()) \
-        .execute().data
-
-    for ref in due_referrals:
-        referred_id = ref['referred_id']
-        ref_user = supabase.table("users").select("last_login").eq("id", referred_id).execute().data
-        
-        if ref_user:
-            last_login_str = ref_user[0]['last_login']
-            last_login = datetime.datetime.fromisoformat(last_login_str.replace('Z', '+00:00'))
-            twelve_hours_ago = now - datetime.timedelta(hours=12)
-            
-            new_status = "Success" if last_login >= twelve_hours_ago else "Failed"
-            
-            supabase.rpc("process_referral_payout", {
-                "p_referral_id": ref['id'],
-                "p_referrer_id": user_id,
-                "p_new_status": new_status,
-                "p_reward_amount": 30.00
-            }).execute()
-            
-    # ইউজারের রেফারেল হিস্ট্রি ডেটা রিট্রিভ করা (Postgrest standard join)
-    referrals_data = supabase.table("referrals") \
-        .select("status, created_at, users:referred_id(username, email)") \
-        .eq("referrer_id", user_id).execute().data
-        
-    # রিয়েল-টাইম স্ট্যাটস নিশ্চিতভাবে গণনা করা
-    success_count = 0
-    processing_count = 0
-    failed_count = 0
-    
-    for r in referrals_data:
-        status = r.get('status', 'Processing')
-        if status == 'Success':
-            success_count += 1
-        elif status == 'Processing':
-            processing_count += 1
-        elif status == 'Failed':
-            failed_count += 1
-            
-    total_earnings = success_count * 30.00
-    ref_link = request.url_root + "register?ref=" + user['username']
-    
-    return render_template('referrals.html', 
-                           referrals=referrals_data, 
-                           ref_link=ref_link,
-                           success_count=success_count,
-                           processing_count=processing_count,
-                           failed_count=failed_count,
-                           total_earnings=total_earnings)
-
-
-# ২. প্রোফাইল ও সেটিংস রাউট (রেফার লিংক ও শর্টকাট সহ)
-@app.route('/profile', methods=['GET', 'POST'])
-def profile():
-    user_id = session.get('user_id')
-    if not user_id:
-        return redirect(url_for('login'))
-        
-    if request.method == 'POST':
-        phone = request.form.get('phone_number')
-        age = request.form.get('age')
-        district = request.form.get('district')
-        proof_url = request.form.get('avatar_url')
-        
-        update_data = {}
-        if phone: update_data['phone_number'] = phone
-        if age: update_data['age'] = int(age) if age.isdigit() else None
-        if district: update_data['district'] = district
-        if proof_url: update_data['avatar_url'] = proof_url
-        
-        if update_data:
-            supabase.table("users").update(update_data).eq("id", user_id).execute()
-            flash("প্রোফাইল তথ্য সফলভাবে আপডেট করা হয়েছে।", "success")
-            return redirect(url_for('profile'))
-            
-    user = supabase.table("users").select("*").eq("id", user_id).execute().data[0]
-    ref_link = request.url_root + "register?ref=" + user['username']
-    
-    return render_template('profile.html', user=user, ref_link=ref_link)
-    
 # ৭. ক্লেইম এপিআই
 @app.route('/claim-mining', methods=['POST'])
 def claim_mining():
