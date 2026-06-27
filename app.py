@@ -118,7 +118,81 @@ def admin_dashboard():
                            users_list=users_list,
                            search_query=search_query)
 
-# (অন্যান্য রাউটের সাথে নিচের নতুন রাউটটি যুক্ত করুন)
+# (অন্যান্য কোড অপরিবর্তিত থাকবে, /tasks, /tasks/submit-normal এবং /history রাউটগুলো প্রতিস্থাপন করুন)
+
+@app.route('/tasks')
+def tasks():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+        
+    user = supabase.table("users").select("*").eq("id", user_id).execute().data[0]
+    
+    # ইউজার ইতিমধ্যে ক্লেইম করা ওয়ান-টাইম টাস্কগুলোর তালিকা
+    completed_one_times = supabase.table("user_one_time_tasks") \
+        .select("task_name").eq("user_id", user_id).execute().data
+    claimed_one_times = [t['task_name'] for t in completed_one_times]
+    
+    # সফল রেফারেল সংখ্যা যাচাই
+    success_refs_query = supabase.table("referrals").select("id").eq("referrer_id", user_id).eq("status", "Success").execute().data
+    success_ref_count = len(success_refs_query)
+    
+    # প্রোফাইল সম্পূর্ণ করা হয়েছে কিনা যাচাই করা
+    is_profile_complete = bool(user.get('phone_number') and user.get('age') and user.get('district'))
+    
+    # ইউজারের সাবমিট করা পূর্ববর্তী নরমাল টাস্কের ডাটা
+    submissions = supabase.table("task_submissions").select("task_id, status").eq("user_id", user_id).execute().data
+    submission_map = {s['task_id']: s['status'] for s in submissions}
+    
+    # এডমিনের তৈরি সমস্ত নরমাল টাস্কসমূহ
+    all_normal_tasks = supabase.table("tasks").select("*").order("created_at", desc=True).execute().data
+    
+    # ফিল্টারিং লজিক: কেবল সেই কাজগুলোই দেখাবে যা ইউজার সাবমিট করেনি অথবা পূর্বে 'Rejected' হয়েছে
+    active_normal_tasks = []
+    for task in all_normal_tasks:
+        status = submission_map.get(task['id'])
+        if status is None or status == 'Rejected':
+            active_normal_tasks.append(task)
+
+    return render_template('tasks.html', 
+                           claimed_one_times=claimed_one_times,
+                           success_ref_count=success_ref_count,
+                           is_profile_complete=is_profile_complete,
+                           all_normal_tasks=active_normal_tasks, # ফিল্টার করা টাস্ক পাঠানো হচ্ছে
+                           submission_map=submission_map)
+
+
+@app.route('/tasks/submit-normal', methods=['POST'])
+def submit_normal():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+        
+    task_id = request.form.get('task_id')
+    proof_url = request.form.get('proof_image_url')
+    
+    if not proof_url:
+        flash("দয়া করে কাজের প্রুফ (স্ক্রিনশট) আপলোড করুন।", "danger")
+        return redirect(url_for('tasks'))
+        
+    try:
+        # যদি পূর্বে কোনো Rejected সাবমিশন থাকে, তবে তা ডাটাবেজ থেকে মুছে ফেলা হচ্ছে (যাতে কনফ্লিক্ট না হয়)
+        supabase.table("task_submissions").delete() \
+            .eq("user_id", user_id).eq("task_id", task_id).eq("status", "Rejected").execute()
+        
+        # নতুন পেন্ডিং সাবমিশন ইনসার্ট করা হচ্ছে
+        supabase.table("task_submissions").insert({
+            "user_id": user_id,
+            "task_id": task_id,
+            "proof_image_url": proof_url,
+            "status": "Pending"
+        }).execute()
+        flash("কাজের প্রুফ সফলভাবে জমা দেওয়া হয়েছে। এডমিন ভেরিফাই করবে।", "success")
+    except Exception:
+        flash("এই কাজটি ইতিমধ্যে প্রক্রিয়াধীন (Pending) অথবা অনুমোদিত (Approved) আছে।", "danger")
+        
+    return redirect(url_for('tasks'))
+
 
 @app.route('/history')
 def history():
@@ -126,13 +200,17 @@ def history():
     if not user_id:
         return redirect(url_for('login'))
         
-    # ডিপোজিট এবং উইথড্রয়াল ডাটা রিট্রিভ করা
+    # ডিপোজিট, উইথড্রয়াল এবং টাস্ক সাবমিশন হিস্ট্রি রিট্রিভ করা
     deposits = supabase.table("deposits").select("*").eq("user_id", user_id).order("created_at", desc=True).execute().data
     withdrawals = supabase.table("withdrawals").select("*").eq("user_id", user_id).order("created_at", desc=True).execute().data
     
-    return render_template('history.html', deposits=deposits, withdrawals=withdrawals)
+    # জয়েনিং কুয়েরি দিয়ে টাস্ক প্রুফ ও রিওয়ার্ডের তথ্য নিয়ে আসা
+    task_history = supabase.table("task_submissions") \
+        .select("proof_image_url, status, created_at, tasks(title, reward)") \
+        .eq("user_id", user_id).order("created_at", desc=True).execute().data
     
-
+    return render_template('history.html', deposits=deposits, withdrawals=withdrawals, task_history=task_history)
+    
 @app.route('/admin/user-action', methods=['POST'])
 def admin_user_action():
     if not check_admin_auth():
@@ -173,43 +251,6 @@ def admin_user_action():
     return redirect(url_for('admin_dashboard'))
 
 
-# (অন্যান্য কোডের সাথে নিচের নতুন রাউটগুলো যুক্ত করুন)
-# (অন্যান্য কোডের সাথে নিচের নতুন রাউটগুলো যুক্ত করুন)
-
-# ১. টাস্ক পেজ ভিউ রাউট
-@app.route('/tasks')
-def tasks():
-    user_id = session.get('user_id')
-    if not user_id:
-        return redirect(url_for('login'))
-        
-    user = supabase.table("users").select("*").eq("id", user_id).execute().data[0]
-    
-    # ইউজার ইতিমধ্যে ক্লেইম করা ওয়ান-টাইম টাস্কগুলোর তালিকা
-    completed_one_times = supabase.table("user_one_time_tasks") \
-        .select("task_name").eq("user_id", user_id).execute().data
-    claimed_one_times = [t['task_name'] for t in completed_one_times]
-    
-    # সফল রেফারেল সংখ্যা যাচাই
-    success_refs_query = supabase.table("referrals").select("id").eq("referrer_id", user_id).eq("status", "Success").execute().data
-    success_ref_count = len(success_refs_query)
-    
-    # প্রোফাইল সম্পূর্ণ করা হয়েছে কিনা যাচাই করা (নম্বর, বয়স, জেলা খালি না থাকলে True)
-    is_profile_complete = bool(user.get('phone_number') and user.get('age') and user.get('district'))
-    
-    # এডমিনের তৈরি সমস্ত অ্যাক্টিভ নরমাল টাস্কসমূহ
-    all_normal_tasks = supabase.table("tasks").select("*").order("created_at", desc=True).execute().data
-    
-    # ইউজারের সাবমিট করা পূর্ববর্তী নরমাল টাস্কের ডাটা
-    submissions = supabase.table("task_submissions").select("task_id, status").eq("user_id", user_id).execute().data
-    submission_map = {s['task_id']: s['status'] for s in submissions}
-
-    return render_template('tasks.html', 
-                           claimed_one_times=claimed_one_times,
-                           success_ref_count=success_ref_count,
-                           is_profile_complete=is_profile_complete,
-                           all_normal_tasks=all_normal_tasks,
-                           submission_map=submission_map)
 
 # (অন্যান্য কোড অপরিবর্তিত থাকবে, কেবল claim_one_time ফাংশনটি নিচে দেওয়া কোড দ্বারা প্রতিস্থাপন করুন)
 
@@ -265,31 +306,8 @@ def claim_one_time():
     
     return jsonify({"status": "success", "message": f"সফলভাবে ক্লেইমড! আপনার ব্যালেন্সে ৳ {reward} যোগ করা হয়েছে। "})
     # ৩. নরমাল টাস্ক সাবমিট এপিআই
-@app.route('/tasks/submit-normal', methods=['POST'])
-def submit_normal():
-    user_id = session.get('user_id')
-    if not user_id:
-        return redirect(url_for('login'))
-        
-    task_id = request.form.get('task_id')
-    proof_url = request.form.get('proof_image_url')
-    
-    if not proof_url:
-        flash("দয়া করে কাজের প্রুফ (স্ক্রিনশট) আপলোড করুন।", "danger")
-        return redirect(url_for('tasks'))
-        
-    try:
-        supabase.table("task_submissions").insert({
-            "user_id": user_id,
-            "task_id": task_id,
-            "proof_image_url": proof_url,
-            "status": "Pending"
-        }).execute()
-        flash("কাজের প্রুফ সফলভাবে জমা দেওয়া হয়েছে। এডমিন ভেরিফাই করবে।", "success")
-    except Exception:
-        flash("এই কাজটি আপনি ইতিমধ্যে একবার জমা দিয়েছেন।", "danger")
-        
-    return redirect(url_for('tasks'))
+
+
 
 
 # ৪. এডমিন টাস্ক প্যানেল (/admin/add)
