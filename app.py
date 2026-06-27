@@ -149,6 +149,18 @@ def reviews_page():
             
     return render_template('reviews.html', reviews=reviews_data, is_admin=is_admin)
 
+# (অন্যান্য রাউটের সাথে নিচের নতুন রাউটটি যুক্ত করুন)
+
+@app.route('/about')
+def about():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+        
+    user = supabase.table("users").select("*").eq("id", user_id).execute().data[0]
+    return render_template('about.html', user=user)
+    
+
 @app.route('/admin/reviews/create', methods=['POST'])
 def admin_create_fake_review():
     user_id = session.get('user_id')
