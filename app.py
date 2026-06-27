@@ -40,6 +40,100 @@ def check_admin_auth():
         return user_id
     return None
 
+# (অন্যান্য কোডের সাথে নিচের নতুন রাউটসমূহ যুক্ত করুন)
+
+# ১. রিভিউ পেজ ভিউ এবং সাধারণ ইউজার রিভিউ পোস্ট রাউট
+@app.route('/reviews', methods=['GET', 'POST'])
+def reviews_page():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+        
+    user = supabase.table("users").select("username, is_admin").eq("id", user_id).execute().data[0]
+    is_admin = user.get('is_admin', False)
+    
+    if request.method == 'POST':
+        comment = request.form.get('comment')
+        rating = int(request.form.get('rating', 5))
+        image_url = request.form.get('image_url')
+        
+        # সাধারণ ইউজারের নিজস্ব রিভিউ ডাটাবেজে সেভ
+        supabase.table("reviews").insert({
+            "user_id": user_id,
+            "reviewer_name": user['username'],
+            "rating": rating,
+            "comment": comment,
+            "image_url": image_url if image_url else None,
+            "is_admin_fake": False
+        }).execute()
+        
+        flash("আপনার মূল্যবান মতামতটি সফলভাবে জমা হয়েছে।", "success")
+        return redirect(url_for('reviews_page'))
+        
+    # ভিজিবিলিটি লজিক:
+    # এডমিন হলে ডাটাবেজের সব রিভিউ দেখতে পারবে।
+    # সাধারণ ইউজার হলে এডমিনের তৈরি 'ফেক' রিভিউগুলো এবং শুধুমাত্র নিজের দেওয়া রিভিউটি দেখতে পারবে।
+    if is_admin:
+        reviews_data = supabase.table("reviews").select("*").order("created_at", desc=True).execute().data
+    else:
+        reviews_data = supabase.table("reviews") \
+            .select("*") \
+            .or_(f"is_admin_fake.eq.true,user_id.eq.{user_id}") \
+            .order("created_at", desc=True).execute().data
+            
+    return render_template('reviews.html', reviews=reviews_data, is_admin=is_admin)
+
+
+# ২. এডমিন কতৃক ফেক রিভিউ তৈরি করার রাউট (কাস্টম নাম, ছবি ও ডেট সহ)
+@app.route('/admin/reviews/create', methods=['POST'])
+def admin_create_fake_review():
+    user_id = session.get('user_id')
+    if not user_id or not check_admin_auth():
+        return "Unauthorized Action", 403
+        
+    fake_name = request.form.get('fake_name')
+    rating = int(request.form.get('rating', 5))
+    comment = request.form.get('comment')
+    image_url = request.form.get('image_url')
+    custom_date = request.form.get('custom_date') # কাস্টম তারিখ ইনপুট
+    
+    review_data = {
+        "user_id": None, # ফেক রিভিউর ক্ষেত্রে কোনো ইউজার আইডি থাকবে না
+        "reviewer_name": fake_name,
+        "rating": rating,
+        "comment": comment,
+        "image_url": image_url if image_url else None,
+        "is_admin_fake": True
+    }
+    
+    # এডমিন যদি কাস্টম কোনো তারিখ সেট করে দেয়
+    if custom_date:
+        try:
+            # ISO ফরম্যাটে কনভার্ট করা
+            parsed_date = datetime.datetime.strptime(custom_date, "%Y-%m-%d")
+            review_data["created_at"] = parsed_date.isoformat()
+        except Exception:
+            pass
+            
+    supabase.table("reviews").insert(review_data).execute()
+    flash("ফেক রিভিউটি সফলভাবে লাইভ করা হয়েছে।", "success")
+    return redirect(url_for('reviews_page'))
+
+
+# ৩. এডমিন কতৃক রিভিউ ডিলিট করার রাউট
+@app.route('/admin/reviews/delete', methods=['POST'])
+def admin_delete_review():
+    user_id = session.get('user_id')
+    if not user_id or not check_admin_auth():
+        return "Unauthorized Action", 403
+        
+    review_id = request.form.get('review_id')
+    supabase.table("reviews").delete().eq("id", review_id).execute()
+    
+    flash("রিভিউটি সফলভাবে ডিলিট করা হয়েছে।", "success")
+    return redirect(url_for('reviews_page'))
+    
+
 @app.route('/admin', methods=['GET', 'POST'])
 def admin_dashboard():
     if not check_admin_auth():
