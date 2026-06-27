@@ -9,15 +9,11 @@
         </h2>
     </div>
 
-    <!-- ২. আধুনিক হরিজোন্টাল ট্যাব বার (Tab Bar) -->
+    <!-- ২. ডাবল ট্যাব বার (ডিপোজিট রিমুভ করা হয়েছে) -->
     <div class="flex border-b border-slate-200 bg-white p-1 rounded-xl shadow-sm border border-slate-200">
         <!-- টাস্ক ট্যাব -->
         <button id="task-btn" onclick="showTab('task')" class="tab-btn w-full py-2.5 text-center text-xs font-bold border-b-2 border-emerald-500 text-emerald-600 transition flex items-center justify-center gap-1.5 focus:outline-none">
             <i class="fa-solid fa-list-check"></i> Tasks
-        </button>
-        <!-- ডিপোজিট ট্যাব -->
-        <button id="deposit-btn" onclick="showTab('deposit')" class="tab-btn w-full py-2.5 text-center text-xs font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-700 transition flex items-center justify-center gap-1.5 focus:outline-none">
-            <i class="fa-solid fa-plus-circle"></i> Deposits
         </button>
         <!-- উইথড্র ট্যাব -->
         <button id="withdraw-btn" onclick="showTab('withdraw')" class="tab-btn w-full py-2.5 text-center text-xs font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-700 transition flex items-center justify-center gap-1.5 focus:outline-none">
@@ -28,7 +24,7 @@
     <!-- ৩. ট্যাব প্যানেল কন্টেইনারস (Tab Panes) -->
     <div class="space-y-4">
         
-        <!-- প্যানেল ১: টাস্ক হিস্ট্রি (ss link বা স্ক্রিনশট লিংক ছাড়া) -->
+        <!-- প্যানেল ১: টাস্ক হিস্ট্রি -->
         <div id="task-pane" class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm transition-all duration-300">
             <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-3 border-b border-slate-50 pb-2">
                 <i class="fa-solid fa-list-check text-emerald-500 mr-1"></i> টাস্ক হিস্ট্রি রেকর্ড
@@ -64,45 +60,7 @@
             </div>
         </div>
 
-        <!-- প্যানেল ২: ডিপোজিট হিস্ট্রি (ডিফল্টভাবে হিডেন) -->
-        <div id="deposit-pane" class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm transition-all duration-300 hidden">
-            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-3 border-b border-slate-50 pb-2">
-                <i class="fa-solid fa-plus-circle text-emerald-500 mr-1"></i> ডিপোজিট রিকোয়েস্টসমূহ
-            </h3>
-            <div class="overflow-x-auto text-[10px]">
-                <table class="w-full text-left">
-                    <thead>
-                        <tr class="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold uppercase">
-                            <th class="p-2">পরিমাণ</th>
-                            <th class="p-2">মেথড / TxID</th>
-                            <th class="p-2 text-right">স্ট্যাটাস</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for item in deposits %}
-                        <tr class="border-b border-slate-50 text-slate-600">
-                            <td class="p-2 font-bold text-emerald-600">৳ {{ item.amount }}</td>
-                            <td class="p-2">
-                                <span>{{ item.payment_method }}</span><br>
-                                <span class="text-[9px] text-slate-400 font-mono">{{ item.transaction_id }}</span>
-                            </td>
-                            <td class="p-2 text-right">
-                                <span class="px-2.5 py-1 rounded-full font-bold text-[8px] uppercase {% if item.status == 'Pending' %}bg-yellow-50 text-yellow-600 border border-yellow-100{% elif item.status == 'Approved' %}bg-emerald-50 text-emerald-600 border-emerald-100{% else %}bg-red-50 text-red-600 border-red-100{% endif %}">
-                                    {{ item.status }}
-                                </span>
-                            </td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="3" class="p-4 text-center text-slate-400">কোনো ডিপোজিট রেকর্ড পাওয়া যায়নি।</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- প্যানেল ৩: উইথড্র হিস্ট্রি (ডিফল্টভাবে হিডেন) -->
+        <!-- প্যানেল ২: উইথড্র হিস্ট্রি (ডিফল্টভাবে হিডেন) -->
         <div id="withdraw-pane" class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm transition-all duration-300 hidden">
             <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-3 border-b border-slate-50 pb-2">
                 <i class="fa-solid fa-minus-circle text-red-500 mr-1"></i> উইথড্রয়াল রিকোয়েস্টসমূহ
@@ -144,24 +102,20 @@
 </div>
 
 <script>
-// টগল ট্যাব সিস্টেম হ্যান্ডল করার জন্য ডাইনামিক জাভাস্ক্রিপ্ট
 function showTab(tabId) {
-    // ১. সমস্ত কন্টেন্ট প্যানেল হাইড করা
+    // প্যানেল হাইড করা
     document.getElementById('task-pane').classList.add('hidden');
-    document.getElementById('deposit-pane').classList.add('hidden');
     document.getElementById('withdraw-pane').classList.add('hidden');
     
-    // ২. সমস্ত বাটনের একটিভ ডিজাইন রিমুভ করা
+    // বাটন রিসেট করা
     const buttons = document.querySelectorAll('.tab-btn');
     buttons.forEach(btn => {
         btn.classList.remove('border-emerald-500', 'text-emerald-600', 'font-black');
         btn.classList.add('border-transparent', 'text-slate-400');
     });
     
-    // ৩. নির্দিষ্ট কন্টেন্ট প্যানেল শো করা
+    // নির্দিষ্ট প্যানেল ও বাটন সক্রিয় করা
     document.getElementById(`${tabId}-pane`).classList.remove('hidden');
-    
-    // ৪. সিলেক্টেড বাটনের ডিজাইন একটিভ করা
     const activeBtn = document.getElementById(`${tabId}-btn`);
     activeBtn.classList.remove('border-transparent', 'text-slate-400');
     activeBtn.classList.add('border-emerald-500', 'text-emerald-600', 'font-black');
