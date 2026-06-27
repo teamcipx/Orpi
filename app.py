@@ -369,49 +369,6 @@ def admin_task_action():
         
     return redirect(url_for('admin_add_task'))
     
-# ২. প্রোফাইল/অ্যাকাউন্ট পেজ রাউট
-@app.route('/profile', methods=['GET', 'POST'])
-def profile():
-    user_id = session.get('user_id')
-    if not user_id:
-        return redirect(url_for('login'))
-        
-    user = supabase.table("users").select("*").eq("id", user_id).execute().data[0]
-    
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-        phone = request.form.get('phone')
-        age = request.form.get('age')
-        district = request.form.get('district')
-        avatar_url = request.form.get('avatar_url') # ক্লায়েন্ট সাইড ImgBB থেকে আপলোড হয়ে আসবে
-        
-        update_data = {
-            "username": username,
-            "phone_number": phone,
-            "age": int(age) if age else None,
-            "district": district
-        }
-        
-        # যদি ইউজার নতুন ছবি আপলোড করে লিংক পাঠায়
-        if avatar_url:
-            update_data["avatar_url"] = avatar_url
-            
-        # যদি পাসওয়ার্ড পরিবর্তন করতে চান
-        if password and password.strip() != "":
-            update_data["password_hash"] = generate_password_hash(password)
-            
-        try:
-            supabase.table("users").update(update_data).eq("id", user_id).execute()
-            session['username'] = username # সেশন ইউজারনেম আপডেট
-            flash("প্রোফাইল তথ্য সফলভাবে আপডেট করা হয়েছে।", "success")
-            return redirect(url_for('profile'))
-        except Exception:
-            flash("ইউজারনেমটি ইতিমধ্যে ব্যবহৃত হচ্ছে বা ত্রুটি ঘটেছে।", "danger")
-            
-    return render_template('profile.html', user=user)
-    
-# (অন্যান্য কোড অপরিবর্তিত থাকবে, উইথড্রয়াল সম্পর্কিত নতুন রাউটটি নিচে যুক্ত করুন)
 
 @app.route('/withdraw', methods=['GET', 'POST'])
 def withdraw():
@@ -692,7 +649,9 @@ def add_money():
     history = supabase.table("deposits").select("*").eq("user_id", user_id).order("created_at", desc=True).execute().data
     return render_template('add_money.html', history=history)
 
-# ৬. রেফারেল রাউট (অন-ডিমান্ড চেকসহ)
+# (অন্যান্য কোড অপরিবর্তিত থাকবে, /referrals এবং /profile রাউট দুটি প্রতিস্থাপন করুন)
+
+# ১. রেফারেল হিস্ট্রি ও স্ট্যাটস রাউট (সম্পূর্ণ নিরাপদ জয়েনিং সহ)
 @app.route('/referrals')
 def referrals():
     user_id = session.get('user_id')
@@ -719,10 +678,8 @@ def referrals():
             last_login = datetime.datetime.fromisoformat(last_login_str.replace('Z', '+00:00'))
             twelve_hours_ago = now - datetime.timedelta(hours=12)
             
-            # ১২ ঘণ্টার মধ্যে ড্যাশবোর্ড ভিজিট করলে Success অন্যথায় Failed
             new_status = "Success" if last_login >= twelve_hours_ago else "Failed"
             
-            # নিরাপদ প্রসেস রেফারেল ফাংশন কল
             supabase.rpc("process_referral_payout", {
                 "p_referral_id": ref['id'],
                 "p_referrer_id": user_id,
@@ -730,14 +687,66 @@ def referrals():
                 "p_reward_amount": 30.00
             }).execute()
             
+    # ইউজারের রেফারেল হিস্ট্রি ডেটা রিট্রিভ করা (Postgrest standard join)
     referrals_data = supabase.table("referrals") \
-        .select("status, created_at, users!referrals_referred_id_fkey(username, email)") \
+        .select("status, created_at, users:referred_id(username, email)") \
         .eq("referrer_id", user_id).execute().data
         
+    # রিয়েল-টাইম স্ট্যাটস নিশ্চিতভাবে গণনা করা
+    success_count = 0
+    processing_count = 0
+    failed_count = 0
+    
+    for r in referrals_data:
+        status = r.get('status', 'Processing')
+        if status == 'Success':
+            success_count += 1
+        elif status == 'Processing':
+            processing_count += 1
+        elif status == 'Failed':
+            failed_count += 1
+            
+    total_earnings = success_count * 30.00
     ref_link = request.url_root + "register?ref=" + user['username']
     
-    return render_template('referrals.html', referrals=referrals_data, ref_link=ref_link)
+    return render_template('referrals.html', 
+                           referrals=referrals_data, 
+                           ref_link=ref_link,
+                           success_count=success_count,
+                           processing_count=processing_count,
+                           failed_count=failed_count,
+                           total_earnings=total_earnings)
 
+
+# ২. প্রোফাইল ও সেটিংস রাউট (রেফার লিংক ও শর্টকাট সহ)
+@app.route('/profile', methods=['GET', 'POST'])
+def profile():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+        
+    if request.method == 'POST':
+        phone = request.form.get('phone_number')
+        age = request.form.get('age')
+        district = request.form.get('district')
+        proof_url = request.form.get('avatar_url')
+        
+        update_data = {}
+        if phone: update_data['phone_number'] = phone
+        if age: update_data['age'] = int(age) if age.isdigit() else None
+        if district: update_data['district'] = district
+        if proof_url: update_data['avatar_url'] = proof_url
+        
+        if update_data:
+            supabase.table("users").update(update_data).eq("id", user_id).execute()
+            flash("প্রোফাইল তথ্য সফলভাবে আপডেট করা হয়েছে।", "success")
+            return redirect(url_for('profile'))
+            
+    user = supabase.table("users").select("*").eq("id", user_id).execute().data[0]
+    ref_link = request.url_root + "register?ref=" + user['username']
+    
+    return render_template('profile.html', user=user, ref_link=ref_link)
+    
 # ৭. ক্লেইম এপিআই
 @app.route('/claim-mining', methods=['POST'])
 def claim_mining():
