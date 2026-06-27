@@ -501,78 +501,6 @@ def login():
     return render_template('login.html')
 
 
-# ২. রেজিস্ট্রেশন রাউট (ইউনিক আইডি/রেফার কোড দিয়ে রেফারার অনুসন্ধান)
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    ref_by = request.args.get('ref', '') # এটি এখন ইউনিক আইডি সংখ্যা (যেমন: 6892)
-    if request.method == 'POST':
-        username = request.form.get('username')
-        email = request.form.get('email')
-        password = request.form.get('password')
-        referrer_code = request.form.get('referrer') # ইউজার ইনপুট করা ইউনিক আইডি কোড
-
-        hashed_password = generate_password_hash(password)
-        
-        initial_balance = 0.00
-        referrer_id = None
-
-        # ইউনিক আইডি বা রেফার কোড দিয়ে রেফারার ভ্যালিডেশন
-        if referrer_code and referrer_code.isdigit():
-            ref_uid = int(referrer_code)
-            referrer_res = supabase.table("users").select("id").eq("uid", ref_uid).execute()
-            if referrer_res.data:
-                referrer_id = referrer_res.data[0]['id']
-                initial_balance = 100.00 # সঠিক রেফারেল কোডে ১০০ টাকা বোনাস
-        
-        user_data = {
-            "username": username,
-            "email": email,
-            "password_hash": hashed_password,
-            "balance": initial_balance
-        }
-        
-        try:
-            new_user_res = supabase.table("users").insert(user_data).execute()
-            if new_user_res.data:
-                new_user_id = new_user_res.data[0]['id']
-                
-                # ফ্রি প্যাকেজ এক্টিভ করা
-                supabase.table("user_packages").insert({
-                    "user_id": new_user_id,
-                    "package_id": 1
-                }).execute()
-                
-                if referrer_id:
-                    # এই রেফারারের পূর্ববর্তী রেফারেল ট্র্যাকিং
-                    existing_refs = supabase.table("referrals").select("id").eq("referrer_id", referrer_id).execute().data
-                    ref_count = len(existing_refs)
-                    
-                    if ref_count == 0:
-                        delay_hours = 1
-                    elif ref_count == 1:
-                        delay_hours = 24
-                    elif ref_count == 2:
-                        delay_hours = 40
-                    else:
-                        delay_hours = 42
-                        
-                    scheduled_time = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=delay_hours)
-                    
-                    supabase.table("referrals").insert({
-                        "referrer_id": referrer_id,
-                        "referred_id": new_user_id,
-                        "status": "Processing",
-                        "scheduled_payout_at": scheduled_time.isoformat()
-                    }).execute()
-                        
-                flash("নিবন্ধন সফল হয়েছে। লগইন করুন।", "success")
-                return redirect(url_for('login'))
-        except Exception:
-            flash("ইউজারনেম অথবা ইমেইলটি ইতিমধ্যে ব্যবহৃত হয়েছে।", "danger")
-            
-    return render_template('register.html', ref_by=ref_by)
-
-
 # ৩. রেফারেল রাউট (ইউনিক আইডি দিয়ে রেফারেল লিংক তৈরি)
 @app.route('/referrals')
 def referrals():
@@ -724,76 +652,7 @@ def withdraw():
                            history=history)
     
     
-# (অন্যান্য কোডের সাথে নিচের ড্যাশবোর্ড আপডেট ও নতুন এপিআই রাউটটি যুক্ত করুন)
-# (অন্যান্য কোড অপরিবর্তিত থাকবে, ড্যাশবোর্ড রাউটটি নিচের কোড দ্বারা প্রতিস্থাপন করুন)
 
-@app.route('/dashboard')
-def dashboard():
-    user_id = session.get('user_id')
-    if not user_id:
-        return redirect(url_for('login'))
-        
-    user = supabase.table("users").select("*").eq("id", user_id).execute().data[0]
-    
-    # ডেইলি চেক-ইন ভ্যালিডেশন (ক্লেইম করা থাকলে ড্যাশবোর্ডে এটি হাইড করতে সাহায্য করবে)
-    is_daily_eligible = True
-    last_checkin_str = user.get('last_daily_checkin')
-    if last_checkin_str:
-        last_checkin = datetime.datetime.fromisoformat(last_checkin_str.replace('Z', '+00:00'))
-        cooldown = datetime.timedelta(hours=24)
-        if datetime.datetime.now(datetime.timezone.utc) < last_checkin + cooldown:
-            is_daily_eligible = False # ২৪ ঘণ্টা পার না হলে বাটনটি হাইড থাকবে
-    
-    # ইউজার প্যাকেজসমূহ
-    owned_pkgs = supabase.table("user_packages") \
-        .select("last_claimed_at, packages(name, duration_hours, yield_amount)") \
-        .eq("user_id", user_id).execute().data
-
-    notice = "Opti Work এ আপনাকে স্বাগতম! ফ্রি মাইনিং চালু করে প্রতি ৮ ঘণ্টায় ৭ টাকা ক্লেইম করুন। প্রিমিয়াম প্যাকেজ কিনলে আয় আরও বৃদ্ধি পাবে।"
-
-    return render_template('dashboard.html', 
-                           user=user, 
-                           owned_packages=owned_pkgs, 
-                           notice=notice,
-                           is_daily_eligible=is_daily_eligible)
-    
-
-# --- ডেইলি চেক-ইন ক্লেইম এপিআই ---
-@app.route('/claim-daily', methods=['POST'])
-def claim_daily():
-    user_id = session.get('user_id')
-    if not user_id:
-        return jsonify({"status": "error", "message": "Unauthorized"}), 401
-        
-    user = supabase.table("users").select("last_daily_checkin").eq("id", user_id).execute().data[0]
-    last_checkin_str = user.get('last_daily_checkin')
-    
-    now = datetime.datetime.now(datetime.timezone.utc)
-    reward_amount = 5.00  # ডেইলি বোনাস ৫ টাকা
-    
-    if last_checkin_str:
-        last_checkin = datetime.datetime.fromisoformat(last_checkin_str.replace('Z', '+00:00'))
-        cooldown = datetime.timedelta(hours=24)
-        
-        # ২৪ ঘণ্টা পার হয়েছে কিনা যাচাই করা
-        if now < last_checkin + cooldown:
-            time_left = (last_checkin + cooldown) - now
-            seconds_left = int(time_left.total_seconds())
-            return jsonify({
-                "status": "error", 
-                "message": "আপনি ইতিমধ্যে আজকের বোনাস নিয়েছেন।", 
-                "seconds_left": seconds_left
-            }), 400
-
-    # ডাটাবেজ আপডেট এবং ব্যালেন্স যোগ
-    supabase.table("users").update({"last_daily_checkin": now.isoformat()}).eq("id", user_id).execute()
-    supabase.rpc("increment_balance", {"user_id": user_id, "amount": reward_amount}).execute()
-    
-    return jsonify({
-        "status": "success", 
-        "message": f"ডেইলি চেক-ইন সফল! আপনার ব্যালেন্সে ৳ {reward_amount} যোগ করা হয়েছে।"
-    })
-    # ৪. স্টোর রাউট (প্যাকেজ শপ)# ৩. স্টোর এবং ক্রয় হিস্ট্রি রাউট
 @app.route('/store')
 def store():
     user_id = session.get('user_id')
@@ -814,45 +673,7 @@ def store():
                            balance=user['balance'], 
                            premium_packages=premium_pkgs,
                            deposit_history=deposit_history,
-                           purchase_history=purchase_history)
-
-
-# ৪. ডাইনামিক ব্যালেন্স শর্টেজ অ্যালার্ট সহ প্যাকেজ বাই রাউট
-@app.route('/buy-package', methods=['POST'])
-def buy_package():
-    user_id = session.get('user_id')
-    package_id = request.form.get('package_id')
-    if not user_id:
-        return redirect(url_for('login'))
-        
-    pkg = supabase.table("packages").select("*").eq("id", package_id).execute()
-    if not pkg.data:
-        flash("প্যাকেজ পাওয়া যায়নি।", "danger")
-        return redirect(url_for('store'))
-        
-    cost = float(pkg.data[0]['cost'])
-    pkg_name = pkg.data[0]['name']
-    
-    user = supabase.table("users").select("balance").eq("id", user_id).execute().data[0]
-    balance = float(user['balance'])
-    
-    if balance >= cost:
-        supabase.rpc("increment_balance", {"user_id": user_id, "amount": -cost}).execute()
-        
-        supabase.table("user_packages").insert({
-            "user_id": user_id,
-            "package_id": package_id,
-            "last_claimed_at": datetime.datetime.now(datetime.timezone.utc).isoformat()
-        }).execute()
-        
-        flash(f"{pkg_name} প্যাকেজটি সফলভাবে সক্রিয় করা হয়েছে।", "success")
-    else:
-        # কত টাকা কম পড়ছে তা চমৎকারভাবে হিসাব করা হচ্ছে
-        shortage = cost - balance
-        flash(f"ব্যালেন্স অপর্যাপ্ত! {pkg_name} প্যাকেজটি কিনতে আপনার আরও ৳ {shortage:.2f} লাগবে। দয়া করে এড মানি করুন।", "danger")
-        
-    return redirect(url_for('store'))
-    
+                           purchase_history=purchase_history)    
 # ৫. রিচার্জ বা অ্যাড মানি রাউট
 @app.route('/add-money', methods=['GET', 'POST'])
 def add_money():
@@ -880,37 +701,219 @@ def add_money():
     history = supabase.table("deposits").select("*").eq("user_id", user_id).order("created_at", desc=True).execute().data
     return render_template('add_money.html', history=history)
 
-# (অন্যান্য কোড অপরিবর্তিত থাকবে, /referrals এবং /profile রাউট দুটি প্রতিস্থাপন করুন)
 
-# ৭. ক্লেইম এপিআই
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    ref_by = request.args.get('ref', '')
+    if request.method == 'POST':
+        username = request.form.get('username')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        referrer_code = request.form.get('referrer')
+
+        hashed_password = generate_password_hash(password)
+        initial_balance = 0.00
+        referrer_id = None
+
+        if referrer_code and referrer_code.isdigit():
+            ref_uid = int(referrer_code)
+            referrer_res = supabase.table("users").select("id").eq("uid", ref_uid).execute()
+            if referrer_res.data:
+                referrer_id = referrer_res.data[0]['id']
+                initial_balance = 100.00
+        
+        user_data = {
+            "username": username,
+            "email": email,
+            "password_hash": hashed_password,
+            "balance": initial_balance
+        }
+        
+        try:
+            new_user_res = supabase.table("users").insert(user_data).execute()
+            if new_user_res.data:
+                new_user_id = new_user_res.data[0]['id']
+                
+                # ফ্রি প্যাকেজের মেয়াদ ৩৬৫ দিন (১ বছর) সেট করে দেওয়া হচ্ছে
+                free_expiry = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=30)
+                supabase.table("user_packages").insert({
+                    "user_id": new_user_id,
+                    "package_id": 1,
+                    "expires_at": free_expiry.isoformat()
+                }).execute()
+                
+                if referrer_id:
+                    existing_refs = supabase.table("referrals").select("id").eq("referrer_id", referrer_id).execute().data
+                    ref_count = len(existing_refs)
+                    
+                    if ref_count == 0:
+                        delay_hours = 1
+                    elif ref_count == 1:
+                        delay_hours = 24
+                    elif ref_count == 2:
+                        delay_hours = 40
+                    else:
+                        delay_hours = 42
+                        
+                    scheduled_time = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=delay_hours)
+                    
+                    supabase.table("referrals").insert({
+                        "referrer_id": referrer_id,
+                        "referred_id": new_user_id,
+                        "status": "Processing",
+                        "scheduled_payout_at": scheduled_time.isoformat()
+                    }).execute()
+                        
+                flash("নিবন্ধন সফল হয়েছে। লগইন করুন।", "success")
+                return redirect(url_for('login'))
+        except Exception:
+            flash("ইউজারনেম অথবা ইমেইলটি ইতিমধ্যে ব্যবহৃত হয়েছে।", "danger")
+            
+    return render_template('register.html', ref_by=ref_by)
+
+
+
+
+# ২. ড্যাশবোর্ড রাউট (মেয়াদোত্তীর্ণ প্যাকেজ অটো-ডিলিট এবং তথ্য সংগ্রহ)
+@app.route('/dashboard')
+def dashboard():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+        
+    now = datetime.datetime.now(datetime.timezone.utc)
+    
+    # নিরাপত্তা ও স্ট্যাবিলিটি আপডেট: মেয়াদ শেষ হওয়া প্যাকেজগুলো অটোমেটিক ডিলিট করা
+    supabase.table("user_packages").delete().eq("user_id", user_id).lt("expires_at", now.isoformat()).execute()
+        
+    user = supabase.table("users").select("*").eq("id", user_id).execute().data[0]
+    balance = float(user['balance'])
+    
+    # ডেইলি চেক-ইন ভ্যালিডেশন
+    is_daily_eligible = True
+    last_checkin_str = user.get('last_daily_checkin')
+    if last_checkin_str:
+        last_checkin = datetime.datetime.fromisoformat(last_checkin_str.replace('Z', '+00:00'))
+        cooldown = datetime.timedelta(hours=24)
+        if now < last_checkin + cooldown:
+            is_daily_eligible = False
+    
+    # মেয়াদ (expires_at) সহ ইউজারের সক্রিয় প্যাকেজগুলোর তালিকা রিট্রিভ করা
+    owned_pkgs = supabase.table("user_packages") \
+        .select("id, last_claimed_at, expires_at, packages(name, duration_hours, yield_amount, is_premium)") \
+        .eq("user_id", user_id).execute().data
+        
+    has_premium_pkg = any(p['packages']['is_premium'] for p in owned_pkgs if p.get('packages'))
+    success_refs_query = supabase.table("referrals").select("id").eq("referrer_id", user_id).eq("status", "Success").execute().data
+    success_ref_count = len(success_refs_query)
+    
+    ref_progress = 50 if (success_ref_count >= 3 or has_premium_pkg) else min(success_ref_count / 3, 1.0) * 50
+    bal_progress = min(balance / 300, 1.0) * 50
+    progress_percent = int(ref_progress + bal_progress)
+
+    notice = "Opti Work এ আপনাকে স্বাগতম! ফ্রি মাইনিং চালু করে প্রতি ৮ ঘণ্টায় ৭ টাকা ক্লেইম করুন। প্রিমিয়াম প্যাকেজ কিনলে আয় আরও বৃদ্ধি পাবে।"
+
+    return render_template('dashboard.html', 
+                           user=user, 
+                           owned_packages=owned_pkgs, 
+                           notice=notice,
+                           progress_percent=progress_percent,
+                           is_daily_eligible=is_daily_eligible)
+
+
+# ৩. প্যাকেজ বাই রাউট (প্রিমিয়াম কিনলে ফ্রি প্যাকেজ চিরতরে মুছে ফেলার লজিক সহ)
+
+@app.route('/buy-package', methods=['POST'])
+def buy_package():
+    user_id = session.get('user_id')
+    package_id = request.form.get('package_id')
+    if not user_id:
+        return redirect(url_for('login'))
+        
+    pkg = supabase.table("packages").select("*").eq("id", package_id).execute()
+    if not pkg.data:
+        flash("প্যাকেজ পাওয়া যায়নি।", "danger")
+        return redirect(url_for('store'))
+        
+    cost = float(pkg.data[0]['cost'])
+    pkg_name = pkg.data[0]['name']
+    
+    user = supabase.table("users").select("balance").eq("id", user_id).execute().data[0]
+    balance = float(user['balance'])
+    
+    if balance >= cost:
+        # ১. প্রিমিয়াম প্যাকেজ কেনার সাথে সাথে ফ্রি প্যাকেজটি (ID 1) চিরতরে ডিলেট করা
+        supabase.table("user_packages").delete().eq("user_id", user_id).eq("package_id", 1).execute()
+        
+        # ২. ব্যালেন্স কর্তন
+        supabase.rpc("increment_balance", {"user_id": user_id, "amount": -cost}).execute()
+        
+        # ৩. প্রিমিয়াম প্যাকেজের ৩০ দিনের মেয়াদকাল (Expires in 30 days) নির্ধারণ
+        expiry_date = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=30)
+        
+        # ৪. নতুন প্রিমিয়াম প্যাকেজ ডাটাবেজে ইনসার্ট
+        supabase.table("user_packages").insert({
+            "user_id": user_id,
+            "package_id": package_id,
+            "last_claimed_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "expires_at": expiry_date.isoformat()
+        }).execute()
+        
+        flash(f"{pkg_name} প্যাকেজটি সফলভাবে সক্রিয় করা হয়েছে। মেয়াদ ৩০ দিন।", "success")
+    else:
+        shortage = cost - balance
+        flash(f"ব্যালেন্স অপর্যাপ্ত! {pkg_name} প্যাকেজটি কিনতে আপনার আরও ৳ {shortage:.2f} লাগবে। দয়া করে এড মানি করুন।", "danger")
+        
+    return redirect(url_for('store'))
+
+
+# ৪. কাস্টম ইন্ডিভিজুয়াল প্যাকেজ ক্লেইম এপিআই (সবুজ গ্লোয়িং টাইমার এবং একক ক্লেইম হ্যান্ডলিং)
 @app.route('/claim-mining', methods=['POST'])
 def claim_mining():
     user_id = session.get('user_id')
     if not user_id:
         return jsonify({"status": "error", "message": "Unauthorized"}), 401
         
-    owned_pkgs = supabase.table("user_packages") \
-        .select("id, last_claimed_at, packages(yield_amount, duration_hours)") \
-        .eq("user_id", user_id).execute().data
-         
-    now = datetime.datetime.now(datetime.timezone.utc)
-    total_yield = 0.00
-    claimed_any = False
-
-    for item in owned_pkgs:
-        last_claimed = datetime.datetime.fromisoformat(item['last_claimed_at'].replace('Z', '+00:00'))
-        cooldown = datetime.timedelta(hours=item['packages']['duration_hours'])
+    # ক্লায়েন্ট থেকে পাঠানো নির্দিষ্ট ইউজার-প্যাকেজ আইডি রিট্রিভ করা
+    user_package_id = request.json.get('user_package_id')
+    if not user_package_id:
+        return jsonify({"status": "error", "message": "অবৈধ মাইনিং রিকোয়েস্ট।"}), 400
         
-        if now >= last_claimed + cooldown:
-            supabase.table("user_packages").update({"last_claimed_at": now.isoformat()}).eq("id", item['id']).execute()
-            total_yield += float(item['packages']['yield_amount'])
-            claimed_any = True
+    # নির্দিষ্ট প্যাকেজ চেক করা
+    pkg_query = supabase.table("user_packages") \
+        .select("id, last_claimed_at, expires_at, packages(yield_amount, duration_hours)") \
+        .eq("id", user_package_id).eq("user_id", user_id).execute().data
+        
+    if not pkg_query:
+        return jsonify({"status": "error", "message": "প্যাকেজটি পাওয়া যায়নি বা মেয়াদ শেষ হয়ে গেছে।"}), 404
+        
+    record = pkg_query[0]
+    now = datetime.datetime.now(datetime.timezone.utc)
+    
+    # মেয়াদ চেক
+    if record.get('expires_at'):
+        expires_at = datetime.datetime.fromisoformat(record['expires_at'].replace('Z', '+00:00'))
+        if now > expires_at:
+            # মেয়াদোত্তীর্ণ নোড রিমুভ
+            supabase.table("user_packages").delete().eq("id", user_package_id).execute()
+            return jsonify({"status": "error", "message": "এই মাইনিং প্যাকেজটির মেয়াদ শেষ হয়ে গেছে।"}), 400
             
-    if claimed_any:
-        supabase.rpc("increment_balance", {"user_id": user_id, "amount": total_yield}).execute()
-        return jsonify({"status": "success", "message": f"৳ {total_yield} ব্যালেন্সে যোগ করা হয়েছে।"})
+    last_claim = datetime.datetime.fromisoformat(record['last_claimed_at'].replace('Z', '+00:00'))
+    cooldown = datetime.timedelta(hours=record['packages']['duration_hours'])
+    
+    if now >= last_claim + cooldown:
+        # শেষ ক্লেইমের সময় আপডেট
+        supabase.table("user_packages").update({"last_claimed_at": now.isoformat()}).eq("id", user_package_id).execute()
+        # ব্যালেন্স অ্যাড করা
+        yield_amount = float(record['packages']['yield_amount'])
+        supabase.rpc("increment_balance", {"user_id": user_id, "amount": yield_amount}).execute()
+        
+        return jsonify({"status": "success", "message": f"৳ {yield_amount} সফলভাবে ক্লেইমড!"})
     else:
-        return jsonify({"status": "error", "message": "দয়া করে মাইনিং সময় শেষ হওয়া পর্যন্ত অপেক্ষা করুন।"})
+        return jsonify({"status": "error", "message": "এই নোডের মাইনিং প্রসেস এখনও সম্পন্ন হয়নি।"})
+
+
+# (অন্যান্য কোড অপরিবর্তিত থাকবে, /referrals এবং /profile রাউট দুটি প্রতিস্থাপন করুন)
 
 # ৮. লগআউট
 @app.route('/logout')
