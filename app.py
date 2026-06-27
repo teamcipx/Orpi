@@ -484,16 +484,33 @@ def register():
             if new_user_res.data:
                 new_user_id = new_user_res.data[0]['id']
                 
-                # ডিফল্ট ফ্রি প্যাকেজ অ্যাসাইন করা
+                # ডিফল্ট ফ্রি মাইনিং প্যাকেজ এক্টিভ করা
                 supabase.table("user_packages").insert({
                     "user_id": new_user_id,
                     "package_id": 1
                 }).execute()
                 
-                # যদি রেফারার আইডি ভ্যালিড থাকে, তবে রেফারেল ট্র্যাকিং টেবিল আপডেট করা
+                # যদি রেফারার আইডি ভ্যালিড থাকে, তবে ডাইনামিক সময়কাল নির্ধারণ করা
                 if referrer_id:
-                    random_hours = random.randint(48, 62)
-                    scheduled_time = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=random_hours)
+                    # এই রেফারারের পূর্ববর্তী রেফারের সংখ্যা কত তা চেক করা হচ্ছে
+                    existing_refs = supabase.table("referrals") \
+                        .select("id") \
+                        .eq("referrer_id", referrer_id) \
+                        .execute().data
+                    
+                    ref_count = len(existing_refs) # বর্তমান রেফারের পূর্ববর্তী মোট সংখ্যা
+                    
+                    # শর্ত অনুযায়ী সময়কাল (delay_hours) নির্ধারণ
+                    if ref_count == 0:
+                        delay_hours = 1      # ১ম রেফারেল ১ ঘণ্টা পর সফল হবে
+                    elif ref_count == 1:
+                        delay_hours = 24     # ২য় রেফারেল ২৪ ঘণ্টা পর সফল হবে
+                    elif ref_count == 2:
+                        delay_hours = 40     # ৩য় রেফারেল ৪০ ঘণ্টা পর সফল হবে
+                    else:
+                        delay_hours = 42     # পরবর্তী সকল রেফারেল ৪২ ঘণ্টা পর সফল হবে
+                        
+                    scheduled_time = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=delay_hours)
                     
                     supabase.table("referrals").insert({
                         "referrer_id": referrer_id,
