@@ -149,8 +149,6 @@ def reviews_page():
             
     return render_template('reviews.html', reviews=reviews_data, is_admin=is_admin)
 
-
-# ২. এডমিন কতৃক ফেক রিভিউ তৈরি করার নিরাপদ রাউট (None ভ্যালু ও ডেট এরর মুক্ত)
 @app.route('/admin/reviews/create', methods=['POST'])
 def admin_create_fake_review():
     user_id = session.get('user_id')
@@ -163,7 +161,7 @@ def admin_create_fake_review():
     image_url = request.form.get('image_url')
     custom_date = request.form.get('custom_date')
     
-    # ইউজার আইডি ব্যতীত নিরাপদ ডেটা স্ট্রাকচার
+    # নিরাপদ ডেটা অবজেক্ট
     review_data = {
         "reviewer_name": fake_name,
         "rating": rating,
@@ -176,19 +174,22 @@ def admin_create_fake_review():
         
     if custom_date:
         try:
-            parsed_date = datetime.datetime.strptime(custom_date, "%Y-%m-%d")
+            # ISO এবং PostgreSQL TIMESTAMPTZ সামঞ্জস্যপূর্ণ টাইমস্ট্যাম্প তৈরি (+00:00 offset সহ)
+            parsed_date = datetime.datetime.strptime(custom_date, "%Y-%m-%d").replace(tzinfo=datetime.timezone.utc)
             review_data["created_at"] = parsed_date.isoformat()
-        except Exception:
-            pass
+        except Exception as date_err:
+            print("Date Parse Error:", date_err)
             
     try:
         supabase.table("reviews").insert(review_data).execute()
         flash("ফেক রিভিউটি সফলভাবে লাইভ করা হয়েছে।", "success")
     except Exception as e:
-        flash(f"ফেক রিভিউ তৈরিতে ডাটাবেজ ত্রুটি ঘটেছে।", "danger")
+        # এখানে ত্রুটির সঠিক বিবরণ (যেমন: টেবিল নেই বা কলাম ভুল) ফ্ল্যাশ মেসেজে দেখা যাবে
+        error_msg = str(e)
+        flash(f"ডাটাবেজ ত্রুটি: {error_msg}", "danger")
+        print("Database Insert Error:", error_msg)
         
     return redirect(url_for('reviews_page'))
-
 
 # ৩. এডমিন কতৃক রিভিউ ডিলিট করার রাউট
 @app.route('/admin/reviews/delete', methods=['POST'])
