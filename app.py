@@ -725,6 +725,7 @@ def withdraw():
     
     
 # (অন্যান্য কোডের সাথে নিচের ড্যাশবোর্ড আপডেট ও নতুন এপিআই রাউটটি যুক্ত করুন)
+# (অন্যান্য কোড অপরিবর্তিত থাকবে, ড্যাশবোর্ড রাউটটি নিচের কোড দ্বারা প্রতিস্থাপন করুন)
 
 @app.route('/dashboard')
 def dashboard():
@@ -733,16 +734,15 @@ def dashboard():
         return redirect(url_for('login'))
         
     user = supabase.table("users").select("*").eq("id", user_id).execute().data[0]
-    balance = float(user['balance'])
     
-    # ১. সফল রেফারেল সংখ্যা বের করা
-    success_refs_query = supabase.table("referrals").select("id").eq("referrer_id", user_id).eq("status", "Success").execute().data
-    success_ref_count = len(success_refs_query)
-    
-    # ২. উইথড্রয়াল প্রগ্রেস বার হিসাব করা (৩ রেফারেল = ৫০%, ৪০০ ব্যালেন্স = ৫০%)
-    ref_progress = min(success_ref_count / 3, 1.0) * 50
-    bal_progress = min(balance / 400, 1.0) * 50
-    progress_percent = int(ref_progress + bal_progress)
+    # ডেইলি চেক-ইন ভ্যালিডেশন (ক্লেইম করা থাকলে ড্যাশবোর্ডে এটি হাইড করতে সাহায্য করবে)
+    is_daily_eligible = True
+    last_checkin_str = user.get('last_daily_checkin')
+    if last_checkin_str:
+        last_checkin = datetime.datetime.fromisoformat(last_checkin_str.replace('Z', '+00:00'))
+        cooldown = datetime.timedelta(hours=24)
+        if datetime.datetime.now(datetime.timezone.utc) < last_checkin + cooldown:
+            is_daily_eligible = False # ২৪ ঘণ্টা পার না হলে বাটনটি হাইড থাকবে
     
     # ইউজার প্যাকেজসমূহ
     owned_pkgs = supabase.table("user_packages") \
@@ -755,8 +755,8 @@ def dashboard():
                            user=user, 
                            owned_packages=owned_pkgs, 
                            notice=notice,
-                           progress_percent=progress_percent)
-
+                           is_daily_eligible=is_daily_eligible)
+    
 
 # --- ডেইলি চেক-ইন ক্লেইম এপিআই ---
 @app.route('/claim-daily', methods=['POST'])
