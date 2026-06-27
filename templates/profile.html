@@ -6,28 +6,35 @@
 
 <div class="space-y-4">
     
-    <!-- প্রোফাইল পিকচার এবং মূল ইনফো কার্ড -->
-    <div class="minimal-card p-5 rounded-2xl bg-white text-center flex flex-col items-center border border-slate-200 shadow-sm relative">
+    <!-- ১. প্রিমিয়াম প্রোফাইল পিকচার এবং আইডি ইনফো কার্ড -->
+    <div class="minimal-card p-6 rounded-3xl bg-white text-center flex flex-col items-center border border-slate-200 shadow-sm relative overflow-hidden">
+        <!-- ব্যাকগ্রাউন্ডে খুব হালকা ওয়াটারমার্ক নিয়ন গ্লো -->
         <div class="absolute -right-8 -top-8 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl"></div>
         
-        <div class="relative w-20 h-20 mb-3 z-10">
-            <img id="profile-pic-preview" src="{{ user.avatar_url }}" alt="Profile" class="w-full h-full rounded-full object-cover border-2 border-slate-100 shadow-sm">
+        <div class="relative w-20 h-20 mb-3.5 z-10">
+            <!-- প্রোফাইল ছবি -->
+            <img id="profile-pic-preview" src="{{ user.avatar_url }}" crossorigin="anonymous" alt="Profile" class="w-full h-full rounded-full object-cover border-2 border-slate-100 shadow-sm">
             <label for="image-upload" class="absolute bottom-0 right-0 bg-slate-950 text-white rounded-full p-2 cursor-pointer hover:bg-slate-800 transition shadow">
                 <i class="fa-solid fa-camera text-[10px]"></i>
             </label>
-            <!-- হিডেন ফাইল ইনপুট -->
             <input type="file" id="image-upload" class="hidden" accept="image/*" onchange="uploadToImgBB(this)">
         </div>
         
         <h2 class="text-base font-extrabold text-slate-800 z-10">{{ user.username }}</h2>
-        <p class="text-xs text-slate-400 mt-0.5 z-10">{{ user.email }}</p>
+        
+        <!-- ইউজার ইউনিক আইডি (UID) স্পষ্টভাবে প্রদর্শন -->
+        <div class="mt-2 bg-slate-100 border border-slate-200/60 px-3 py-1 rounded-full text-[10px] font-extrabold text-slate-600 inline-flex items-center gap-1 z-10">
+            <i class="fa-solid fa-id-card text-emerald-500"></i> UID: {{ user.uid }}
+        </div>
+        
+        <p class="text-[10px] text-slate-400 mt-2 z-10 font-medium">{{ user.email }}</p>
         
         <button onclick="generateShareCard()" class="mt-4 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs px-4 py-2 rounded-xl font-bold transition flex items-center gap-1.5 shadow-sm">
             <i class="fa-solid fa-share-nodes"></i> Share Profile Card
         </button>
     </div>
 
-    <!-- রিড-অনলি ভিউ মোড এবং এডিট মোড সুইচার কার্ড -->
+    <!-- ২. রিড-অনলি ভিউ মোড এবং এডিট মোড সুইচার কার্ড -->
     <div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
         
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -43,8 +50,8 @@
         <!-- ১. রিড-অনলি ভিউ মোড (Default State) -->
         <div id="profile-view-mode" class="space-y-3.5">
             <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 border-b border-slate-50 pb-2 flex justify-between items-center">
-                <span>ব্যক্তিগত তথ্যাদি</span>
-                <button onclick="toggleEditMode(true)" class="text-xs text-blue-500 hover:text-blue-600 font-bold flex items-center gap-1">
+                <span>ব্যক্তিগত তথ্য তালিকা</span>
+                <button onclick="toggleEditMode(true)" class="text-xs text-blue-500 hover:text-blue-600 font-bold flex items-center gap-1 focus:outline-none">
                     <i class="fa-regular fa-pen-to-square"></i> Edit Info
                 </button>
             </h3>
@@ -143,30 +150,33 @@
     </div>
 </div>
 
-<!-- ================= শেয়ার করার জন্য হিডেন ইমেজ কার্ড ================= -->
+<!-- ================= শেয়ার করার জন্য হিডেন প্রিমিয়াম ইমেজ কার্ড ================= -->
 <div class="absolute -top-[9999px] -left-[9999px]">
     <div id="capture-share-card" class="w-[350px] bg-white border border-slate-100 p-6 rounded-3xl flex flex-col items-center justify-between shadow-2xl relative" style="font-family: 'Plus Jakarta Sans', sans-serif;">
-        <div class="absolute top-4 right-4 text-[10px] font-bold text-slate-300">OPTI WORK ⚡</div>
+        <!-- নিয়ন ও ওয়াটারমার্ক ইফেক্ট -->
+        <div class="absolute top-4 right-4 text-[9px] font-extrabold tracking-widest text-slate-300">OPTI WORK ⚡</div>
+        <div class="absolute -left-12 -bottom-12 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl"></div>
         
         <div class="flex flex-col items-center mt-6">
-            <img src="{{ user.avatar_url }}" class="w-20 h-20 rounded-full object-cover border-2 border-emerald-500/10 shadow-md">
-            <h3 class="text-lg font-extrabold text-slate-800 mt-3">{{ user.username }}</h3>
-            <p class="text-xs text-slate-400">Verified Partner Profile</p>
+            <img src="{{ user.avatar_url }}" crossorigin="anonymous" class="w-20 h-20 rounded-full object-cover border-2 border-emerald-500/20 shadow-md">
+            <h3 class="text-base font-extrabold text-slate-800 mt-3">{{ user.username }}</h3>
+            <!-- UID সুন্দরভাবে কার্ডে প্রদর্শন -->
+            <span class="mt-1 bg-slate-100 text-slate-500 text-[8px] font-bold px-2 py-0.5 rounded-full">UID: {{ user.uid }}</span>
         </div>
 
-        <div class="w-full bg-slate-50 border border-slate-100 p-4 rounded-2xl my-6 text-center">
-            <span class="text-[9px] text-slate-400 uppercase font-bold tracking-widest">মোট অর্জিত আয়</span>
+        <div class="w-full bg-slate-50 border border-slate-100 p-4 rounded-2xl my-6 text-center shadow-inner">
+            <span class="text-[8px] text-slate-400 uppercase font-bold tracking-widest">মোট অর্জিত আয়</span>
             <p class="text-3xl font-black text-emerald-500 mt-1">৳ {{ user.balance }}</p>
         </div>
 
-        <div class="text-[9px] text-slate-400 text-center uppercase tracking-wider">
+        <div class="text-[9px] text-slate-400 text-center uppercase tracking-wider font-bold">
             Join using my link to get ৳ 100 bonus instantly!
         </div>
     </div>
 </div>
 
 <script>
-// ১. এডিট মোড টগল জাভাস্ক্রিপ্ট
+// ১. এডিট মোড টগল স্ক্রিপ্ট
 function toggleEditMode(enable) {
     if (enable) {
         document.getElementById('profile-view-mode').classList.add('hidden');
@@ -177,7 +187,7 @@ function toggleEditMode(enable) {
     }
 }
 
-// ২. ImgBB সরাসরি ইমেজ আপলোডিং স্ক্রিপ্ট
+// ২. ImgBB সরাসরি ইমেজ আপলোডিং স্ক্রিপ্ট (উন্নত CORS সাপোর্ট সহ)
 function uploadToImgBB(input) {
     const file = input.files[0];
     if (!file) return;
@@ -191,7 +201,6 @@ function uploadToImgBB(input) {
     const preview = document.getElementById('profile-pic-preview');
     const avatarInput = document.getElementById('avatar-url-input');
     
-    // আপলোডের সময় প্রিভিউ ঝাপসা করে দেওয়া হচ্ছে (ইউজার এক্সপেরিয়েন্সের জন্য)
     preview.style.opacity = "0.5";
 
     const xhr = new XMLHttpRequest();
@@ -205,7 +214,12 @@ function uploadToImgBB(input) {
                 const imageUrl = data.data.url;
                 preview.src = imageUrl;
                 avatarInput.value = imageUrl;
-                alert("ছবি সফলভাবে আপলোড হয়েছে। প্রোফাইল আপডেট বা সেভ করতে Edit Info-তে গিয়ে Save Info বাটনে ক্লিক করুন।");
+                
+                // শেয়ার কার্ডের ডামি ইমেজ ট্যাগও আপডেট করে দেওয়া হচ্ছে যাতে জেনারেশনে সঠিক ছবি আসে
+                const cardImg = document.querySelector('#capture-share-card img');
+                if (cardImg) cardImg.src = imageUrl;
+
+                alert("ছবি সফলভাবে আপলোড হয়েছে। পরিবর্তনটি চূড়ান্ত করতে নিচে Save Info বাটনে ক্লিক করুন।");
             } else {
                 alert("ছবি আপলোড ব্যর্থ হয়েছে।");
             }
@@ -246,10 +260,17 @@ function copyLink() {
     }, 1500);
 }
 
-// ৪. প্রোফাইল শেয়ার কার্ড জেনারেটর
+// ৪. প্রোফাইল শেয়ার কার্ড জেনারেটর (CORS এবং প্রুফ পিকচার সাপোর্ট সহ)
 function generateShareCard() {
     const card = document.getElementById('capture-share-card');
-    html2canvas(card, { useCORS: true }).then(canvas => {
+    
+    // html2canvas কনফিগারেশন যা ব্রাউজার ক্র্যাশ বা ছবি মিসিং হওয়া রোধ করবে
+    html2canvas(card, { 
+        useCORS: true,
+        allowTaint: false,
+        logging: false,
+        scale: 2 // হাই রেজোলিউশন ডাউনলোডের জন্য
+    }).then(canvas => {
         const link = document.createElement('a');
         link.download = `OptiWork-Profile-${Date.now()}.png`;
         link.href = canvas.toDataURL();
