@@ -468,11 +468,30 @@ def admin_task_action():
         flash("টাস্ক সাবমিশন বাতিল (Rejected) করা হয়েছে।", "success")
         
     return redirect(url_for('admin_add_task'))
-    
-# (অন্যান্য কোড অপরিবর্তিত থাকবে, নিম্নলিখিত রাউটগুলো আপডেট করুন)
+    # (অন্যান্য কোড অপরিবর্তিত থাকবে, রুট এবং লগইন রাউট দুটি নিচের কোড দ্বারা প্রতিস্থাপন করুন)
 
+# ১. ল্যান্ডিং বা পরিচিতি পেজ (Root URL - Overview)
+@app.route('/')
+def home():
+    user_id = session.get('user_id')
+    user = None
+    if user_id:
+        try:
+            user_data = supabase.table("users").select("username", "uid").eq("id", user_id).execute().data
+            if user_data:
+                user = user_data[0]
+        except Exception:
+            pass
+    return render_template('home.html', user=user)
+
+
+# ২. ডেডিকেটেড লগইন রাউট
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    # যদি ইউজার অলরেডি লগইন থাকে, তবে ড্যাশবোর্ডে রিডাইরেক্ট করা
+    if session.get('user_id'):
+        return redirect(url_for('dashboard'))
+        
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
@@ -487,9 +506,7 @@ def login():
                 return render_template('login.html')
                 
             if check_password_hash(user['password_hash'], password):
-                # সেশন স্থায়ী বা পারমানেন্ট হিসেবে সেট করা হচ্ছে (৩০ দিন মেয়াদে লক থাকবে)
                 session.permanent = True
-                
                 session['user_id'] = user['id']
                 session['username'] = user['username']
                 session['uid'] = user['uid']
@@ -501,6 +518,7 @@ def login():
             
         flash("ভুল ইমেইল অথবা পাসওয়ার্ড।", "danger")
     return render_template('login.html')
+    
     
 
 # ৩. রেফারেল রাউট (ইউনিক আইডি দিয়ে রেফারেল লিংক তৈরি)
