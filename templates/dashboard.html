@@ -35,7 +35,7 @@
             <i class="fa-solid fa-gift"></i>
         </div>
         <div>
-            <h4 class="text-xs font-bold text-slate-700">데일리 চেক-ইন বোনাস</h4>
+            <h4 class="text-xs font-bold text-slate-700">ডেইলি চেক-ইন বোনাস</h4>
             <p class="text-[9px] text-slate-400 mt-0.5">প্রতিদিন লগইন করে ৳ ৫.০০ বোনাস নিন</p>
         </div>
     </div>
@@ -205,7 +205,7 @@
 </div>
 
 <script>
-// ১. ডেইলি চেক-ইন ক্লেইম স্ক্রিপ্ট
+/// dashboard.html ফাইলের runDailyCheckin স্ক্রিপ্টটি এটি দিয়ে রিপ্লেস করুন
 async function runDailyCheckin() {
     const btn = document.getElementById('daily-btn');
     btn.setAttribute('disabled', 'true');
@@ -213,22 +213,24 @@ async function runDailyCheckin() {
 
     try {
         const res = await fetch('/claim-daily', { method: 'POST' });
-        const data = await res.json();
+        const data = await res.json(); // ফ্লাস্কের পাঠানো JSON ডাটা রিড করা
 
         if (res.status === 200) {
             alert(data.message);
             location.reload();
         } else {
+            // ডাটাবেজের আসল সমস্যাটি এখন এলার্ট বক্সে পপ-আপ আকারে দেখা যাবে
             alert(data.message);
-            btn.className = "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed text-[11px] font-bold px-3 py-2 rounded-xl shadow-none";
-            btn.innerText = "Claimed Today";
+            btn.removeAttribute('disabled');
+            btn.innerText = "CLAIM ৳৫";
         }
     } catch (e) {
-        alert("কানেকশন ত্রুটি!");
+        alert("কানেকশন ত্রুটি বা অবৈধ সার্ভার রেসপন্স!");
         btn.removeAttribute('disabled');
         btn.innerText = "CLAIM ৳৫";
     }
 }
+    
 
 // ২. একাধিক রানিং প্যাকেজের জন্য ডাইনামিক মাল্টি-টাইমার এবং আলাদা বাটন আনলক স্ক্রিপ্ট
 function updateDashboardTimers() {
