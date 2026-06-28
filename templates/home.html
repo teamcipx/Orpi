@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Opti Work - Decentralized Cloud Mining Platform</title>
+    <title>Opti Work - Cloud Mining & Hardware Rental</title>
     <!-- Google Fonts: Plus Jakarta Sans -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Font Awesome Icons -->
@@ -87,12 +87,77 @@
             </div>
         </div>
 
-        <!-- ২. যেভাবে কাজ করে (How it Works) -->
+        <!-- ২. ফ্রিতে কাজের বিশেষ হাইলাইট ব্যানার (Free Mining Spotlight) -->
+        <div class="bg-emerald-50 border border-emerald-100 p-5 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative overflow-hidden">
+            <div class="absolute -right-8 -bottom-8 w-24 h-24 bg-emerald-500/10 rounded-full blur-3xl"></div>
+            <div class="z-10">
+                <span class="bg-emerald-100 text-emerald-800 text-[8px] font-extrabold px-2.5 py-0.5 rounded-full border border-emerald-200 uppercase tracking-wide inline-block mb-1.5">
+                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full inline-block mr-1"></span> 100% Free Mining
+                </span>
+                <h3 class="text-sm font-black text-slate-800">কোনো বিনিয়োগ ছাড়াই ফ্রিতে কাজ করুন!</h3>
+                <p class="text-[10px] text-slate-500 mt-1 max-w-sm">আমাদের ফ্রি ট্রায়াল প্রসেসর নোডটি অ্যাক্টিভ করুন এবং প্রতি ৮ ঘণ্টায় ৳ ৭.০০ (দৈনিক ৳ ২১.০০) সম্পূর্ণ ফ্রিতে কোনো ডিপোজিট ছাড়াই ইনকাম শুরু করুন।</p>
+            </div>
+            <a href="/register" class="bg-slate-950 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition shadow z-10 w-full sm:w-auto text-center">
+                ফ্রি ইনকাম শুরু করুন
+            </a>
+        </div>
+
+        <!-- ৩. ইন্টারেক্টিভ ইনকাম ক্যালকুলেটর (Interactive Profit Estimator) -->
+        <div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-4">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 border-b border-slate-50 pb-2 flex items-center gap-1.5">
+                <i class="fa-solid fa-calculator text-emerald-500"></i> আপনার মাইনিং আয় হিসাব করুন (Profit Estimator)
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- সিলেক্টর বাটন গ্রুপ -->
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">প্যাকেজ নির্বাচন করুন</label>
+                    <div class="space-y-1.5">
+                        <button onclick="calculateProfit(0, 21, 'Free Node', '৳ ০.০০')" class="w-full text-left p-3 border border-slate-200 rounded-xl hover:border-slate-400 transition bg-slate-50 flex justify-between items-center text-xs font-bold">
+                            <span>Free Package</span> <span class="text-slate-400 font-normal">মূল্য: ৳ ০.০০</span>
+                        </button>
+                        <button onclick="calculateProfit(500, 135, 'Starter GPU', '৳ ৫০০.০০')" class="w-full text-left p-3 border border-slate-200 rounded-xl hover:border-slate-400 transition bg-slate-50 flex justify-between items-center text-xs font-bold">
+                            <span>Starter GPU Rig</span> <span class="text-emerald-600 font-bold">মূল্য: ৳ ৫০০.০০</span>
+                        </button>
+                        <button onclick="calculateProfit(1000, 300, 'Basic ASIC', '৳ ১,০০০.০০')" class="w-full text-left p-3 border border-slate-200 rounded-xl hover:border-slate-400 transition bg-slate-50 flex justify-between items-center text-xs font-bold">
+                            <span>Basic ASIC Miner</span> <span class="text-emerald-600 font-bold">মূল্য: ৳ ১,০০০.০০</span>
+                        </button>
+                        <button onclick="calculateProfit(5000, 1800, 'Industrial Node', '৳ ৫,০০০.০০')" class="w-full text-left p-3 border border-slate-200 rounded-xl hover:border-slate-400 transition bg-slate-50 flex justify-between items-center text-xs font-bold">
+                            <span>Industrial Node</span> <span class="text-emerald-600 font-bold">মূল্য: ৳ ৫,০০০.০০</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- লাভ প্রদর্শন কার্ড -->
+                <div class="bg-slate-50 border border-slate-100 p-4 rounded-xl flex flex-col justify-between">
+                    <div>
+                        <span class="text-[8px] bg-slate-200 text-slate-600 px-2 py-0.5 rounded font-bold uppercase" id="calc-node-tag">Free Node</span>
+                        <h4 class="text-xs font-bold text-slate-800 mt-2">আনুমানিক আয়ের প্রজেকশন</h4>
+                        <p class="text-[10px] text-slate-400 mt-0.5">রেন্টাল প্রাইস: <span class="font-bold text-slate-600" id="calc-price-label">৳ ০.০০</span></p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 my-3">
+                        <div class="bg-white p-2.5 rounded-lg border border-slate-100">
+                            <span class="text-[8px] text-slate-400 font-bold uppercase block">দৈনিক আয় (Daily)</span>
+                            <span class="text-sm font-black text-emerald-600" id="calc-daily">৳ ২১.০০</span>
+                        </div>
+                        <div class="bg-white p-2.5 rounded-lg border border-slate-100">
+                            <span class="text-[8px] text-slate-400 font-bold uppercase block">মাসিক আয় (Monthly)</span>
+                            <span class="text-sm font-black text-emerald-600" id="calc-monthly">৳ ৬৩০.০০</span>
+                        </div>
+                    </div>
+
+                    <p class="text-[8px] text-slate-400 font-medium">
+                        * এটি একটি আনুমানিক হিসাব। ক্লাউড মাইনিংয়ের গ্লোবাল ডিফিকাল্টি এবং নেটওয়ার্ক স্ট্যাটাসের ওপর ভিত্তি করে আয় সামান্য পরিবর্তিত হতে পারে।
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ৪. যেভাবে কাজ করে (How it Works) -->
         <div class="space-y-3">
             <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 text-center mb-1">সহজ ৩টি ধাপে মাইনিং শুরু করুন</h2>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                
-                <!-- ধাপ ১ -->
                 <div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm text-center space-y-2">
                     <div class="w-9 h-9 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center mx-auto text-slate-700">
                         <i class="fa-solid fa-user-plus text-sm"></i>
@@ -101,16 +166,14 @@
                     <p class="text-[10px] text-slate-400 leading-relaxed">১ মিনিটে বিনামূল্যে আপনার অ্যাকাউন্ট তৈরি করুন। রেফারেল কোডে যোগ দিলে পাবেন ১০০ টাকা ওয়েলকাম বোনাস।</p>
                 </div>
 
-                <!-- ধাপ ২ -->
                 <div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm text-center space-y-2">
                     <div class="w-9 h-9 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center mx-auto text-slate-700">
                         <i class="fa-solid fa-server text-sm"></i>
                     </div>
                     <h3 class="text-xs font-bold text-slate-800">২. হার্ডওয়্যার ভাড়া নিন</h3>
-                    <p class="text-[10px] text-slate-400 leading-relaxed">আমাদের ডাটা সেন্টার থেকে আপনার পছন্দের প্রসেসর নোড ভাড়া নিন। প্রিমিয়াম মেম্বারদের জন্য রেফারেল ছাড়াই উইথড্র সুবিধা রয়েছে।</p>
+                    <p class="text-[10px] text-slate-400 leading-relaxed">আমাদের ডাটা সেন্টার থেকে আপনার পছন্দের প্রসেসর নোড ভাড়া নিন। প্রিমিয়াম মেম্বারদের জন্য রেফারেল ছাড়াই উইথড্র সুবিধা রয়েছে।</p>
                 </div>
 
-                <!-- ধাপ ৩ -->
                 <div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm text-center space-y-2">
                     <div class="w-9 h-9 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center mx-auto text-slate-700">
                         <i class="fa-solid fa-wallet text-sm"></i>
@@ -121,7 +184,7 @@
             </div>
         </div>
 
-        <!-- ৩. প্ল্যাটফর্ম পরিসংখ্যান (Real-time Stats) -->
+        <!-- ৫. প্ল্যাটফর্ম পরিসংখ্যান (Real-time Stats) -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div class="minimal-card p-4 rounded-2xl bg-white text-center">
                 <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider">Active Nodes</span>
@@ -141,6 +204,26 @@
             </div>
         </div>
 
+        <!-- ৬. মিনিমালিস্ট এফএকিউ (FAQ Accordion) -->
+        <div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 border-b border-slate-50 pb-2">
+                <i class="fa-solid fa-question-circle text-slate-400"></i> সাধারণ জিজ্ঞাসা ও উত্তর (FAQ)
+            </h3>
+            
+            <div class="space-y-3 text-xs">
+                <!-- প্রশ্ন ১ -->
+                <div class="p-3 bg-slate-50 border border-slate-100 rounded-xl">
+                    <p class="font-bold text-slate-800 mb-1">প্রশ্ন: আমি কি সম্পূর্ণ ফ্রিতে উইথড্র করতে পারব?</p>
+                    <p class="text-[10px] text-slate-500 leading-relaxed">উত্তর: হ্যাঁ, সম্পূর্ণ ফ্রিতে উইথড্র করা সম্ভব। তবে ফ্রি নোড ব্যবহারের ক্ষেত্রে সিকিউরিটি ভেরিফিকেশনের জন্য ন্যূনতম ৩টি সফল রেফারেল এবং ৩০০ টাকা ব্যালেন্স প্রয়োজন হবে। প্রিমিয়াম নোড ভাড়া নিলে কোনো প্রকার রেফারেল ছাড়াই সরাসরি উইথড্র করা যাবে।</p>
+                </div>
+                <!-- প্রশ্ন ২ -->
+                <div class="p-3 bg-slate-50 border border-slate-100 rounded-xl">
+                    <p class="font-bold text-slate-800 mb-1">প্রশ্ন: উইথড্র রিকোয়েস্ট করতে কত সময় লাগে?</p>
+                    <p class="text-[10px] text-slate-500 leading-relaxed">উত্তর: আপনার অ্যাকাউন্টে ৩০০ টাকা ব্যালেন্স হলেই আপনি যেকোনো সময় উইথড্র রিকোয়েস্ট করতে পারবেন। আমাদের ফিন্যান্স টিম সাধারণত ১২-২৪ ঘণ্টার মধ্যে পেমেন্ট প্রসেস সম্পন্ন করে থাকে।</p>
+                </div>
+            </div>
+        </div>
+
     </main>
 
     <!-- ফুটার সেকশন -->
@@ -153,6 +236,20 @@
             </div>
         </div>
     </footer>
+
+    <!-- ইনকাম ক্যালকুলেটর ইন্টারেক্টিভ জাভাস্ক্রিপ্ট স্ক্রিপ্ট -->
+    <script>
+        function calculateProfit(price, dailyIncome, nodeTag, priceLabel) {
+            // প্রজেকশন ক্যালকুলেশন
+            const monthlyIncome = dailyIncome * 30;
+            
+            // রিয়েল-টাইম ডাটা আপডেট
+            document.getElementById('calc-node-tag').innerText = nodeTag;
+            document.getElementById('calc-price-label').innerText = priceLabel;
+            document.getElementById('calc-daily').innerText = "৳ " + dailyIncome.toFixed(2);
+            document.getElementById('calc-monthly').innerText = "৳ " + monthlyIncome.toFixed(2);
+        }
+    </script>
 
 </body>
 </html>
