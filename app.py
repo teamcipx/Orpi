@@ -793,6 +793,48 @@ def register():
 
 
 
+@app.route('/claim-daily', methods=['POST'])
+def claim_daily():
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"status": "error", "message": "Unauthorized"}), 401
+        
+    try:
+        # ইউজারের চেক-ইন ডাটা নিয়ে আসা
+        user_query = supabase.table("users").select("last_daily_checkin").eq("id", user_id).execute()
+        if not user_query.data:
+            return jsonify({"status": "error", "message": "ব্যবহারকারী সনাক্ত করা যায়নি।"}), 404
+            
+        user = user_query.data[0]
+        last_checkin_str = user.get('last_daily_checkin')
+        
+        now = datetime.datetime.now(datetime.timezone.utc)
+        reward_amount = 5.00  # ডেইলি বোনাস ৫ টাকা
+        
+        if last_checkin_str:
+            last_checkin = datetime.datetime.fromisoformat(last_checkin_str.replace('Z', '+00:00'))
+            cooldown = datetime.timedelta(hours=24)
+            
+            # ২৪ ঘণ্টা ভ্যালিডেশন
+            if now < last_checkin + cooldown:
+                time_left = (last_checkin + cooldown) - now
+                seconds_left = int(time_left.total_seconds())
+                return jsonify({
+                    "status": "error", 
+                    "message": "আপনি ইতিমধ্যে আজকের ডেইলি বোনাস ক্লেইম করেছেন।"
+                }), 400
+
+        # শেষ ক্লেইমের সময় এবং ব্যালেন্স নিরাপদে আপডেট করা
+        supabase.table("users").update({"last_daily_checkin": now.isoformat()}).eq("id", user_id).execute()
+        supabase.rpc("increment_balance", {"user_id": user_id, "amount": reward_amount}).execute()
+        
+        return jsonify({
+            "status": "success", 
+            "message": f"ডেইলি চেক-ইন সফল! আপনার ব্যালেন্সে ৳ {reward_amount} যোগ করা হয়েছে।"
+        })
+    except Exception as e:
+        # ডাটাবেজ বা সার্ভার সাইডের আসল এররটি JSON আকারে রিটার্ন করা হচ্ছে যাতে ফ্রন্টএন্ডে তা দেখা যায়
+        return jsonify({"status": "error", "message": f"ডাটাবেজ ত্রুটি: {str(e)}"}), 500
 
 # ২. ড্যাশবোর্ড রাউট (মেয়াদোত্তীর্ণ প্যাকেজ অটো-ডিলিট এবং তথ্য সংগ্রহ)
 @app.route('/dashboard')
