@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="space-y-4">
+    
+    <!-- ১. এজেন্ট পরিচিতি কার্ড -->
+    <div class="minimal-card p-5 rounded-3xl bg-white border border-slate-200 shadow-sm relative overflow-hidden">
+        <div class="absolute -right-8 -top-8 w-24 h-24 bg-blue-500/5 rounded-full blur-2xl"></div>
+        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-4 border-b border-slate-50 pb-2.5 flex items-center gap-1.5">
+            <i class="fa-solid fa-user-tie text-blue-500"></i> Agent Portal (গোপন ড্যাশবোর্ড)
+        </h2>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="p-3 mb-4 text-xs text-center rounded-xl border font-bold {% if category == 'success' %}bg-emerald-50 text-emerald-600 border-emerald-100{% else %}bg-red-50 text-red-600 border-red-100{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div>
+            <span class="text-[9px] text-slate-400 uppercase tracking-widest font-bold">মোট এজেন্ট রেভিনিউ</span>
+            <p class="text-3xl font-black text-blue-600 mt-1">৳ {{ user.agent_balance }}</p>
+            <p class="text-[9px] text-slate-400 mt-1 leading-relaxed">* আপনার রেফারকৃত মেম্বারদের প্রতিটি অনুমোদিত ডিপোজিটের ৫০% কমিশন এখানে যোগ হয়।</p>
+        </div>
+    </div>
+
+    <!-- ২. ডেডিকেটেড এজেন্ট উইথড্রয়াল ফরম (বিকাশ ও রকেট) -->
+    <div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-3 border-b border-slate-50 pb-2 flex items-center gap-1.5">
+            <i class="fa-solid fa-money-check-dollar"></i> Agent Cash Out (উইথড্র করুন)
+        </h3>
+        
+        {% if user.agent_balance >= 300 %}
+        <form action="/agent/withdraw" method="POST" class="space-y-3.5">
+            <div>
+                <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">উইথড্র পরিমাণ (৳) [সর্বনিম্ন ৩০০]</label>
+                <input type="number" name="amount" min="50" max="{{ user.agent_balance }}" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">গেটওয়ে</label>
+                    <select name="method" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none">
+                        <option value="Bkash">bKash (Personal)</option>
+                        <option value="Nagad">Nagad (Personal)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">মোবাইল নম্বর</label>
+                    <input type="text" name="number" required placeholder="017XXXXXXXX" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none">
+                </div>
+            </div>
+            <button type="submit" class="w-full bg-slate-950 hover:bg-slate-800 text-white font-extrabold text-xs py-2.5 rounded-xl transition">
+                কমিশন উইথড্র করুন
+            </button>
+        </form>
+        {% else %}
+        <div class="p-4 bg-slate-50 text-slate-500 rounded-xl text-center text-xs border border-dashed border-slate-200">
+            <i class="fa-solid fa-lock text-slate-400 mb-1.5 text-base block"></i>
+            উইথড্র করার জন্য ন্যূনতম 50 টাকা এজেন্ট ব্যালেন্স প্রয়োজন।
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- ৩. এজেন্ট উইথড্রয়াল হিস্ট্রি টেবিল -->
+    <div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-3 border-b border-slate-50 pb-2 flex items-center gap-1.5">
+            <i class="fa-solid fa-file-invoice"></i> এজেন্ট উইথড্র রেকর্ড
+        </h3>
+        <div class="overflow-x-auto text-[10px]">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold uppercase">
+                        <th class="p-2.5">পরিমাণ</th>
+                        <th class="p-2.5">গেটওয়ে / নম্বর</th>
+                        <th class="p-2.5 text-right">স্ট্যাটাস</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in withdraw_history %}
+                    <tr class="border-b border-slate-50 text-slate-600">
+                        <td class="p-2.5 font-bold">৳ {{ item.amount }}</td>
+                        <td class="p-2.5">
+                            <span>{{ item.payment_method }}</span><br>
+                            <span class="text-[9px] text-slate-400 font-mono">{{ item.payment_number }}</span>
+                        </td>
+                        <td class="p-2.5 text-right">
+                            <span class="px-2 py-0.5 rounded-full font-bold text-[8px] uppercase {% if item.status == 'Pending' %}bg-yellow-50 text-yellow-600 border border-yellow-100{% elif item.status == 'Approved' %}bg-emerald-50 text-emerald-600 border-emerald-100{% else %}bg-red-50 text-red-600 border-red-100{% endif %}">
+                                {{ item.status }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="3" class="p-4 text-center text-slate-400">কোনো এজেন্ট উইথড্র রেকর্ড পাওয়া যায়নি।</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ৪. এজেন্টের মাধ্যমে আমন্ত্রিত ইউজারদের ডিপোজিট কমিশন হিস্ট্রি -->
+    <div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-3 border-b border-slate-50 pb-2 flex items-center gap-1.5">
+            <i class="fa-solid fa-clock-rotate-left text-slate-400"></i> ডাউনলাইন ডিপোজিট রেভিনিউ
+        </h3>
+        <div class="overflow-x-auto text-[10px]">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold uppercase">
+                        <th class="p-2.5">ইউজার তথ্য</th>
+                        <th class="p-2.5">ডিপোজিট পরিমাণ</th>
+                        <th class="p-2.5 text-right">অর্জিত কমিশন (৫০%)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in deposits %}
+                    <tr class="border-b border-slate-50 text-slate-600">
+                        <td class="p-2.5">
+                            <span class="font-bold text-slate-700">{{ item.users.username }}</span><br>
+                            <span class="text-[8px] text-slate-400 font-mono">UID: {{ item.users.uid }}</span>
+                        </td>
+                        <td class="p-2.5 font-bold text-slate-600">৳ {{ item.amount }}</td>
+                        <td class="p-2.5 text-right font-black text-emerald-600">
+                            + ৳ {{ (item.amount * 0.50) | round(2) }}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="3" class="p-4 text-center text-slate-400">আপনার মেম্বারদের কোনো সফল ডিপোজিট রেকর্ড নেই।</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
