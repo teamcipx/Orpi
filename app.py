@@ -195,7 +195,30 @@ def simulate_traffic_cron():
         send_telegram_notification(pending_msg)
         
     return jsonify({"status": "completed", "instant_payouts_and_pendings_created": True}), 200
-    
+
+
+def mask_email(email):
+    try:
+        parts = email.split('@')
+        name, domain = parts[0], parts[1]
+        if len(name) > 3:
+            return f"{name[:2]}***{name[-1]}@{domain}"
+        return f"{name[0]}***@{domain}"
+    except Exception:
+        return "u***@email.com"
+
+app.jinja_env.filters['mask_email'] = mask_email
+
+
+def check_admin_auth():
+    user_id = session.get('user_id')
+    if not user_id:
+        return None
+    user = supabase.table("users").select("is_admin, is_banned").eq("id", user_id).execute().data
+    if user and user[0]['is_admin'] and not user[0]['is_banned']:
+        return user_id
+    return None
+
 
 @app.route('/admin', methods=['GET', 'POST'])
 def admin_dashboard():
