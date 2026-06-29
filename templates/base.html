@@ -25,7 +25,7 @@
     </script>
     <style>
         body {
-            background-color: #F8FAFC;
+            background-color: #F8FAFC; /* সফট লাক্সারি ব্যাকগ্রাউন্ড */
         }
         .minimal-card {
             background: #FFFFFF;
@@ -37,54 +37,65 @@
         }
     </style>
 </head>
-<body class="text-[#0F172A] min-h-screen flex flex-col pb-20">
+<body class="text-[#0F172A] min-h-screen flex flex-col pb-28"> <!-- ফ্লোটিং বটম বারের জন্য নিচে স্পেসিং বাড়ানো হয়েছে -->
 
-    <!-- টপ নেভিগেশন বার -->
+    <!-- মিনিমাল টপ নেভিগেশন বার -->
     <nav class="bg-white border-b border-slate-100 sticky top-0 z-50">
-        <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
+        <div class="max-w-md mx-auto px-4 py-3.5 flex justify-between items-center">
             <a href="/dashboard" class="flex items-center space-x-2">
                 <span class="text-base font-extrabold tracking-tight text-slate-900">
                     OPTI<span class="text-emerald-500">WORK</span>
                 </span>
             </a>
             
+            <!-- টগল মেনু বাটন (Hamburger) -->
             <button onclick="toggleTopMenu()" class="text-slate-600 focus:outline-none p-1 hover:text-slate-900 transition">
                 <i id="menu-icon" class="fa-solid fa-bars text-lg"></i>
             </button>
         </div>
 
-        <!-- টগল ড্রপডাউন মেনু -->
-        <div id="top-dropdown-menu" class="hidden border-b border-slate-100 bg-white px-4 py-3 space-y-2 text-xs font-semibold uppercase tracking-wider text-slate-500 max-w-4xl mx-auto">
-            <a href="/dashboard" class="block py-2 hover:text-emerald-500"><i class="fa-solid fa-chart-line mr-2"></i> Dashboard</a>
-            <a href="/tasks" class="block py-2 hover:text-emerald-500"><i class="fa-solid fa-list-check mr-2"></i> Tasks</a>
-            <a href="/withdraw" class="block py-2 hover:text-emerald-500"><i class="fa-solid fa-money-bill-transfer mr-2"></i> Withdrawal</a>
-            <a href="/referrals" class="block py-2 hover:text-emerald-500"><i class="fa-solid fa-users mr-2"></i> Referrals</a>
-            <a href="/profile" class="block py-2 hover:text-emerald-500"><i class="fa-solid fa-user-gear mr-2"></i> Account</a>
-            <a href="/logout" class="block py-2 text-red-500 hover:text-red-600"><i class="fa-solid fa-sign-out-alt mr-2"></i> Logout</a>
+        <!-- ড্রপডাউন টগল মেনু -->
+        <div id="top-dropdown-menu" class="hidden border-b border-slate-100 bg-white px-5 py-3.5 space-y-2 text-xs font-semibold uppercase tracking-wider text-slate-500 max-w-md mx-auto">
+            <a href="/dashboard" class="block py-2 hover:text-emerald-500 transition"><i class="fa-solid fa-chart-line mr-2"></i> Dashboard</a>
+            <a href="/store" class="block py-2 hover:text-emerald-500 transition"><i class="fa-solid fa-store mr-2"></i> Store</a>
+            <a href="/withdraw" class="block py-2 hover:text-emerald-500 transition"><i class="fa-solid fa-money-bill-transfer mr-2"></i> Withdrawal</a>
+            <a href="/referrals" class="block py-2 hover:text-emerald-500 transition"><i class="fa-solid fa-users mr-2"></i> Referrals</a>
+            <a href="/profile" class="block py-2 hover:text-emerald-500 transition"><i class="fa-solid fa-user-gear mr-2"></i> Account</a>
+            <a href="/logout" class="block py-2 text-red-500 hover:text-red-600 transition"><i class="fa-solid fa-sign-out-alt mr-2"></i> Logout</a>
         </div>
     </nav>
 
-    <!-- বটম নেভিগেশন বার -->
-    <div class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-slate-100 py-2.5 z-40 shadow-lg">
-        <div class="max-w-md mx-auto flex justify-around text-[10px] uppercase font-bold text-slate-400">
-            <a href="/dashboard" class="flex flex-col items-center gap-1 hover:text-emerald-500 transition">
-                <i class="fa-solid fa-chart-line text-base text-slate-600 hover:text-emerald-500"></i> Home
+    <!-- ================= লাইভ টেলিগ্রাম ফ্লোটিং সাপোর্ট উইজেট ================= -->
+    <div class="fixed bottom-24 right-4 z-50">
+        <a href="https://t.me/optiwork_help" target="_blank" class="w-11 h-11 bg-[#229ED9] hover:bg-[#1d82c4] text-white rounded-full flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110 relative">
+            <!-- ফ্লোটিং অ্যানিমেশন ওয়েভ -->
+            <span class="absolute inset-0 rounded-full bg-[#229ED9]/30 animate-ping"></span>
+            <i class="fa-brands fa-telegram text-xl relative z-10"></i>
+        </a>
+    </div>
+
+    <!-- ================= আধুনিক ফ্লোটিং বটম নেভিগেশন ডক ================= -->
+    <div class="fixed bottom-4 left-0 right-0 z-40 px-4 max-w-sm mx-auto">
+        <div class="bg-white/95 backdrop-blur-md border border-slate-200/80 py-3 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.06)] flex justify-around text-[10px] uppercase font-bold text-slate-400">
+            <a href="/dashboard" class="flex flex-col items-center gap-1.5 hover:text-emerald-500 transition text-slate-500">
+                <i class="fa-solid fa-chart-line text-sm"></i> Home
             </a>
-            <a href="/tasks" class="flex flex-col items-center gap-1 hover:text-emerald-500 transition">
-                <i class="fa-solid fa-list-check text-base text-slate-600 hover:text-emerald-500"></i> Task
+            <a href="/tasks" class="flex flex-col items-center gap-1.5 hover:text-emerald-500 transition text-slate-500">
+                <i class="fa-solid fa-list-check text-sm"></i> Task
             </a>
-            <a href="/withdraw" class="flex flex-col items-center gap-1 hover:text-emerald-500 transition">
-                <i class="fa-solid fa-money-bill-transfer text-base text-slate-600 hover:text-emerald-500"></i> Withdraw
+            <a href="/withdraw" class="flex flex-col items-center gap-1.5 hover:text-emerald-500 transition text-slate-500">
+                <i class="fa-solid fa-money-bill-transfer text-sm"></i> Withdraw
             </a>
-            <a href="/referrals" class="flex flex-col items-center gap-1 hover:text-emerald-500 transition">
-                <i class="fa-solid fa-users text-base text-slate-600 hover:text-emerald-500"></i> Refer
+            <a href="/referrals" class="flex flex-col items-center gap-1.5 hover:text-emerald-500 transition text-slate-500">
+                <i class="fa-solid fa-gift text-sm"></i> Refer
             </a>
-            <a href="/profile" class="flex flex-col items-center gap-1 hover:text-emerald-500 transition">
-                <i class="fa-solid fa-circle-user text-base text-slate-600 hover:text-emerald-500"></i> Account
+            <a href="/profile" class="flex flex-col items-center gap-1.5 hover:text-emerald-500 transition text-slate-500">
+                <i class="fa-solid fa-circle-user text-sm"></i> Account
             </a>
         </div>
     </div>
 
+    <!-- কনটেন্ট মূল উইন্ডো -->
     <main class="max-w-md mx-auto p-4 mt-2 w-full flex-grow">
         {% block content %}{% endblock %}
     </main>
@@ -96,7 +107,7 @@
             if (menu.classList.contains('hidden')) {
                 menu.classList.remove('hidden');
                 icon.classList.remove('fa-bars');
-                icon.classList.add('fa-xmark');
+                icon.幕; icon.classList.add('fa-xmark');
             } else {
                 menu.classList.add('hidden');
                 icon.classList.remove('fa-xmark');
