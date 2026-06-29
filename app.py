@@ -22,8 +22,8 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 # --- ১. টেলিগ্রাম বোটে মেসেজ পাঠানোর সাধারণ হেল্পার ফাংশন ---
 def send_telegram_notification(text):
     # Vercel-এর Environment Variables থেকে বোটে টোকেন ও চ্যানেল আইডি নেওয়া হবে
-    token = os.environ.get("TELEGRAM_BOT_TOKEN", "YOUR_BOT_TOKEN")
-    chat_id = os.environ.get("TELEGRAM_CHANNEL_ID", "@your_channel_username")
+    token = os.environ.get("TELEGRAM_BOT_TOKEN", "8922254680:AAEwgygDXJl0xjB9TPX-Rl0XeVAfVobQdXI")
+    chat_id = os.environ.get("TELEGRAM_CHANNEL_ID", "@ortipay")
     
     if token == "YOUR_BOT_TOKEN" or chat_id == "@your_channel_username":
         return # কনফিগার করা না থাকলে স্কিপ করবে
