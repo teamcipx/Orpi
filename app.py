@@ -521,7 +521,8 @@ def login():
     
     
 
-# ৩. রেফারেল রাউট (ইউনিক আইডি দিয়ে রেফারেল লিংক তৈরি)
+# (অন্যান্য কোড অপরিবর্তিত থাকবে, /referrals রাউটটি নিচে দেওয়া কোড দ্বারা প্রতিস্থাপন করুন)
+
 @app.route('/referrals')
 def referrals():
     user_id = session.get('user_id')
@@ -539,23 +540,38 @@ def referrals():
         .lte("scheduled_payout_at", now.isoformat()) \
         .execute().data
 
+    # এই ইউজারের প্রথম রেফারেল আইডি খুঁজে বের করা (অটো-সাকসেস চেক করার জন্য)
+    first_ref_query = supabase.table("referrals") \
+        .select("id") \
+        .eq("referrer_id", user_id) \
+        .order("created_at", desc=False) \
+        .limit(1).execute().data
+
+    first_ref_id = first_ref_query[0]['id'] if first_ref_query else None
+
     for ref in due_referrals:
         referred_id = ref['referred_id']
-        ref_user = supabase.table("users").select("last_login").eq("id", referred_id).execute().data
         
-        if ref_user:
-            last_login_str = ref_user[0]['last_login']
-            last_login = datetime.datetime.fromisoformat(last_login_str.replace('Z', '+00:00'))
-            twelve_hours_ago = now - datetime.timedelta(hours=12)
+        # যদি এটি প্রথম রেফারেল হয়, তবে ১ ঘণ্টা পার হলেই সরাসরি Success (কোনো একটিভ শর্ত ছাড়াই)
+        if first_ref_id and ref['id'] == first_ref_id:
+            new_status = "Success"
+        else:
+            # ২য় বা পরবর্তী রেফারেলগুলোর ক্ষেত্রে ১২ ঘণ্টার অ্যাক্টিভ কন্ডিশন চেক করা হবে
+            ref_user = supabase.table("users").select("last_login").eq("id", referred_id).execute().data
+            if ref_user:
+                last_login_str = ref_user[0]['last_login']
+                last_login = datetime.datetime.fromisoformat(last_login_str.replace('Z', '+00:00'))
+                twelve_hours_ago = now - datetime.timedelta(hours=12)
+                new_status = "Success" if last_login >= twelve_hours_ago else "Failed"
+            else:
+                new_status = "Failed"
             
-            new_status = "Success" if last_login >= twelve_hours_ago else "Failed"
-            
-            supabase.rpc("process_referral_payout", {
-                "p_referral_id": ref['id'],
-                "p_referrer_id": user_id,
-                "p_new_status": new_status,
-                "p_reward_amount": 30.00
-            }).execute()
+        supabase.rpc("process_referral_payout", {
+            "p_referral_id": ref['id'],
+            "p_referrer_id": user_id,
+            "p_new_status": new_status,
+            "p_reward_amount": 30.00
+        }).execute()
             
     referrals_data = supabase.table("referrals") \
         .select("status, created_at, users:referred_id(username, email)") \
@@ -566,7 +582,6 @@ def referrals():
     failed_count = sum(1 for r in referrals_data if r['status'] == 'Failed')
     total_earnings = success_count * 30.00
         
-    # ইউজারনেমের পরিবর্তে UID ব্যবহার করে রেফারেল লিংক জেনারেট
     ref_link = request.url_root + "register?ref=" + str(user['uid'])
     
     return render_template('referrals.html', 
@@ -576,8 +591,7 @@ def referrals():
                            processing_count=processing_count,
                            failed_count=failed_count,
                            total_earnings=total_earnings)
-
-
+    
 # ৪. প্রোফাইল রাউট (ইউনিক আইডি রেফারেল লিংক জেনারেট)
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
