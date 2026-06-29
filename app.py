@@ -1,6 +1,9 @@
 import os
 import datetime
 import random
+import urllib.request
+import urllib.parse
+import json
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from supabase import create_client, Client
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -15,6 +18,115 @@ SUPABASE_URL = os.environ.get("SUPABASE_URL", "YOUR_SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "YOUR_SUPABASE_KEY")
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
+
+# --- ১. টেলিগ্রাম বোটে মেসেজ পাঠানোর সাধারণ হেল্পার ফাংশন ---
+def send_telegram_notification(text):
+    # Vercel-এর Environment Variables থেকে বোটে টোকেন ও চ্যানেল আইডি নেওয়া হবে
+    token = os.environ.get("TELEGRAM_BOT_TOKEN", "YOUR_BOT_TOKEN")
+    chat_id = os.environ.get("TELEGRAM_CHANNEL_ID", "@your_channel_username")
+    
+    if token == "YOUR_BOT_TOKEN" or chat_id == "@your_channel_username":
+        return # কনফিগার করা না থাকলে স্কিপ করবে
+
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    data = urllib.parse.urlencode({
+        "chat_id": chat_id,
+        "text": text,
+        "parse_mode": "HTML"
+    }).encode("utf-8")
+    
+    try:
+        req = urllib.request.Request(url, data=data)
+        urllib.request.urlopen(req)
+    except Exception as e:
+        print("Telegram API Error:", e)
+
+
+# --- ২. মোবাইল নম্বর মাস্ক এবং র্যান্ডম ডাটা জেনারেটর ---
+def generate_fake_phone():
+    prefixes = ['017', '019', '018', '015', '016', '013', '014']
+    prefix = random.choice(prefixes)
+    suffix = random.randint(100, 999)
+    return f"{prefix}*****{suffix}"
+
+
+# --- ৩. প্রতি মিনিটে ট্রাফিক জেনারেশন এবং সাকসেস পোস্ট ক্রন রাউট ---
+@app.route('/api/cron/simulate-traffic', methods=['GET'])
+def simulate_traffic_cron():
+    # সিকিউরিটি কী চেক (যাতে অন্য কেউ এই লিংকে বারবার ব্রাউজ করে স্প্যাম না করতে পারে)
+    cron_key = request.args.get('key')
+    if cron_key != os.environ.get("CRON_SECRET_KEY", "secure_cron_key_123"):
+        return jsonify({"status": "error", "message": "Unauthorized"}), 401
+        
+    now = datetime.datetime.now(datetime.timezone.utc)
+    
+    # ক. ৩-৪ ঘণ্টা পূর্বে পেন্ডিং থাকা ফেক ট্রানজেকশনগুলো খুঁজে বের করে SUCCESS করা
+    due_success_tx = supabase.table("simulated_transactions") \
+        .select("*") \
+        .eq("status", "Pending") \
+        .lte("scheduled_success_at", now.isoformat()) \
+        .execute().data
+        
+    for tx in due_success_tx:
+        # স্ট্যাটাস Success আপডেট করা
+        supabase.table("simulated_transactions").update({"status": "Success"}).eq("id", tx['id']).execute()
+        
+        # টেলিগ্রামে Success মেসেজ পোস্ট করা
+        success_msg = f"""<b>✅ {tx['type'].upper()} SUCCESSFUL</b>
+────────────────────
+<b>User UID:</b> <code>#{tx['uid']}</code>
+<b>Amount:</b> ৳ {tx['amount']}
+<b>Gateway:</b> {tx['method']}
+<b>Number:</b> {tx['phone_number']}
+<b>Status:</b> 🟢 Completed (Success)
+────────────────────
+<i>Payout processed via Automated Node!</i>"""
+        send_telegram_notification(success_msg)
+
+    # খ. প্রতি মিনিটে ৭ থেকে ৮টি নতুন ফেক PENDING ট্রানজেকশন তৈরি করা
+    num_of_posts = random.randint(7, 8)
+    for _ in range(num_of_posts):
+        fake_uid = random.randint(1000, 6891) # ৬৮৯২ আইডির নিচের পুরনো মেম্বারদের শো করার জন্য
+        fake_phone = generate_fake_phone()
+        tx_type = random.choice(['Deposit', 'Withdraw'])
+        method = random.choice(['bKash', 'Nagad'])
+        
+        # উইথড্র ৩00-৫000 এবং ডিপোজিট ৫০০-১০০০০ টাকা র্যান্ডমলি নির্ধারণ
+        if tx_type == 'Withdraw':
+            amount = float(random.choice([300, 500, 750, 1000, 1250, 1500, 2000, 3000]))
+        else:
+            amount = float(random.choice([500, 1000, 2000, 3500, 5000, 10000]))
+            
+        # ৩ থেকে ৪ ঘণ্টার মধ্যে র্যান্ডম সাকসেস টাইম নির্ধারণ
+        random_delay_minutes = random.randint(180, 240) # ৩ থেকে ৪ ঘণ্টা
+        scheduled_success = now + datetime.timedelta(minutes=random_delay_minutes)
+        
+        # ডাটাবেজে ফেক রেকর্ড সেভ করা
+        supabase.table("simulated_transactions").insert({
+            "uid": fake_uid,
+            "phone_number": fake_phone,
+            "amount": amount,
+            "method": method,
+            "type": tx_type,
+            "status": "Pending",
+            "scheduled_payout_at": None, # (কলাম নাম অনুযায়ী সেফটি)
+            "scheduled_success_at": scheduled_success.isoformat()
+        }).execute()
+        
+        # টেলিগ্রামে Pending মেসেজ পোস্ট করা
+        pending_msg = f"""<b>🚨 NEW {tx_type.upper()} REQUEST</b>
+────────────────────
+<b>User UID:</b> <code>#{fake_uid}</code>
+<b>Amount:</b> ৳ {amount}
+<b>Gateway:</b> {method}
+<b>Number:</b> {fake_phone}
+<b>Status:</b> 🟡 Pending (Processing)
+────────────────────
+<i>Request queued on Mining Server...</i>"""
+        send_telegram_notification(pending_msg)
+        
+    return jsonify({"status": "completed", "posts_created": num_of_posts}), 200
+    
 # ইমেইল মাস্ক করার ফিল্টার (যেমন: ab***c@domain.com)
 def mask_email(email):
     try:
@@ -27,6 +139,7 @@ def mask_email(email):
         return "u***@email.com"
 
 app.jinja_env.filters['mask_email'] = mask_email
+
 
 
 # ------------------ এডমিন প্যানেল রাউটসমূহ ------------------
