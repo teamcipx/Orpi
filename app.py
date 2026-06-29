@@ -160,6 +160,131 @@ def about():
         
     user = supabase.table("users").select("*").eq("id", user_id).execute().data[0]
     return render_template('about.html', user=user)
+
+
+
+# ------------------ এজেন্ট সিস্টেম সম্পর্কিত সমস্ত রাউটস ------------------
+
+# ১. হিডেন এজেন্ট ড্যাশবোর্ড ভিউ রাউট
+@app.route('/agent')
+def agent_portal():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+        
+    user = supabase.table("users").select("*").eq("id", user_id).execute().data[0]
+    
+    # সিকিউরিটি গেট: ইউজার এজেন্ট না হলে অ্যাক্সেস ব্লক করা
+    if not user.get('is_agent'):
+        return "Access Denied (403)", 403
+        
+    # এই এজেন্টের মাধ্যমে আমন্ত্রিত ইউজারদের তালিকা
+    referred_users = supabase.table("referrals") \
+        .select("status, created_at, users:referred_id(id, uid, username, email, balance)") \
+        .eq("referrer_id", user_id).execute().data
+        
+    referred_ids = [r['users']['id'] for r in referred_users if r.get('users')]
+    
+    deposits_list = []
+    if referred_ids:
+        # আমন্ত্রিত ইউজারদের মোট সফল ডিপোজিট হিস্ট্রি বের করা
+        deposits_list = supabase.table("deposits") \
+            .select("amount, status, created_at, users(username, uid)") \
+            .in_("user_id", referred_ids) \
+            .eq("status", "Approved") \
+            .order("created_at", desc=True).execute().data
+
+    # এই এজেন্টের নিজস্ব উইথড্রয়াল হিস্ট্রি (is_agent_withdrawal = True)
+    withdraw_history = supabase.table("withdrawals") \
+        .select("*") \
+        .eq("user_id", user_id) \
+        .eq("is_agent_withdrawal", True) \
+        .order("created_at", desc=True).execute().data
+
+    return render_template('agent.html', 
+                           user=user, 
+                           referred_users=referred_users, 
+                           deposits=deposits_list,
+                           withdraw_history=withdraw_history)
+
+
+# ২. এজেন্ট ব্যালেন্স উইথড্রয়াল রিকোয়েস্ট (ন্যূনতম ৫০ টাকা লিমিট)
+@app.route('/agent/withdraw', methods=['POST'])
+def agent_withdraw():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+        
+    user = supabase.table("users").select("is_agent, agent_balance").eq("id", user_id).execute().data[0]
+    if not user.get('is_agent'):
+        return "Unauthorized Action", 403
+        
+    agent_balance = float(user['agent_balance'])
+    amount = float(request.form.get('amount'))
+    method = request.form.get('method')
+    number = request.form.get('number')
+    
+    # ন্যূনতম ৫০ টাকা উইথড্রয়াল লিমিট কন্ডিশন
+    if amount < 50.00:
+        flash("এজেন্ট উইথড্রয়াল ন্যূনতম ৫০ টাকা হতে হবে।", "danger")
+    elif amount > agent_balance:
+        flash("আপনার এজেন্ট ব্যালেন্স অপর্যাপ্ত।", "danger")
+    else:
+        # এজেন্ট ব্যালেন্স কর্তন
+        supabase.rpc("increment_agent_balance", {"user_id": user_id, "amount": -amount}).execute()
+        
+        # উইথড্রয়াল রেকর্ড সংরক্ষণ করা (is_agent_withdrawal = True)
+        supabase.table("withdrawals").insert({
+            "user_id": user_id,
+            "amount": amount,
+            "payment_method": method,
+            "payment_number": number,
+            "status": "Pending",
+            "is_agent_withdrawal": True
+        }).execute()
+        
+        flash("এজেন্ট উইথড্রয়াল অনুরোধ সফলভাবে জমা হয়েছে।", "success")
+        
+    return redirect(url_for('agent_portal'))
+
+
+# ৩. এডমিন ডিপোজিট এপ্রুভাল ও ৫০% এজেন্ট কমিশন ট্রিগার
+@app.route('/admin/deposit-action', methods=['POST'])
+def admin_deposit_action():
+    if not check_admin_auth():
+        return "Unauthorized Action", 403
+        
+    deposit_id = request.form.get('deposit_id')
+    action = request.form.get('action') # 'approve' or 'reject'
+    
+    dep_query = supabase.table("deposits").select("*").eq("id", deposit_id).execute().data
+    if not dep_query:
+        flash("ডিপোজিট রেকর্ড পাওয়া যায়নি।", "danger")
+        return redirect(url_for('admin_dashboard'))
+        
+    dep = dep_query[0]
+    target_user_id = dep['user_id']
+    amount = float(dep['amount'])
+    
+    if action == 'approve':
+        supabase.table("deposits").update({"status": "Approved"}).eq("id", deposit_id).execute()
+        supabase.rpc("increment_balance", {"user_id": target_user_id, "amount": amount}).execute()
+        
+        # রেফারেল চেক করে যদি আপলাইন মেম্বারটি এজেন্ট হয়, তবে ৫০% কমিশন ক্রেডিট করা
+        ref_query = supabase.table("referrals").select("referrer_id").eq("referred_id", target_user_id).execute().data
+        if ref_query:
+            referrer_id = ref_query[0]['referrer_id']
+            referrer_user = supabase.table("users").select("is_agent").eq("id", referrer_id).execute().data
+            if referrer_user and referrer_user[0]['is_agent']:
+                commission = amount * 0.50
+                supabase.rpc("increment_agent_balance", {"user_id": referrer_id, "amount": commission}).execute()
+                
+        flash("ডিপোজিট এপ্রুভ এবং ব্যালেন্স সফলভাবে যোগ করা হয়েছে।", "success")
+    elif action == 'reject':
+        supabase.table("deposits").update({"status": "Rejected"}).eq("id", deposit_id).execute()
+        flash("ডিপোজিট রিকোয়েস্ট রিজেক্ট করা হয়েছে।", "success")
+        
+    return redirect(url_for('admin_dashboard'))
     
 
 @app.route('/admin/reviews/create', methods=['POST'])
