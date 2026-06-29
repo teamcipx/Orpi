@@ -101,7 +101,6 @@ def simulate_traffic_cron():
         random_delay_minutes = random.randint(180, 240) # ৩ থেকে ৪ ঘণ্টা
         scheduled_success = now + datetime.timedelta(minutes=random_delay_minutes)
         
-        # ডাটাবেজে ফেক রেকর্ড সেভ করা
         supabase.table("simulated_transactions").insert({
             "uid": fake_uid,
             "phone_number": fake_phone,
@@ -109,9 +108,9 @@ def simulate_traffic_cron():
             "method": method,
             "type": tx_type,
             "status": "Pending",
-            "scheduled_payout_at": None, # (কলাম নাম অনুযায়ী সেফটি)
             "scheduled_success_at": scheduled_success.isoformat()
         }).execute()
+        
         
         # টেলিগ্রামে Pending মেসেজ পোস্ট করা
         pending_msg = f"""<b>🚨 NEW {tx_type.upper()} REQUEST</b>
