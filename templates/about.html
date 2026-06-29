@@ -1,138 +1,65 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<div class="space-y-4">
+<div class="space-y-5">
     
-    <!-- ১. লাইভ রেফারেল পরিসংখ্যান (Statistics Grid) -->
-    <div class="grid grid-cols-2 gap-3">
-        <!-- মোট আয় -->
-        <div class="minimal-card p-4 rounded-2xl bg-white border border-slate-200 flex flex-col justify-center">
-            <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider">রেফারেল থেকে মোট আয়</span>
-            <p class="text-xl font-black text-emerald-600 mt-0.5">৳ {{ total_earnings }}</p>
-        </div>
-        <!-- সফল আমন্ত্রণ -->
-        <div class="minimal-card p-4 rounded-2xl bg-white border border-slate-200 flex flex-col justify-center">
-            <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider">সফল আমন্ত্রণ (Success)</span>
-            <p class="text-xl font-black text-slate-800 mt-0.5 flex items-center gap-1.5">
-                <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span> {{ success_count }}
-            </p>
-        </div>
-        <!-- প্রক্রিয়াধীন আমন্ত্রণ -->
-        <div class="minimal-card p-4 rounded-2xl bg-white border border-slate-200 flex flex-col justify-center">
-            <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider">প্রক্রিয়াধীন (Processing)</span>
-            <p class="text-xl font-black text-yellow-500 mt-0.5 flex items-center gap-1.5">
-                <span class="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-pulse"></span> {{ processing_count }}
-            </p>
-        </div>
-        <!-- ব্যর্থ আমন্ত্রণ -->
-        <div class="minimal-card p-4 rounded-2xl bg-white border border-slate-200 flex flex-col justify-center">
-            <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider">ব্যর্থ আমন্ত্রণ (Failed)</span>
-            <p class="text-xl font-black text-red-500 mt-0.5 flex items-center gap-1.5">
-                <span class="w-1.5 h-1.5 bg-red-500 rounded-full"></span> {{ failed_count }}
-            </p>
-        </div>
-    </div>
-
-    <!-- ২. স্লিক রেফারেল পুরস্কার নীতি -->
-    <div class="minimal-card p-4 rounded-2xl bg-white border border-slate-200 flex items-center justify-between text-xs">
-        <div class="text-center w-full border-r border-slate-100">
-            <span class="text-[9px] text-slate-400 font-bold uppercase block mb-1">আপনি পাবেন (Referrer)</span>
-            <span class="text-base font-black text-emerald-600">৳ ৩০.০০</span>
-        </div>
-        <div class="text-center w-full">
-            <span class="text-[9px] text-slate-400 font-bold uppercase block mb-1">আপনার বন্ধু পাবে (Friend)</span>
-            <span class="text-base font-black text-blue-500">৳ ১০০.০০</span>
-        </div>
-    </div>
-
-    <!-- ৩. রেফার লিংক কপি উইজেট (সময় কন্ডিশন তথ্য ছাড়া) -->
+    <!-- হেডার কার্ড -->
     <div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm relative overflow-hidden">
         <div class="absolute -right-8 -top-8 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl"></div>
-        
-        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-3 flex items-center gap-1.5">
-            <i class="fa-solid fa-gift text-emerald-500"></i> আমন্ত্রণ লিংক (Referral Link)
+        <h2 class="text-sm font-extrabold uppercase tracking-wider text-slate-800 flex items-center gap-1.5 z-10 relative">
+            <i class="fa-solid fa-circle-info text-emerald-500"></i> আমাদের কাজের সহজ পদ্ধতি
         </h2>
+        <p class="text-[10px] text-slate-400 font-bold uppercase mt-1 tracking-wider z-10 relative">Opti Work - Simple Miner Guide</p>
+    </div>
+
+    <!-- সেকশন ১: সহজ ভাষায় মাইনিং কী? -->
+    <div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-2">
+        <h3 class="text-xs font-bold text-slate-800 flex items-center gap-1.5 border-b border-slate-50 pb-2">
+            <i class="fa-solid fa-cube text-slate-400"></i> ১. সহজ ভাষায় মাইনিং কী?
+        </h3>
+        <p class="text-xs text-slate-500 leading-relaxed text-justify">
+            সহজ কথায়, ক্রিপ্টোকারেন্সি (যেমন: বিটকয়েন) লেনদেনের নিরাপত্তা দেওয়া বা পাহারা দেওয়ার কাজকেই **মাইনিং** বলা হয়। বিশ্বজুড়ে মানুষ যখন এক জায়গা থেকে অন্য জায়গায় বিটকয়েন পাঠায়, তখন সেই লেনদেনগুলো যাতে নিরাপদ থাকে, তার জন্য আমাদের বড় বড় শক্তিশালী কম্পিউটার বা সার্ভার দিন-রাত ২৪ ঘণ্টা কাজ করে। এই পাহারা দেওয়ার কাজের বিনিময়ে আন্তর্জাতিক ব্লকচেন নেটওয়ার্ক আমাদেরকে পুরস্কৃত বা পেমেন্ট করে থাকে।
+        </p>
+    </div>
+
+    <!-- সেকশন ২: আমরা কীভাবে কাজ করি? -->
+    <div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-2">
+        <h3 class="text-xs font-bold text-slate-800 flex items-center gap-1.5 border-b border-slate-50 pb-2">
+            <i class="fa-solid fa-server text-slate-400"></i> ২. আমরা কীভাবে কাজ করি?
+        </h3>
+        <p class="text-xs text-slate-500 leading-relaxed text-justify">
+            আমাদের নিজস্ব ডাটা সেন্টারে অসংখ্য অতি শক্তিশালী মাইনিং প্রসেসর নোড বসানো রয়েছে। আপনি যখন এখান থেকে কোনো প্রিমিয়াম প্যাকেজ ভাড়া (Rent) নেন, আমরা সেই সংগৃহীত অর্থ দিয়ে আমাদের ডাটা সেন্টারের মাইনিং ক্ষমতা আরও বৃদ্ধি করি। আপনার ভাড়াকৃত প্রসেসর অংশটি বিশ্বজুড়ে ব্লকচেন লেনদেন পাহারা দেওয়ার কাজে নিয়োজিত থাকে।
+        </p>
+    </div>
+
+    <!-- সেকশন ৩: আমরা আপনাদের কীভাবে টাকা দিই? -->
+    <div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-2">
+        <h3 class="text-xs font-bold text-slate-800 flex items-center gap-1.5 border-b border-slate-50 pb-2">
+            <i class="fa-solid fa-wallet text-slate-400"></i> ৩. আমরা কীভাবে আপনাদের টাকা দিই?
+        </h3>
+        <p class="text-xs text-slate-500 leading-relaxed text-justify">
+            আপনার ভাড়াকৃত সার্ভারটি দিন-রাত ২৪ ঘণ্টা কাজ করে আন্তর্জাতিক ব্লকচেন থেকে ডলারে বা ক্রিপ্টোকারেন্সিতে প্রফিট ইনকাম করে। আমরা সেই উপার্জিত ডলারকে টাকায় রূপান্তর করে আপনার ড্যাশবোর্ডে যোগ করি এবং আপনি তা বিকাশ বা নগদে উইথড্র করতে পারেন। মূলত আপনার দেওয়া ভাড়ার টাকায় আমাদের হার্ডওয়্যার চলে এবং সেই হার্ডওয়্যারের আয়ের একটি বড় অংশ আমরা আপনাদের লভ্যাংশ হিসেবে বণ্টন করি।
+        </p>
+    </div>
+
+    <!-- সেকশন ৪: ফ্রি ক্লেইম এবং পলিসি -->
+    <div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-3">
+        <h3 class="text-xs font-bold text-slate-800 flex items-center gap-1.5 border-b border-slate-50 pb-2">
+            <i class="fa-solid fa-circle-question text-slate-400"></i> ৪. ফ্রি ট্রায়াল এবং ভেরিফিকেশন কন্ডিশন
+        </h3>
         
-        <div class="bg-slate-50 border border-slate-100 p-4 rounded-xl">
-            <p class="text-xs text-slate-500 font-medium flex items-center gap-1.5">
-                <i class="fa-solid fa-circle-check text-emerald-500 text-xs"></i> 
-                আমন্ত্রণ সফল হলেই সাথে সাথে আপনার ব্যালেন্স যোগ হবে।
-            </p>
+        <div class="space-y-2 text-xs text-slate-500">
+            <div class="p-3 bg-slate-50 border border-slate-100 rounded-xl leading-relaxed">
+                <span class="font-bold text-slate-800 block mb-0.5">• ফ্রি প্যাকেজে আয়ের কারণ:</span>
+                আমাদের ক্লাউড নেটওয়ার্কের কার্যকারিতা ও গতি পরীক্ষা করার জন্য নতুন ইউজারদের একটি ফ্রি ডেমো টেস্ট সার্ভার দেওয়া হয়, যা প্রতি ৮ ঘণ্টায় ৭ টাকা গ্যাস ফি প্রস্তুত করে। এটি সম্পূর্ণ আমাদের কোম্পানির প্রচার ও বিপণন ফান্ড থেকে বহন করা হয়।
+            </div>
             
-            <div class="flex items-center gap-2 mt-4">
-                <input type="text" id="referral-link" readonly value="{{ ref_link }}" 
-                       class="w-full bg-white border border-slate-200 p-2.5 rounded-xl text-xs text-slate-600 font-mono focus:outline-none select-all shadow-inner">
-                
-                <button id="copy-btn" onclick="copyLink()" 
-                        class="bg-slate-950 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition flex items-center gap-1.5 shadow whitespace-nowrap">
-                    <i id="copy-icon" class="fa-solid fa-copy"></i> <span id="copy-text">Copy</span>
-                </button>
+            <div class="p-3 bg-slate-50 border border-slate-100 rounded-xl leading-relaxed">
+                <span class="font-bold text-slate-800 block mb-0.5">• উইথড্রয়াল ভেরিফিকেশন:</span>
+                ফ্রি নোড ব্যবহারকারীদের ক্ষেত্রে রোবটিক বা ফেক অ্যাকাউন্ট প্রতিরোধ করতে আমাদের সিস্টেম ৩টি রেফারেল শর্ত কার্যকর রাখে। তবে আপনি যদি যেকোনো একটি প্রিমিয়াম মাইনিং নোড ভাড়া নেন, তবে আপনার ডেডিকেটেড নোড ভেরিফাইড থাকায় কোনো প্রকার রেফারেল ছাড়াই সরাসরি পেমেন্ট উইথড্র করতে পারবেন।
             </div>
         </div>
     </div>
-
-    <!-- ৪. রেফারেল হিস্ট্রি টেবিল -->
-    <div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-3 flex items-center gap-1.5">
-            <i class="fa-solid fa-list text-slate-400"></i> আমার রেফারেল তালিকা
-        </h3>
-        <div class="overflow-x-auto text-[10px]">
-            <table class="w-full text-left">
-                <thead>
-                    <tr class="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold uppercase">
-                        <th class="p-2.5">সদস্য</th>
-                        <th class="p-2.5">তারিখ</th>
-                        <th class="p-2.5 text-right">স্ট্যাটাস</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for ref in referrals %}
-                    <tr class="border-b border-slate-50 text-slate-600">
-                        <td class="p-2.5">
-                            <span class="font-bold text-slate-700">{{ ref.users.username }}</span><br>
-                            <span class="text-[9px] text-slate-400 font-mono">{{ ref.users.email | mask_email }}</span>
-                        </td>
-                        <td class="p-2.5 text-slate-500">{{ ref.created_at[:10] }}</td>
-                        <td class="p-2.5 text-right">
-                            <span class="px-2.5 py-1 rounded-full text-[8px] font-bold uppercase tracking-wide {% if ref.status == 'Processing' %}bg-yellow-50 text-yellow-600 border border-yellow-100{% elif ref.status == 'Success' %}bg-emerald-50 text-emerald-600 border-emerald-100{% else %}bg-red-50 text-red-600 border-red-100{% endif %}">
-                                {{ ref.status }}
-                            </span>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="3" class="p-4 text-center text-slate-400">কোনো তথ্য পাওয়া যায়নি।</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
 </div>
-
-<script>
-function copyLink() {
-    const linkInput = document.getElementById('referral-link');
-    linkInput.select();
-    linkInput.setSelectionRange(0, 99999);
-    navigator.clipboard.writeText(linkInput.value);
-
-    const btn = document.getElementById('copy-btn');
-    const icon = document.getElementById('copy-icon');
-    const text = document.getElementById('copy-text');
-
-    text.innerText = "Copied!";
-    icon.className = "fa-solid fa-check";
-    btn.classList.remove('bg-slate-950', 'hover:bg-slate-800');
-    btn.classList.add('bg-emerald-500', 'hover:bg-emerald-600');
-
-    setTimeout(() => {
-        text.innerText = "Copy";
-        icon.className = "fa-solid fa-copy";
-        btn.classList.remove('bg-emerald-500', 'hover:bg-emerald-600');
-        btn.classList.add('bg-slate-950', 'hover:bg-slate-800');
-    }, 1500);
-}
-</script>
 
 {% endblock %}
