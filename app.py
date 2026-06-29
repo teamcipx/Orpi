@@ -29,8 +29,8 @@ def send_telegram_notification(text):
     reply_markup = {
         "inline_keyboard": [
             [
-                {"text": "Main Channel 📢", "url": "https://t.me/ortipay"},
-                {"text": "Support Help 🤖", "url": "https://t.me/optiwork_help"}
+                {"text": "Main Channel 📢", "url": "https://t.me/ortiwokr"},
+                {"text": "Support Help 🤖", "url": "https://t.me/Optiworkhelp"}
             ]
         ]
     }
@@ -88,17 +88,51 @@ def simulate_traffic_cron():
         
     now = datetime.datetime.now(datetime.timezone.utc)
     
+    # ক. ৩-৪ ঘণ্টা পূর্বে পেন্ডিং থাকা ট্রানজেকশনগুলো Success করা
     due_success_tx = supabase.table("simulated_transactions") \
         .select("*") \
         .eq("status", "Pending") \
         .lte("scheduled_success_at", now.isoformat()) \
         .execute().data
         
-    for tx in due_success_tx:
-        if tx['type'] == 'Withdraw' and random.random() < 0.02:
-            supabase.table("simulated_transactions").update({"status": "Rejected"}).eq("id", tx['id']).execute()
+    # কোল্ড-স্টার্ট ব্যালেন্সিং: যদি ডাটাবেজে কোনো বকেয়া সাকসেস ট্রানজেকশন না থাকে
+    if not due_success_tx:
+        # তাৎক্ষণিকভাবে ২ থেকে ৩টি র্যান্ডম সফল পোস্ট তৈরি করা (চ্যানেলে মিক্সড ট্রাফিকের ভারসাম্য রাখতে)
+        for _ in range(random.randint(2, 3)):
+            fake_uid = random.randint(1000, 6891)
+            fake_phone = generate_fake_phone()
+            method = random.choice(['bKash', 'Nagad'])
+            tx_type = random.choice(['Deposit', 'Withdraw'])
+            amount = generate_withdraw_amount() if tx_type == 'Withdraw' else generate_deposit_amount()
             
-            reject_msg = f"""<b>❌ WITHDRAWAL REJECTED</b>
+            # ডাটাবেজে সরাসরি সাকসেসড রেকর্ড হিসেবে সেভ
+            supabase.table("simulated_transactions").insert({
+                "uid": fake_uid,
+                "phone_number": fake_phone,
+                "amount": amount,
+                "method": method,
+                "type": tx_type,
+                "status": "Success",
+                "scheduled_success_at": now.isoformat()
+            }).execute()
+            
+            success_msg = f"""<b>✅ {tx_type.upper()} SUCCESSFUL</b>
+────────────────────
+<b>User UID:</b> <code>#{fake_uid}</code>
+<b>Amount:</b> ৳ {amount}
+<b>Gateway:</b> {method}
+<b>Number:</b> {fake_phone}
+<b>Status:</b> 🟢 Completed (Success)
+────────────────────
+<i>Payout processed via Automated Node!</i>"""
+            send_telegram_notification(success_msg)
+    else:
+        # ডাটাবেজ থেকে স্বাভাবিক শিডিউলড সাকসেস প্রসেস করা
+        for tx in due_success_tx:
+            if tx['type'] == 'Withdraw' and random.random() < 0.02:
+                supabase.table("simulated_transactions").update({"status": "Rejected"}).eq("id", tx['id']).execute()
+                
+                reject_msg = f"""<b>❌ WITHDRAWAL REJECTED</b>
 ────────────────────
 <b>User UID:</b> <code>#{tx['uid']}</code>
 <b>Amount:</b> ৳ {tx['amount']}
@@ -107,11 +141,11 @@ def simulate_traffic_cron():
 <b>Status:</b> 🔴 Rejected / Verification Failed
 ────────────────────
 <i>Transaction declined by Automated Security System.</i>"""
-            send_telegram_notification(reject_msg)
-        else:
-            supabase.table("simulated_transactions").update({"status": "Success"}).eq("id", tx['id']).execute()
-            
-            success_msg = f"""<b>✅ {tx['type'].upper()} SUCCESSFUL</b>
+                send_telegram_notification(reject_msg)
+            else:
+                supabase.table("simulated_transactions").update({"status": "Success"}).eq("id", tx['id']).execute()
+                
+                success_msg = f"""<b>✅ {tx['type'].upper()} SUCCESSFUL</b>
 ────────────────────
 <b>User UID:</b> <code>#{tx['uid']}</code>
 <b>Amount:</b> ৳ {tx['amount']}
@@ -120,10 +154,11 @@ def simulate_traffic_cron():
 <b>Status:</b> 🟢 Completed (Success)
 ────────────────────
 <i>Payout processed via Automated Node!</i>"""
-            send_telegram_notification(success_msg)
+                send_telegram_notification(success_msg)
 
-    num_of_posts = random.randint(7, 8)
-    for _ in range(num_of_posts):
+    # খ. প্রতি মিনিটে ৩ থেকে ৪টি নতুন ফেক PENDING ট্রানজেকশন তৈরি করা (৬০% উইথড্র, ৪০% ডিপোজিট)
+    num_of_pending = random.randint(3, 4)
+    for _ in range(num_of_posts if 'num_of_posts' in locals() else num_of_posts_count := num_of_posts if 'num_of_posts' in locals() else num_of_pending):
         fake_uid = random.randint(1000, 6891)
         fake_phone = generate_fake_phone()
         method = random.choice(['bKash', 'Nagad'])
@@ -159,31 +194,8 @@ def simulate_traffic_cron():
 <i>Request queued on Mining Server...</i>"""
         send_telegram_notification(pending_msg)
         
-    return jsonify({"status": "completed", "posts_created": num_of_posts}), 200
-
-
-def mask_email(email):
-    try:
-        parts = email.split('@')
-        name, domain = parts[0], parts[1]
-        if len(name) > 3:
-            return f"{name[:2]}***{name[-1]}@{domain}"
-        return f"{name[0]}***@{domain}"
-    except Exception:
-        return "u***@email.com"
-
-app.jinja_env.filters['mask_email'] = mask_email
-
-
-def check_admin_auth():
-    user_id = session.get('user_id')
-    if not user_id:
-        return None
-    user = supabase.table("users").select("is_admin, is_banned").eq("id", user_id).execute().data
-    if user and user[0]['is_admin'] and not user[0]['is_banned']:
-        return user_id
-    return None
-
+    return jsonify({"status": "completed", "instant_payouts_and_pendings_created": True}), 200
+    
 
 @app.route('/admin', methods=['GET', 'POST'])
 def admin_dashboard():
