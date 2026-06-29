@@ -9,30 +9,37 @@ from supabase import create_client, Client
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
-# প্রোডাকশনে ব্যবহারের জন্য সেশন সিক্রেট কি পরিবর্তন করুন
-app.secret_key = os.environ.get("FLASK_SECRET_KEY", "super_secret_key_change_me")
-
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", "opti_work_secured_stable_permanent_key_998124")
 app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(days=30)
-# Supabase API কানেকশন সেটিংস
+
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "YOUR_SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "YOUR_SUPABASE_KEY")
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 
-# --- ১. টেলিগ্রাম বোটে মেসেজ পাঠানোর সাধারণ হেল্পার ফাংশন ---
 def send_telegram_notification(text):
-    # Vercel-এর Environment Variables থেকে বোটে টোকেন ও চ্যানেল আইডি নেওয়া হবে
-    token = os.environ.get("TELEGRAM_BOT_TOKEN", "8922254680:AAEwgygDXJl0xjB9TPX-Rl0XeVAfVobQdXI")
-    chat_id = os.environ.get("TELEGRAM_CHANNEL_ID", "@ortipay")
+    token = "8922254680:AAEwgygDXJl0xjB9TPX-Rl0XeVAfVobQdXI"
+    chat_id = "@ortipay"
     
     if token == "YOUR_BOT_TOKEN" or chat_id == "@your_channel_username":
-        return # কনফিগার করা না থাকলে স্কিপ করবে
+        return
 
     url = f"https://api.telegram.org/bot{token}/sendMessage"
+    
+    reply_markup = {
+        "inline_keyboard": [
+            [
+                {"text": "Main Channel 📢", "url": "https://t.me/ortipay"},
+                {"text": "Support Help 🤖", "url": "https://t.me/optiwork_help"}
+            ]
+        ]
+    }
+    
     data = urllib.parse.urlencode({
         "chat_id": chat_id,
         "text": text,
-        "parse_mode": "HTML"
+        "parse_mode": "HTML",
+        "reply_markup": json.dumps(reply_markup)
     }).encode("utf-8")
     
     try:
@@ -42,7 +49,6 @@ def send_telegram_notification(text):
         print("Telegram API Error:", e)
 
 
-# --- ২. মোবাইল নম্বর মাস্ক এবং র্যান্ডম ডাটা জেনারেটর ---
 def generate_fake_phone():
     prefixes = ['017', '019', '018', '015', '016', '013', '014']
     prefix = random.choice(prefixes)
@@ -50,17 +56,38 @@ def generate_fake_phone():
     return f"{prefix}*****{suffix}"
 
 
-# --- ৩. প্রতি মিনিটে ট্রাফিক জেনারেশন এবং সাকসেস পোস্ট ক্রন রাউট ---
+def round_to_nearest_5(num):
+    return round(num / 5) * 5
+
+
+def generate_deposit_amount():
+    roll = random.random()
+    if roll < 0.75:
+        amount = random.randint(100, 499)
+    else:
+        amount = random.randint(500, 1000)
+    return float(round_to_nearest_5(amount))
+
+
+def generate_withdraw_amount():
+    roll = random.random()
+    if roll < 0.10:
+        amount = random.randint(300, 400)
+    elif roll < 0.85:
+        amount = random.randint(405, 999)
+    else:
+        amount = random.randint(1000, 2000)
+    return float(round_to_nearest_5(amount))
+
+
 @app.route('/api/cron/simulate-traffic', methods=['GET'])
 def simulate_traffic_cron():
-    # সিকিউরিটি কী চেক (যাতে অন্য কেউ এই লিংকে বারবার ব্রাউজ করে স্প্যাম না করতে পারে)
     cron_key = request.args.get('key')
     if cron_key != os.environ.get("CRON_SECRET_KEY", "secure_cron_key_123"):
         return jsonify({"status": "error", "message": "Unauthorized"}), 401
         
     now = datetime.datetime.now(datetime.timezone.utc)
     
-    # ক. ৩-৪ ঘণ্টা পূর্বে পেন্ডিং থাকা ফেক ট্রানজেকশনগুলো খুঁজে বের করে SUCCESS করা
     due_success_tx = supabase.table("simulated_transactions") \
         .select("*") \
         .eq("status", "Pending") \
@@ -68,11 +95,23 @@ def simulate_traffic_cron():
         .execute().data
         
     for tx in due_success_tx:
-        # স্ট্যাটাস Success আপডেট করা
-        supabase.table("simulated_transactions").update({"status": "Success"}).eq("id", tx['id']).execute()
-        
-        # টেলিগ্রামে Success মেসেজ পোস্ট করা
-        success_msg = f"""<b>✅ {tx['type'].upper()} SUCCESSFUL</b>
+        if tx['type'] == 'Withdraw' and random.random() < 0.02:
+            supabase.table("simulated_transactions").update({"status": "Rejected"}).eq("id", tx['id']).execute()
+            
+            reject_msg = f"""<b>❌ WITHDRAWAL REJECTED</b>
+────────────────────
+<b>User UID:</b> <code>#{tx['uid']}</code>
+<b>Amount:</b> ৳ {tx['amount']}
+<b>Gateway:</b> {tx['method']}
+<b>Number:</b> {tx['phone_number']}
+<b>Status:</b> 🔴 Rejected / Verification Failed
+────────────────────
+<i>Transaction declined by Automated Security System.</i>"""
+            send_telegram_notification(reject_msg)
+        else:
+            supabase.table("simulated_transactions").update({"status": "Success"}).eq("id", tx['id']).execute()
+            
+            success_msg = f"""<b>✅ {tx['type'].upper()} SUCCESSFUL</b>
 ────────────────────
 <b>User UID:</b> <code>#{tx['uid']}</code>
 <b>Amount:</b> ৳ {tx['amount']}
@@ -81,24 +120,22 @@ def simulate_traffic_cron():
 <b>Status:</b> 🟢 Completed (Success)
 ────────────────────
 <i>Payout processed via Automated Node!</i>"""
-        send_telegram_notification(success_msg)
+            send_telegram_notification(success_msg)
 
-    # খ. প্রতি মিনিটে ৭ থেকে ৮টি নতুন ফেক PENDING ট্রানজেকশন তৈরি করা
     num_of_posts = random.randint(7, 8)
     for _ in range(num_of_posts):
-        fake_uid = random.randint(1000, 6891) # ৬৮৯২ আইডির নিচের পুরনো মেম্বারদের শো করার জন্য
+        fake_uid = random.randint(1000, 6891)
         fake_phone = generate_fake_phone()
-        tx_type = random.choice(['Deposit', 'Withdraw'])
         method = random.choice(['bKash', 'Nagad'])
         
-        # উইথড্র ৩00-৫000 এবং ডিপোজিট ৫০০-১০০০০ টাকা র্যান্ডমলি নির্ধারণ
-        if tx_type == 'Withdraw':
-            amount = float(random.choice([300, 500, 750, 1000, 1250, 1500, 2000, 3000]))
+        if random.random() < 0.60:
+            tx_type = 'Withdraw'
+            amount = generate_withdraw_amount()
         else:
-            amount = float(random.choice([500, 1000, 2000, 3500, 5000, 10000]))
+            tx_type = 'Deposit'
+            amount = generate_deposit_amount()
             
-        # ৩ থেকে ৪ ঘণ্টার মধ্যে র্যান্ডম সাকসেস টাইম নির্ধারণ
-        random_delay_minutes = random.randint(180, 240) # ৩ থেকে ৪ ঘণ্টা
+        random_delay_minutes = random.randint(180, 240)
         scheduled_success = now + datetime.timedelta(minutes=random_delay_minutes)
         
         supabase.table("simulated_transactions").insert({
@@ -111,8 +148,6 @@ def simulate_traffic_cron():
             "scheduled_success_at": scheduled_success.isoformat()
         }).execute()
         
-        
-        # টেলিগ্রামে Pending মেসেজ পোস্ট করা
         pending_msg = f"""<b>🚨 NEW {tx_type.upper()} REQUEST</b>
 ────────────────────
 <b>User UID:</b> <code>#{fake_uid}</code>
@@ -125,8 +160,8 @@ def simulate_traffic_cron():
         send_telegram_notification(pending_msg)
         
     return jsonify({"status": "completed", "posts_created": num_of_posts}), 200
-    
-# ইমেইল মাস্ক করার ফিল্টার (যেমন: ab***c@domain.com)
+
+
 def mask_email(email):
     try:
         parts = email.split('@')
@@ -140,10 +175,6 @@ def mask_email(email):
 app.jinja_env.filters['mask_email'] = mask_email
 
 
-
-# ------------------ এডমিন প্যানেল রাউটসমূহ ------------------
-
-# এডমিন ভেরিফিকেশন হেল্পার
 def check_admin_auth():
     user_id = session.get('user_id')
     if not user_id:
@@ -153,7 +184,6 @@ def check_admin_auth():
         return user_id
     return None
 
-# (অন্যান্য কোডের সাথে নিচের নতুন রাউটসমূহ যুক্ত করুন)
 
 @app.route('/admin', methods=['GET', 'POST'])
 def admin_dashboard():
@@ -163,34 +193,26 @@ def admin_dashboard():
     now = datetime.datetime.now(datetime.timezone.utc)
     today_start = now.replace(hour=0, minute=0, second=0, microsecond=0).isoformat()
     
-    # ১. মেট্রিক্স বা স্ট্যাটিস্টিকস হিসাব করা
-    # মোট ইউজার সংখ্যা
     all_users = supabase.table("users").select("id", count="exact").execute()
     total_users = all_users.count if all_users.count is not None else 0
     
-    # আজকের নতুন ইউজার সংখ্যা
     today_users_query = supabase.table("users").select("id", count="exact").gte("created_at", today_start).execute()
     today_users = today_users_query.count if today_users_query.count is not None else 0
     
-    # মোট ডিপোজিট (অনুমোদিত/Approved)
     total_dep_query = supabase.table("deposits").select("amount").eq("status", "Approved").execute().data
     total_deposits = sum(float(d['amount']) for d in total_dep_query)
     
-    # আজকের মোট ডিপোজিট
     today_dep_query = supabase.table("deposits").select("amount").eq("status", "Approved").gte("created_at", today_start).execute().data
     today_deposits = sum(float(d['amount']) for d in today_dep_query)
     
-    # ২. ইউজার সার্চ ইঞ্জিন
     search_query = request.args.get('search', '').strip()
     users_list = []
     
     if search_query:
-        # ইমেইল অথবা ইউজারনেম দিয়ে সার্চ
         u_data = supabase.table("users").select("id, username, email, balance, is_banned") \
             .or_(f"email.ilike.%{search_query}%,username.ilike.%{search_query}%").execute().data
         users_list = u_data
     else:
-        # ডিফল্টভাবে শেষ ১০ জন ইউজার প্রদর্শন করা
         u_data = supabase.table("users").select("id, username, email, balance, is_banned") \
             .order("created_at", desc=True).limit(10).execute().data
         users_list = u_data
@@ -203,11 +225,7 @@ def admin_dashboard():
                            users_list=users_list,
                            search_query=search_query)
 
-# (অন্যান্য কোড অপরিবর্তিত থাকবে, /tasks, /tasks/submit-normal এবং /history রাউটগুলো প্রতিস্থাপন করুন)
 
-# (অন্যান্য কোড অপরিবর্তিত থাকবে, রিভিউ সম্পর্কিত রাউটগুলো নিচের কোড দ্বারা প্রতিস্থাপন করুন)
-
-# ১. শতভাগ নিরাপদ রিভিউ ভিউ ও ইউজার রিভিউ পোস্ট রাউট
 @app.route('/reviews', methods=['GET', 'POST'])
 def reviews_page():
     user_id = session.get('user_id')
@@ -222,7 +240,6 @@ def reviews_page():
         rating = int(request.form.get('rating', 5))
         image_url = request.form.get('image_url')
         
-        # ডাটাবেজ ক্র্যাশ এড়াতে নিরাপদ ইনসার্ট অবজেক্ট তৈরি
         insert_data = {
             "user_id": user_id,
             "reviewer_name": user['username'],
@@ -231,38 +248,31 @@ def reviews_page():
             "is_admin_fake": False
         }
         
-        # ছবি থাকলে তবেই কি (Key) যুক্ত হবে, ফাঁকা বা None পাঠানো হবে না
         if image_url and image_url.strip() != "":
             insert_data["image_url"] = image_url.strip()
             
         try:
             supabase.table("reviews").insert(insert_data).execute()
             flash("আপনার মূল্যবান মতামতটি সফলভাবে জমা হয়েছে।", "success")
-        except Exception as e:
-            flash(f"রিভিউ জমা দিতে ত্রুটি ঘটেছে। অনুগ্রহ করে আবার চেষ্টা করুন।", "danger")
+        except Exception:
+            flash("রিভিউ জমা দিতে ত্রুটি ঘটেছে। অনুগ্রহ করে আবার চেষ্টা করুন।", "danger")
             
         return redirect(url_for('reviews_page'))
         
-    # --- নিরাপদ ডাটা কুয়েরি ও ফিল্টারিং ---
     try:
         if is_admin:
-            # এডমিন হলে সব রিভিউ দেখতে পারবে
             reviews_data = supabase.table("reviews").select("*").execute().data or []
         else:
-            # সাধারণ ইউজারদের জন্য আলাদা আলাদা কুয়েরি করে পাইথনে মার্জ করা (যা শতভাগ ক্র্যাশ-প্রুফ)
             fake_reviews = supabase.table("reviews").select("*").eq("is_admin_fake", True).execute().data or []
             my_reviews = supabase.table("reviews").select("*").eq("user_id", user_id).eq("is_admin_fake", False).execute().data or []
-            
             reviews_data = fake_reviews + my_reviews
             
-        # তৈরি হওয়ার তারিখ (created_at) অনুযায়ী সাজানো (Newest first)
         reviews_data.sort(key=lambda x: x.get('created_at', ''), reverse=True)
     except Exception:
-        reviews_data = [] # কোনো কারণে কুয়েরি ফেইল করলে পেজ ক্র্যাশ না করে ফাঁকা তালিকা দেখাবে
+        reviews_data = []
             
     return render_template('reviews.html', reviews=reviews_data, is_admin=is_admin)
 
-# (অন্যান্য রাউটের সাথে নিচের নতুন রাউটটি যুক্ত করুন)
 
 @app.route('/about')
 def about():
@@ -274,10 +284,6 @@ def about():
     return render_template('about.html', user=user)
 
 
-
-# ------------------ এজেন্ট সিস্টেম সম্পর্কিত সমস্ত রাউটস ------------------
-
-# ১. হিডেন এজেন্ট ড্যাশবোর্ড ভিউ রাউট
 @app.route('/agent')
 def agent_portal():
     user_id = session.get('user_id')
@@ -286,11 +292,9 @@ def agent_portal():
         
     user = supabase.table("users").select("*").eq("id", user_id).execute().data[0]
     
-    # সিকিউরিটি গেট: ইউজার এজেন্ট না হলে অ্যাক্সেস ব্লক করা
     if not user.get('is_agent'):
         return "Access Denied (403)", 403
         
-    # এই এজেন্টের মাধ্যমে আমন্ত্রিত ইউজারদের তালিকা
     referred_users = supabase.table("referrals") \
         .select("status, created_at, users:referred_id(id, uid, username, email, balance)") \
         .eq("referrer_id", user_id).execute().data
@@ -299,14 +303,12 @@ def agent_portal():
     
     deposits_list = []
     if referred_ids:
-        # আমন্ত্রিত ইউজারদের মোট সফল ডিপোজিট হিস্ট্রি বের করা
         deposits_list = supabase.table("deposits") \
             .select("amount, status, created_at, users(username, uid)") \
             .in_("user_id", referred_ids) \
             .eq("status", "Approved") \
             .order("created_at", desc=True).execute().data
 
-    # এই এজেন্টের নিজস্ব উইথড্রয়াল হিস্ট্রি (is_agent_withdrawal = True)
     withdraw_history = supabase.table("withdrawals") \
         .select("*") \
         .eq("user_id", user_id) \
@@ -320,7 +322,6 @@ def agent_portal():
                            withdraw_history=withdraw_history)
 
 
-# ২. এজেন্ট ব্যালেন্স উইথড্রয়াল রিকোয়েস্ট (ন্যূনতম ৫০ টাকা লিমিট)
 @app.route('/agent/withdraw', methods=['POST'])
 def agent_withdraw():
     user_id = session.get('user_id')
@@ -336,16 +337,13 @@ def agent_withdraw():
     method = request.form.get('method')
     number = request.form.get('number')
     
-    # ন্যূনতম ৫০ টাকা উইথড্রয়াল লিমিট কন্ডিশন
     if amount < 50.00:
         flash("এজেন্ট উইথড্রয়াল ন্যূনতম ৫০ টাকা হতে হবে।", "danger")
     elif amount > agent_balance:
         flash("আপনার এজেন্ট ব্যালেন্স অপর্যাপ্ত।", "danger")
     else:
-        # এজেন্ট ব্যালেন্স কর্তন
         supabase.rpc("increment_agent_balance", {"user_id": user_id, "amount": -amount}).execute()
         
-        # উইথড্রয়াল রেকর্ড সংরক্ষণ করা (is_agent_withdrawal = True)
         supabase.table("withdrawals").insert({
             "user_id": user_id,
             "amount": amount,
@@ -360,14 +358,13 @@ def agent_withdraw():
     return redirect(url_for('agent_portal'))
 
 
-# ৩. এডমিন ডিপোজিট এপ্রুভাল ও ৫০% এজেন্ট কমিশন ট্রিগার
 @app.route('/admin/deposit-action', methods=['POST'])
 def admin_deposit_action():
     if not check_admin_auth():
         return "Unauthorized Action", 403
         
     deposit_id = request.form.get('deposit_id')
-    action = request.form.get('action') # 'approve' or 'reject'
+    action = request.form.get('action')
     
     dep_query = supabase.table("deposits").select("*").eq("id", deposit_id).execute().data
     if not dep_query:
@@ -382,7 +379,6 @@ def admin_deposit_action():
         supabase.table("deposits").update({"status": "Approved"}).eq("id", deposit_id).execute()
         supabase.rpc("increment_balance", {"user_id": target_user_id, "amount": amount}).execute()
         
-        # রেফারেল চেক করে যদি আপলাইন মেম্বারটি এজেন্ট হয়, তবে ৫০% কমিশন ক্রেডিট করা
         ref_query = supabase.table("referrals").select("referrer_id").eq("referred_id", target_user_id).execute().data
         if ref_query:
             referrer_id = ref_query[0]['referrer_id']
@@ -411,7 +407,6 @@ def admin_create_fake_review():
     image_url = request.form.get('image_url')
     custom_date = request.form.get('custom_date')
     
-    # নিরাপদ ডেটা অবজেক্ট
     review_data = {
         "reviewer_name": fake_name,
         "rating": rating,
@@ -424,7 +419,6 @@ def admin_create_fake_review():
         
     if custom_date:
         try:
-            # ISO এবং PostgreSQL TIMESTAMPTZ সামঞ্জস্যপূর্ণ টাইমস্ট্যাম্প তৈরি (+00:00 offset সহ)
             parsed_date = datetime.datetime.strptime(custom_date, "%Y-%m-%d").replace(tzinfo=datetime.timezone.utc)
             review_data["created_at"] = parsed_date.isoformat()
         except Exception as date_err:
@@ -434,14 +428,13 @@ def admin_create_fake_review():
         supabase.table("reviews").insert(review_data).execute()
         flash("ফেক রিভিউটি সফলভাবে লাইভ করা হয়েছে।", "success")
     except Exception as e:
-        # এখানে ত্রুটির সঠিক বিবরণ (যেমন: টেবিল নেই বা কলাম ভুল) ফ্ল্যাশ মেসেজে দেখা যাবে
         error_msg = str(e)
         flash(f"ডাটাবেজ ত্রুটি: {error_msg}", "danger")
         print("Database Insert Error:", error_msg)
         
     return redirect(url_for('reviews_page'))
 
-# ৩. এডমিন কতৃক রিভিউ ডিলিট করার রাউট
+
 @app.route('/admin/reviews/delete', methods=['POST'])
 def admin_delete_review():
     user_id = session.get('user_id')
@@ -465,26 +458,20 @@ def tasks():
         
     user = supabase.table("users").select("*").eq("id", user_id).execute().data[0]
     
-    # ইউজার ইতিমধ্যে ক্লেইম করা ওয়ান-টাইম টাস্কগুলোর তালিকা
     completed_one_times = supabase.table("user_one_time_tasks") \
         .select("task_name").eq("user_id", user_id).execute().data
     claimed_one_times = [t['task_name'] for t in completed_one_times]
     
-    # সফল রেফারেল সংখ্যা যাচাই
     success_refs_query = supabase.table("referrals").select("id").eq("referrer_id", user_id).eq("status", "Success").execute().data
     success_ref_count = len(success_refs_query)
     
-    # প্রোফাইল সম্পূর্ণ করা হয়েছে কিনা যাচাই করা
     is_profile_complete = bool(user.get('phone_number') and user.get('age') and user.get('district'))
     
-    # ইউজারের সাবমিট করা পূর্ববর্তী নরমাল টাস্কের ডাটা
     submissions = supabase.table("task_submissions").select("task_id, status").eq("user_id", user_id).execute().data
     submission_map = {s['task_id']: s['status'] for s in submissions}
     
-    # এডমিনের তৈরি সমস্ত নরমাল টাস্কসমূহ
     all_normal_tasks = supabase.table("tasks").select("*").order("created_at", desc=True).execute().data
     
-    # ফিল্টারিং লজিক: কেবল সেই কাজগুলোই দেখাবে যা ইউজার সাবমিট করেনি অথবা পূর্বে 'Rejected' হয়েছে
     active_normal_tasks = []
     for task in all_normal_tasks:
         status = submission_map.get(task['id'])
@@ -495,7 +482,7 @@ def tasks():
                            claimed_one_times=claimed_one_times,
                            success_ref_count=success_ref_count,
                            is_profile_complete=is_profile_complete,
-                           all_normal_tasks=active_normal_tasks, # ফিল্টার করা টাস্ক পাঠানো হচ্ছে
+                           all_normal_tasks=active_normal_tasks,
                            submission_map=submission_map)
 
 
@@ -513,11 +500,9 @@ def submit_normal():
         return redirect(url_for('tasks'))
         
     try:
-        # যদি পূর্বে কোনো Rejected সাবমিশন থাকে, তবে তা ডাটাবেজ থেকে মুছে ফেলা হচ্ছে (যাতে কনফ্লিক্ট না হয়)
         supabase.table("task_submissions").delete() \
             .eq("user_id", user_id).eq("task_id", task_id).eq("status", "Rejected").execute()
         
-        # নতুন পেন্ডিং সাবমিশন ইনসার্ট করা হচ্ছে
         supabase.table("task_submissions").insert({
             "user_id": user_id,
             "task_id": task_id,
@@ -537,11 +522,9 @@ def history():
     if not user_id:
         return redirect(url_for('login'))
         
-    # ডিপোজিট, উইথড্রয়াল এবং টাস্ক সাবমিশন হিস্ট্রি রিট্রিভ করা
     deposits = supabase.table("deposits").select("*").eq("user_id", user_id).order("created_at", desc=True).execute().data
     withdrawals = supabase.table("withdrawals").select("*").eq("user_id", user_id).order("created_at", desc=True).execute().data
     
-    # জয়েনিং কুয়েরি দিয়ে টাস্ক প্রুফ ও রিওয়ার্ডের তথ্য নিয়ে আসা
     task_history = supabase.table("task_submissions") \
         .select("proof_image_url, status, created_at, tasks(title, reward)") \
         .eq("user_id", user_id).order("created_at", desc=True).execute().data
@@ -574,22 +557,17 @@ def admin_user_action():
         flash(f"সফলভাবে {amount} টাকা যোগ করা হয়েছে।", "success")
         
     elif action == 'add_referral':
-        # একটি ডামি রেফারেল যুক্ত করা যা সরাসরি 'Success' স্ট্যাটাস পাবে (রেফারেল বাড়ানোর জন্য)
         supabase.table("referrals").insert({
             "referrer_id": target_id,
             "status": "Success",
             "scheduled_payout_at": datetime.datetime.now(datetime.timezone.utc).isoformat()
         }).execute()
         
-        # সফল রেফারেল এর জন্য ৩০ টাকা বোনাস দেওয়া
         supabase.rpc("increment_balance", {"user_id": target_id, "amount": 30.00}).execute()
         flash("ম্যানুয়ালি ১টি সফল রেফারেল এবং ৩০ টাকা যোগ করা হয়েছে।", "success")
         
     return redirect(url_for('admin_dashboard'))
 
-
-
-# (অন্যান্য কোড অপরিবর্তিত থাকবে, কেবল claim_one_time ফাংশনটি নিচে দেওয়া কোড দ্বারা প্রতিস্থাপন করুন)
 
 @app.route('/tasks/claim-one-time', methods=['POST'])
 def claim_one_time():
@@ -600,14 +578,12 @@ def claim_one_time():
     task_name = request.json.get('task_name')
     user = supabase.table("users").select("*").eq("id", user_id).execute().data[0]
     
-    # ইতিমধ্যে ক্লেইম করা হয়েছে কিনা যাচাই
     exists = supabase.table("user_one_time_tasks").select("id").eq("user_id", user_id).eq("task_name", task_name).execute().data
     if exists:
         return jsonify({"status": "error", "message": "এই টাস্কটি ইতিমধ্যে ক্লেইম করা হয়েছে।"})
         
     reward = 0.00
     
-    # ইউজারনেম দিয়ে সফল রেফারের মোট সংখ্যা বের করা
     success_refs_query = supabase.table("referrals").select("id").eq("referrer_id", user_id).eq("status", "Success").execute().data
     success_ref_count = len(success_refs_query)
     
@@ -618,10 +594,10 @@ def claim_one_time():
             return jsonify({"status": "error", "message": "আপনার প্রোফাইলের সব তথ্য এখনও পূর্ণ করা হয়নি।"})
             
     elif task_name == 'join_channel':
-        reward = 5.00 # ডিরেক্ট ক্লিক ক্লেইম
+        reward = 5.00
         
     elif task_name == 'watch_tutorial':
-        reward = 5.00 # ডিরেক্ট ক্লিক ক্লেইম
+        reward = 5.00
         
     elif task_name == 'refer_3':
         if success_ref_count >= 3:
@@ -637,17 +613,12 @@ def claim_one_time():
     else:
         return jsonify({"status": "error", "message": "অবৈধ টাস্ক রিকোয়েস্ট। "})
         
-    # বোনাস যোগ করা এবং ট্র্যাক করা
     supabase.rpc("increment_balance", {"user_id": user_id, "amount": reward}).execute()
     supabase.table("user_one_time_tasks").insert({"user_id": user_id, "task_name": task_name}).execute()
     
     return jsonify({"status": "success", "message": f"সফলভাবে ক্লেইমড! আপনার ব্যালেন্সে ৳ {reward} যোগ করা হয়েছে। "})
-    # ৩. নরমাল টাস্ক সাবমিট এপিআই
 
 
-
-
-# ৪. এডমিন টাস্ক প্যানেল (/admin/add)
 @app.route('/admin/add', methods=['GET', 'POST'])
 def admin_add_task():
     if not check_admin_auth():
@@ -668,7 +639,6 @@ def admin_add_task():
         flash("নতুন নরমাল টাস্কটি সফলভাবে ডাটাবেজে যুক্ত হয়েছে।", "success")
         return redirect(url_for('admin_add_task'))
         
-    # পেন্ডিং প্রুফ সাবমিশনসমূহ রিট্রিভ করা (ভেরিফিকেশনের জন্য)
     pending_submissions = supabase.table("task_submissions") \
         .select("id, proof_image_url, status, created_at, users(username, email), tasks(title, reward)") \
         .eq("status", "Pending").execute().data
@@ -676,14 +646,13 @@ def admin_add_task():
     return render_template('admin_add.html', pending_submissions=pending_submissions)
 
 
-# ৫. এডমিন সাবমিশন এপ্রুভ/রিজেক্ট অ্যাকশন
 @app.route('/admin/task-action', methods=['POST'])
 def admin_task_action():
     if not check_admin_auth():
         return "Unauthorized Action", 403
         
     submission_id = request.form.get('submission_id')
-    action = request.form.get('action') # 'approve' or 'reject'
+    action = request.form.get('action')
     
     submission = supabase.table("task_submissions").select("*, tasks(reward)").eq("id", submission_id).execute().data
     if not submission:
@@ -695,19 +664,16 @@ def admin_task_action():
     reward = float(sub['tasks']['reward'])
     
     if action == 'approve':
-        # স্ট্যাটাস Approved করা এবং ব্যালেন্স যোগ করা
         supabase.table("task_submissions").update({"status": "Approved"}).eq("id", submission_id).execute()
         supabase.rpc("increment_balance", {"user_id": user_id, "amount": reward}).execute()
         flash("টাস্ক সাবমিশন এপ্রুভ এবং ইউজারকে রিওয়ার্ড দেওয়া হয়েছে।", "success")
     elif action == 'reject':
-        # স্ট্যাটাস Rejected করা
         supabase.table("task_submissions").update({"status": "Rejected"}).eq("id", submission_id).execute()
         flash("টাস্ক সাবমিশন বাতিল (Rejected) করা হয়েছে।", "success")
         
     return redirect(url_for('admin_add_task'))
-    # (অন্যান্য কোড অপরিবর্তিত থাকবে, রুট এবং লগইন রাউট দুটি নিচের কোড দ্বারা প্রতিস্থাপন করুন)
 
-# ১. ল্যান্ডিং বা পরিচিতি পেজ (Root URL - Overview)
+
 @app.route('/')
 def home():
     user_id = session.get('user_id')
@@ -722,10 +688,8 @@ def home():
     return render_template('home.html', user=user)
 
 
-# ২. ডেডিকেটেড লগইন রাউট
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    # যদি ইউজার অলরেডি লগইন থাকে, তবে ড্যাশবোর্ডে রিডাইরেক্ট করা
     if session.get('user_id'):
         return redirect(url_for('dashboard'))
         
@@ -758,8 +722,6 @@ def login():
     
     
 
-# (অন্যান্য কোড অপরিবর্তিত থাকবে, /referrals রাউটটি নিচে দেওয়া কোড দ্বারা প্রতিস্থাপন করুন)
-
 @app.route('/referrals')
 def referrals():
     user_id = session.get('user_id')
@@ -769,7 +731,6 @@ def referrals():
     now = datetime.datetime.now(datetime.timezone.utc)
     user = supabase.table("users").select("uid").eq("id", user_id).execute().data[0]
     
-    # অন-ডিমান্ড রেফারেল সময় ও শর্ত পরীক্ষা
     due_referrals = supabase.table("referrals") \
         .select("id, referred_id") \
         .eq("referrer_id", user_id) \
@@ -777,7 +738,6 @@ def referrals():
         .lte("scheduled_payout_at", now.isoformat()) \
         .execute().data
 
-    # এই ইউজারের প্রথম রেফারেল আইডি খুঁজে বের করা (অটো-সাকসেস চেক করার জন্য)
     first_ref_query = supabase.table("referrals") \
         .select("id") \
         .eq("referrer_id", user_id) \
@@ -789,11 +749,9 @@ def referrals():
     for ref in due_referrals:
         referred_id = ref['referred_id']
         
-        # যদি এটি প্রথম রেফারেল হয়, তবে ১ ঘণ্টা পার হলেই সরাসরি Success (কোনো একটিভ শর্ত ছাড়াই)
         if first_ref_id and ref['id'] == first_ref_id:
             new_status = "Success"
         else:
-            # ২য় বা পরবর্তী রেফারেলগুলোর ক্ষেত্রে ১২ ঘণ্টার অ্যাক্টিভ কন্ডিশন চেক করা হবে
             ref_user = supabase.table("users").select("last_login").eq("id", referred_id).execute().data
             if ref_user:
                 last_login_str = ref_user[0]['last_login']
@@ -829,7 +787,6 @@ def referrals():
                            failed_count=failed_count,
                            total_earnings=total_earnings)
     
-# ৪. প্রোফাইল রাউট (ইউনিক আইডি রেফারেল লিংক জেনারেট)
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
     user_id = session.get('user_id')
@@ -855,7 +812,6 @@ def profile():
             
     user = supabase.table("users").select("*").eq("id", user_id).execute().data[0]
     
-    # ইউজারনেমের পরিবর্তে UID ব্যবহার করে রেফারেল লিংক জেনারেট
     ref_link = request.url_root + "register?ref=" + str(user['uid'])
     
     return render_template('profile.html', user=user, ref_link=ref_link)
@@ -866,11 +822,9 @@ def withdraw():
     if not user_id:
         return redirect(url_for('login'))
         
-    # ১. ইউজারের ব্যালেন্স এবং তথ্য নেওয়া
     user = supabase.table("users").select("*").eq("id", user_id).execute().data[0]
     balance = float(user['balance'])
     
-    # ২. সফল রেফারেলের সংখ্যা বের করা (status = 'Success')
     success_refs_query = supabase.table("referrals") \
         .select("id") \
         .eq("referrer_id", user_id) \
@@ -878,7 +832,6 @@ def withdraw():
         .execute().data
     success_ref_count = len(success_refs_query)
     
-    # ৩. শর্তসমূহ পরীক্ষা
     meets_referral_cond = (success_ref_count >= 3)
     meets_balance_cond = (balance >= 400.00)
     can_withdraw = (meets_referral_cond and meets_balance_cond)
@@ -895,10 +848,8 @@ def withdraw():
         elif amount > balance:
             flash("আপনার অ্যাকাউন্টে পর্যাপ্ত ব্যালেন্স নেই।", "danger")
         else:
-            # ব্যালেন্স বিয়োগ করা
             supabase.rpc("increment_balance", {"user_id": user_id, "amount": -amount}).execute()
             
-            # উইথড্রয়াল রিকোয়েস্ট তৈরি
             supabase.table("withdrawals").insert({
                 "user_id": user_id,
                 "amount": amount,
@@ -910,7 +861,6 @@ def withdraw():
             flash("উইথড্রয়াল অনুরোধ সফলভাবে সাবমিট হয়েছে।", "success")
             return redirect(url_for('withdraw'))
             
-    # ইউজারের নিজস্ব উইথড্রয়াল হিস্ট্রি রিট্রিভ করা
     history = supabase.table("withdrawals").select("*").eq("user_id", user_id).order("created_at", desc=True).execute().data
     
     return render_template('withdrawal.html', 
@@ -933,7 +883,6 @@ def store():
     user = supabase.table("users").select("balance").eq("id", user_id).execute().data[0]
     premium_pkgs = supabase.table("packages").select("*").eq("is_premium", True).order("cost", desc=False).execute().data
     
-    # কাস্টম হিস্ট্রি লোড (স্টোরের নিচে দেখানোর জন্য)
     deposit_history = supabase.table("deposits").select("*").eq("user_id", user_id).order("created_at", desc=True).execute().data
     
     purchase_history = supabase.table("user_packages") \
@@ -945,7 +894,6 @@ def store():
                            premium_packages=premium_pkgs,
                            deposit_history=deposit_history,
                            purchase_history=purchase_history)    
-# ৫. রিচার্জ বা অ্যাড মানি রাউট
 @app.route('/add-money', methods=['GET', 'POST'])
 def add_money():
     user_id = session.get('user_id')
@@ -1005,7 +953,6 @@ def register():
             if new_user_res.data:
                 new_user_id = new_user_res.data[0]['id']
                 
-                # ফ্রি প্যাকেজের মেয়াদ ৩৬৫ দিন (১ বছর) সেট করে দেওয়া হচ্ছে
                 free_expiry = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=30)
                 supabase.table("user_packages").insert({
                     "user_id": new_user_id,
@@ -1051,7 +998,6 @@ def claim_daily():
         return jsonify({"status": "error", "message": "Unauthorized"}), 401
         
     try:
-        # ইউজারের চেক-ইন ডাটা নিয়ে আসা
         user_query = supabase.table("users").select("last_daily_checkin").eq("id", user_id).execute()
         if not user_query.data:
             return jsonify({"status": "error", "message": "ব্যবহারকারী সনাক্ত করা যায়নি।"}), 404
@@ -1060,13 +1006,12 @@ def claim_daily():
         last_checkin_str = user.get('last_daily_checkin')
         
         now = datetime.datetime.now(datetime.timezone.utc)
-        reward_amount = 5.00  # ডেইলি বোনাস ৫ টাকা
+        reward_amount = 5.00
         
         if last_checkin_str:
             last_checkin = datetime.datetime.fromisoformat(last_checkin_str.replace('Z', '+00:00'))
             cooldown = datetime.timedelta(hours=24)
             
-            # ২৪ ঘণ্টা ভ্যালিডেশন
             if now < last_checkin + cooldown:
                 time_left = (last_checkin + cooldown) - now
                 seconds_left = int(time_left.total_seconds())
@@ -1075,7 +1020,6 @@ def claim_daily():
                     "message": "আপনি ইতিমধ্যে আজকের ডেইলি বোনাস ক্লেইম করেছেন।"
                 }), 400
 
-        # শেষ ক্লেইমের সময় এবং ব্যালেন্স নিরাপদে আপডেট করা
         supabase.table("users").update({"last_daily_checkin": now.isoformat()}).eq("id", user_id).execute()
         supabase.rpc("increment_balance", {"user_id": user_id, "amount": reward_amount}).execute()
         
@@ -1084,10 +1028,8 @@ def claim_daily():
             "message": f"ডেইলি চেক-ইন সফল! আপনার ব্যালেন্সে ৳ {reward_amount} যোগ করা হয়েছে।"
         })
     except Exception as e:
-        # ডাটাবেজ বা সার্ভার সাইডের আসল এররটি JSON আকারে রিটার্ন করা হচ্ছে যাতে ফ্রন্টএন্ডে তা দেখা যায়
         return jsonify({"status": "error", "message": f"ডাটাবেজ ত্রুটি: {str(e)}"}), 500
 
-# ২. ড্যাশবোর্ড রাউট (মেয়াদোত্তীর্ণ প্যাকেজ অটো-ডিলিট এবং তথ্য সংগ্রহ)
 @app.route('/dashboard')
 def dashboard():
     user_id = session.get('user_id')
@@ -1096,13 +1038,11 @@ def dashboard():
         
     now = datetime.datetime.now(datetime.timezone.utc)
     
-    # নিরাপত্তা ও স্ট্যাবিলিটি আপডেট: মেয়াদ শেষ হওয়া প্যাকেজগুলো অটোমেটিক ডিলিট করা
     supabase.table("user_packages").delete().eq("user_id", user_id).lt("expires_at", now.isoformat()).execute()
         
     user = supabase.table("users").select("*").eq("id", user_id).execute().data[0]
     balance = float(user['balance'])
     
-    # ডেইলি চেক-ইন ভ্যালিডেশন
     is_daily_eligible = True
     last_checkin_str = user.get('last_daily_checkin')
     if last_checkin_str:
@@ -1111,7 +1051,6 @@ def dashboard():
         if now < last_checkin + cooldown:
             is_daily_eligible = False
     
-    # মেয়াদ (expires_at) সহ ইউজারের সক্রিয় প্যাকেজগুলোর তালিকা রিট্রিভ করা
     owned_pkgs = supabase.table("user_packages") \
         .select("id, last_claimed_at, expires_at, packages(name, duration_hours, yield_amount, is_premium)") \
         .eq("user_id", user_id).execute().data
@@ -1134,8 +1073,6 @@ def dashboard():
                            is_daily_eligible=is_daily_eligible)
 
 
-# ৩. প্যাকেজ বাই রাউট (প্রিমিয়াম কিনলে ফ্রি প্যাকেজ চিরতরে মুছে ফেলার লজিক সহ)
-
 @app.route('/buy-package', methods=['POST'])
 def buy_package():
     user_id = session.get('user_id')
@@ -1155,16 +1092,12 @@ def buy_package():
     balance = float(user['balance'])
     
     if balance >= cost:
-        # ১. প্রিমিয়াম প্যাকেজ কেনার সাথে সাথে ফ্রি প্যাকেজটি (ID 1) চিরতরে ডিলেট করা
         supabase.table("user_packages").delete().eq("user_id", user_id).eq("package_id", 1).execute()
         
-        # ২. ব্যালেন্স কর্তন
         supabase.rpc("increment_balance", {"user_id": user_id, "amount": -cost}).execute()
         
-        # ৩. প্রিমিয়াম প্যাকেজের ৩০ দিনের মেয়াদকাল (Expires in 30 days) নির্ধারণ
         expiry_date = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=30)
         
-        # ৪. নতুন প্রিমিয়াম প্যাকেজ ডাটাবেজে ইনসার্ট
         supabase.table("user_packages").insert({
             "user_id": user_id,
             "package_id": package_id,
@@ -1180,19 +1113,16 @@ def buy_package():
     return redirect(url_for('store'))
 
 
-# ৪. কাস্টম ইন্ডিভিজুয়াল প্যাকেজ ক্লেইম এপিআই (সবুজ গ্লোয়িং টাইমার এবং একক ক্লেইম হ্যান্ডলিং)
 @app.route('/claim-mining', methods=['POST'])
 def claim_mining():
     user_id = session.get('user_id')
     if not user_id:
         return jsonify({"status": "error", "message": "Unauthorized"}), 401
         
-    # ক্লায়েন্ট থেকে পাঠানো নির্দিষ্ট ইউজার-প্যাকেজ আইডি রিট্রিভ করা
     user_package_id = request.json.get('user_package_id')
     if not user_package_id:
         return jsonify({"status": "error", "message": "অবৈধ মাইনিং রিকোয়েস্ট।"}), 400
         
-    # নির্দিষ্ট প্যাকেজ চেক করা
     pkg_query = supabase.table("user_packages") \
         .select("id, last_claimed_at, expires_at, packages(yield_amount, duration_hours)") \
         .eq("id", user_package_id).eq("user_id", user_id).execute().data
@@ -1203,11 +1133,9 @@ def claim_mining():
     record = pkg_query[0]
     now = datetime.datetime.now(datetime.timezone.utc)
     
-    # মেয়াদ চেক
     if record.get('expires_at'):
         expires_at = datetime.datetime.fromisoformat(record['expires_at'].replace('Z', '+00:00'))
         if now > expires_at:
-            # মেয়াদোত্তীর্ণ নোড রিমুভ
             supabase.table("user_packages").delete().eq("id", user_package_id).execute()
             return jsonify({"status": "error", "message": "এই মাইনিং প্যাকেজটির মেয়াদ শেষ হয়ে গেছে।"}), 400
             
@@ -1215,9 +1143,7 @@ def claim_mining():
     cooldown = datetime.timedelta(hours=record['packages']['duration_hours'])
     
     if now >= last_claim + cooldown:
-        # শেষ ক্লেইমের সময় আপডেট
         supabase.table("user_packages").update({"last_claimed_at": now.isoformat()}).eq("id", user_package_id).execute()
-        # ব্যালেন্স অ্যাড করা
         yield_amount = float(record['packages']['yield_amount'])
         supabase.rpc("increment_balance", {"user_id": user_id, "amount": yield_amount}).execute()
         
