@@ -7,10 +7,8 @@
     <marquee class="font-semibold text-xs tracking-wide" scrollamount="3">{{ notice }}</marquee>
 </div>
 
-
-<!-- ৩. প্রিমিয়াম মিনিমাল ইউজার কার্ড -->
+<!-- ২. ইউজার ব্যালেন্স কার্ড -->
 <div class="minimal-card p-5 rounded-2xl mb-4 bg-white border border-slate-200 shadow-sm flex items-center justify-between relative overflow-hidden">
-    <!-- ব্যাকগ্রাউন্ডে খুব হালকা ওয়াটারমার্ক গ্লো -->
     <div class="absolute -right-8 -top-8 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl"></div>
     
     <div class="flex items-center gap-3.5 z-10">
@@ -22,9 +20,7 @@
             <h2 class="text-sm font-extrabold text-slate-800 flex items-center gap-1">
                 {{ user.username }}
             </h2>
-            <div class="mt-1 flex items-center gap-1.5">
-                <span class="text-[9px] bg-slate-100 text-slate-500 font-bold uppercase tracking-wider px-2 py-0.5 rounded-full">UID: {{ user.uid }}</span>
-            </div>
+            <span class="text-[9px] bg-slate-100 text-slate-500 font-bold uppercase tracking-wider px-2 py-0.5 rounded-full">UID: {{ user.uid }}</span>
         </div>
     </div>
     <div class="text-right z-10">
@@ -33,7 +29,7 @@
     </div>
 </div>
 
-<!-- ৪. ডেইলি চেক-ইন উইজেট (ক্লেইম করা থাকলে সম্পূর্ণ হাইড থাকবে) -->
+<!-- ৩. ডেইলি চেক-ইন উইজেট (ক্লেইম করা থাকলে সম্পূর্ণ হাইড থাকবে) -->
 {% if is_daily_eligible %}
 <div class="minimal-card p-4 rounded-2xl mb-4 bg-white border border-slate-200 shadow-sm flex items-center justify-between">
     <div class="flex items-center gap-3">
@@ -51,7 +47,7 @@
 </div>
 {% endif %}
 
-<!-- ৫. বহুমাত্রিক মাইনিং টার্মিনাল -->
+<!-- ৪. বহুমাত্রিক মাইনিং টার্মিনাল -->
 <div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-4">
     <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
         <i class="fa-solid fa-server text-emerald-500 animate-pulse"></i>
@@ -95,7 +91,7 @@
 
                 <button id="claim-btn-{{ item.id }}" onclick="runClaim('{{ item.id }}')" disabled 
                         class="bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed font-extrabold text-[10px] px-4 py-2 rounded-xl transition shadow-none">
-                    <i class="fa-solid fa-lock text-[10px]"></i> CLAIM
+                    <i class="fa-solid fa-lock text-[9px]"></i> CLAIM
                 </button>
             </div>
         </div>
@@ -103,7 +99,7 @@
     </div>
 </div>
 
-<!-- ৬. কুইক নেভিগেশন গ্রিড (অন্যান্য পেজ শর্টকাট) -->
+<!-- ৫. কুইক নেভিগেশন গ্রিড -->
 <div class="grid grid-cols-3 gap-3 my-4">
     <a href="/history" class="minimal-card p-3 rounded-xl flex flex-col items-center justify-center text-center hover:border-slate-300 transition bg-white border border-slate-200 shadow-sm">
         <i class="fa-solid fa-clock-rotate-left text-slate-500 text-sm mb-1.5"></i>
@@ -131,7 +127,7 @@
     </a>
 </div>
 
-<!-- ৭. হেল্প ও সাপোর্ট সেকশন (রিয়েল লিংক সহ) -->
+<!-- ৬. লার্নিং ও হেল্প ব্যানারস -->
 <div class="space-y-3">
     <!-- আমরা কীভাবে আপনাদেরকে টাকা দিবো? -->
     <a href="/about" class="minimal-card p-4 rounded-xl flex items-center justify-between hover:border-slate-300 transition bg-white border border-slate-200 shadow-sm">
@@ -147,7 +143,7 @@
         <i class="fa-solid fa-chevron-right text-slate-300 text-xs"></i>
     </a>
 
-    <!-- কীভাবে কাজ করবেন? ভিডিও -->
+    <!-- ইউটিউব ভিডিও টিউটোরিয়াল -->
     <a href="https://www.youtube.com/watch?v=YOUR_VIDEO_ID" target="_blank" class="minimal-card p-4 rounded-xl flex items-center justify-between hover:border-slate-300 transition bg-white border border-slate-200 shadow-sm">
         <div class="flex items-center gap-3">
             <div class="text-red-500 text-lg">
@@ -161,7 +157,7 @@
         <span class="text-[9px] bg-red-50 text-red-600 border border-red-100 px-2.5 py-0.5 rounded-full font-bold">ভিডিও</span>
     </a>
 
-    <!-- পেমেন্ট প্রুফ চ্যানেল লিংক (নতুন যুক্ত করা হয়েছে) -->
+    <!-- পেমেন্ট প্রুফ চ্যানেল লিংক -->
     <a href="https://t.me/ortipay" target="_blank" class="minimal-card p-4 rounded-xl flex items-center justify-between hover:border-slate-300 transition bg-white border border-slate-200 shadow-sm">
         <div class="flex items-center gap-3">
             <div class="text-emerald-500 text-base">
@@ -209,7 +205,7 @@
         <span class="text-[9px] bg-purple-50 text-purple-600 border border-purple-100 px-2.5 py-0.5 rounded-full font-bold">আপগ্রেড</span>
     </a>
 
-    <!-- টেলিগ্রাম মেইন চ্যানেল লিংক (নতুন যুক্ত করা হয়েছে) -->
+    <!-- টেলিগ্রাম মেইন চ্যানেল লিংক -->
     <a href="https://t.me/ortiwokr" target="_blank" class="minimal-card p-4 rounded-xl flex items-center justify-between hover:border-slate-300 transition bg-white border border-slate-200 shadow-sm">
         <div class="flex items-center gap-3">
             <div class="text-sky-500 text-base">
