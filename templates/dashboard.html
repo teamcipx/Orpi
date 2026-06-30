@@ -37,7 +37,7 @@
             <i class="fa-solid fa-gift"></i>
         </div>
         <div>
-            <h4 class="text-xs font-bold text-slate-700">ডেইলি চেক-ইন বোনাস</h4>
+            <h4 class="text-xs font-bold text-slate-700">데일리 চেক-ইন বোনাস</h4>
             <p class="text-[9px] text-slate-400 mt-0.5">প্রতিদিন লগইন করে ৳ ৫.০০ বোনাস নিন</p>
         </div>
     </div>
@@ -47,7 +47,7 @@
 </div>
 {% endif %}
 
-<!-- ৪. বহুমাত্রিক মাইনিং টার্মিনাল -->
+<!-- ৪. বহুমাত্রিক মাইনিং টার্মিনাল (ক্র্যাশ-প্রুফ টাইমস্ট্যাম্প ভ্যালিডেশন সহ) -->
 <div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-4">
     <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
         <i class="fa-solid fa-server text-emerald-500 animate-pulse"></i>
@@ -66,11 +66,13 @@
                 </div>
                 <div>
                     <h4 class="font-bold text-slate-800 text-xs">{{ item.packages.name }} (৳ {{ item.packages.yield_amount }})</h4>
+                    
+                    <!-- নিরাপদ মেয়াদ প্রদর্শন লজিক (যা তারিখ খালি থাকলেও কখনো ক্র্যাশ করবে না) -->
                     <p class="text-[9px] text-slate-400 font-semibold mt-0.5 uppercase tracking-wide">
                         {% if item.packages.is_premium %}
-                            মেয়اد শেষ হবে: {{ item.expires_at[:10] }} (৩০ দিন)
+                            মেয়াদ শেষ হবে: {% if item.expires_at %}{{ item.expires_at[:10] }}{% else %}৩০ দিন{% endif %}
                         {% else %}
-                            মেয়اد শেষ হবে: {{ item.expires_at[:10] }} (১ বছর)
+                            মেয়াদ শেষ হবে: {% if item.expires_at %}{{ item.expires_at[:10] }}{% else %}১ বছর{% endif %}
                         {% endif %}
                     </p>
                 </div>
@@ -95,6 +97,8 @@
                 </button>
             </div>
         </div>
+        {% else %}
+        <p class="text-xs text-slate-400 text-center py-4">বর্তমানে কোনো অ্যাক্টিভ মাইনিং নোড পাওয়া যায়নি।</p>
         {% endfor %}
     </div>
 </div>
