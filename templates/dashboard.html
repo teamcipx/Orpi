@@ -7,18 +7,6 @@
     <marquee class="font-semibold text-xs tracking-wide" scrollamount="3">{{ notice }}</marquee>
 </div>
 
-<!-- ২. উইথড্রয়াল প্রগ্রেস বার কার্ড -->
-<div class="minimal-card p-4 rounded-2xl mb-4 bg-white border border-slate-200 shadow-sm space-y-2">
-    <div class="flex justify-between items-center text-xs">
-        <span class="font-bold text-slate-600 uppercase tracking-wide"><i class="fa-solid fa-chart-pie text-emerald-500 mr-1"></i> উইথড্রয়াল অগ্রগতি</span>
-        <span class="font-black text-emerald-600">{{ progress_percent }}% সম্পন্ন</span>
-    </div>
-    <!-- প্রগ্রেস বার ট্র্যাক -->
-    <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden border border-slate-200/50">
-        <div class="bg-gradient-to-r from-emerald-400 to-emerald-500 h-full rounded-full transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(16,185,129,0.2)]" style="width: {{ progress_percent }}%"></div>
-    </div>
-    <p class="text-[9px] text-slate-400 font-medium">* ৩টি সফল রেফার এবং ৩০০ টাকা ব্যালেন্স হলে এটি ১০০% পূর্ণ হবে ও উইথড্র আনলক হবে।</p>
-</div>
 
 <!-- ৩. প্রিমিয়াম মিনিমাল ইউজার কার্ড -->
 <div class="minimal-card p-5 rounded-2xl mb-4 bg-white border border-slate-200 shadow-sm flex items-center justify-between relative overflow-hidden">
