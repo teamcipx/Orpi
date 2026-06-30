@@ -1064,7 +1064,7 @@ def claim_daily():
         return jsonify({"status": "error", "message": f"ডাটাবেজ ত্রুটি: {str(e)}"}), 500
 
 # (অন্যান্য কোড অপরিবর্তিত থাকবে, কেবল /dashboard রাউটটি নিচের কোড দ্বারা প্রতিস্থাপন করুন)
-
+# app.py ফাইলের ড্যাশবোর্ড রাউটটি নিচের কোড দ্বারা সম্পূর্ণ আপডেট করে নিন:
 @app.route('/dashboard')
 def dashboard():
     user_id = session.get('user_id')
@@ -1073,28 +1073,11 @@ def dashboard():
         
     now = datetime.datetime.now(datetime.timezone.utc)
     
-    # ১. ইউজারের সমস্ত প্যাকেজ রিট্রিভ করা
-    all_pkgs = supabase.table("user_packages") \
-        .select("id, last_claimed_at, expires_at, packages(name, duration_hours, yield_amount, is_premium)") \
-        .eq("user_id", user_id).execute().data or []
-        
-    owned_pkgs = []
-    expired_ids = []
-    
-    # ২. পাইথন স্তরে অত্যন্ত নিখুঁতভাবে মেয়াদোত্তীর্ণ প্যাকেজ ফিল্টার করা (যা শতভাগ ক্র্যাশ-প্রুফ)
-    for p in all_pkgs:
-        if p.get('expires_at') and p.get('packages'):
-            expires_at = datetime.datetime.fromisoformat(p['expires_at'].replace('Z', '+00:00'))
-            if now > expires_at:
-                expired_ids.append(p['id'])
-            else:
-                owned_pkgs.append(p)
-        else:
-            owned_pkgs.append(p)
-            
-    # ৩. মেয়াদোত্তীর্ণ প্যাকেজগুলো ডাটাবেজ থেকে ক্লিন করা
-    if expired_ids:
-        supabase.table("user_packages").delete().in_("id", expired_ids).execute()
+    # মেয়াদোত্তীর্ণ প্যাকেজ ডিলিট (নিরাপদ চেকিং)
+    try:
+        supabase.table("user_packages").delete().eq("user_id", user_id).not_.is_("expires_at", "null").lt("expires_at", now.isoformat()).execute()
+    except Exception:
+        pass
         
     user = supabase.table("users").select("*").eq("id", user_id).execute().data[0]
     balance = float(user['balance'])
@@ -1108,6 +1091,31 @@ def dashboard():
         if now < last_checkin + cooldown:
             is_daily_eligible = False
     
+    # মেয়াদ (expires_at) সহ ইউজারের সক্রিয় প্যাকেজগুলোর তালিকা রিট্রিভ করা
+    all_pkgs = supabase.table("user_packages") \
+        .select("id, last_claimed_at, expires_at, packages(name, duration_hours, yield_amount, is_premium)") \
+        .eq("user_id", user_id).execute().data or []
+        
+    # সেলফ-হিলিং কন্ডিশন: যদি ইউজারের কোনো প্যাকেজই সচল না থাকে
+    if not all_pkgs:
+        free_expiry = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=365)
+        supabase.table("user_packages").insert({
+            "user_id": user_id,
+            "package_id": 1,
+            "expires_at": free_expiry.isoformat()
+        }).execute()
+        
+        all_pkgs = supabase.table("user_packages") \
+            .select("id, last_claimed_at, expires_at, packages(name, duration_hours, yield_amount, is_premium)") \
+            .eq("user_id", user_id).execute().data or []
+
+    owned_pkgs = []
+    for p in all_pkgs:
+        # যদি কোনো প্যাকেজের মূল ইনফরমেশন ডাটাবেজে না পাওয়া যায় তবে ক্র্যাশ এড়াতে স্কিপ করবে
+        if not p.get('packages'):
+            continue
+        owned_pkgs.append(p)
+        
     has_premium_pkg = any(p['packages']['is_premium'] for p in owned_pkgs if p.get('packages'))
     success_refs_query = supabase.table("referrals").select("id").eq("referrer_id", user_id).eq("status", "Success").execute().data
     success_ref_count = len(success_refs_query)
@@ -1124,7 +1132,7 @@ def dashboard():
                            notice=notice,
                            progress_percent=progress_percent,
                            is_daily_eligible=is_daily_eligible)
-
+    
 @app.route('/buy-package', methods=['POST'])
 def buy_package():
     user_id = session.get('user_id')
