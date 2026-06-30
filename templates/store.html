@@ -2,8 +2,8 @@
 {% block content %}
 
 <!-- ব্যালেন্স তথ্য ও অ্যাড মানি বাটন বার -->
-<div class="minimal-card p-5 rounded-2xl mb-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white border border-slate-200 shadow-sm relative overflow-hidden">
-    <div class="absolute -left-12 -top-12 w-28 h-28 bg-emerald-500/5 rounded-full blur-3xl"></div>
+<div class="minimal-card p-4 rounded-2xl mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white border border-slate-200 shadow-sm relative overflow-hidden">
+    <div class="absolute -left-12 -top-12 w-28 h-28 bg-emerald-500/5 rounded-full blur-2xl"></div>
     <div class="z-10">
         <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
             <i class="fa-solid fa-store text-emerald-500"></i> প্রিমিয়াম মাইনিং স্টোর
@@ -11,11 +11,10 @@
         <p class="text-[9px] text-slate-400 mt-1 font-bold uppercase tracking-wider">Choose your processing node</p>
     </div>
     <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end z-10">
-        <span class="bg-emerald-50 text-emerald-600 border border-emerald-100 px-3 py-2 rounded-xl text-xs font-black">
+        <span class="bg-emerald-50 text-emerald-600 border border-emerald-100 px-3 py-1.5 rounded-xl text-xs font-black">
             ব্যালেন্স: ৳ {{ balance }}
         </span>
-        <!-- রিচার্জ করার ডিরেক্ট শর্টকাট বাটন -->
-        <a href="/add-money" class="bg-slate-950 hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+        <a href="/add-money" class="bg-slate-950 hover:bg-slate-800 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
             <i class="fa-solid fa-plus-circle text-[11px]"></i> Add Money
         </a>
     </div>
@@ -24,7 +23,7 @@
 {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
         {% for category, message in messages %}
-            <div class="p-3.5 mb-5 text-xs text-center rounded-xl border font-bold {% if category == 'success' %}bg-emerald-50 text-emerald-600 border-emerald-100{% else %}bg-red-50 text-red-600 border-red-100{% endif %}">
+            <div class="p-3.5 mb-4 text-xs text-center rounded-xl border font-bold {% if category == 'success' %}bg-emerald-50 text-emerald-600 border-emerald-100{% else %}bg-red-50 text-red-600 border-red-100{% endif %}">
                 {{ message }}
             </div>
         {% endfor %}
@@ -34,17 +33,21 @@
 <!-- প্রফেশনাল গ্রিড সিস্টেমে রেসপন্সিভ প্যাকেজ কার্ডসমূহ -->
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
     {% for pkg in premium_packages %}
-    <div class="minimal-card p-5 rounded-3xl flex flex-col justify-between hover:border-slate-300 transition bg-white border border-slate-200 shadow-sm relative overflow-hidden group">
+    <div class="minimal-card p-5 rounded-3xl flex flex-col justify-between hover:shadow-md transition bg-white border border-slate-200 shadow-sm relative overflow-hidden group">
         <!-- ব্যাকগ্রাউন্ড গ্লো ইফেক্ট -->
         <div class="absolute -right-8 -top-8 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl group-hover:bg-emerald-500/10 transition"></div>
         
         <div class="space-y-4">
-            <!-- প্যাকেজ হেডার ও কাস্টম ট্যাগ -->
+            <!-- প্যাকেজ হেডার ও ডাবল ব্যাজ -->
             <div class="flex justify-between items-start">
-                <div class="space-y-1">
-                    <span class="bg-purple-50 text-purple-600 border border-purple-100 px-2.5 py-0.5 rounded-full text-[8px] font-extrabold uppercase tracking-wider">
-                        {% if pkg.cost <= 1000 %}Micro Node{% elif pkg.cost <= 3500 %}ASIC Core{% else %}Super Cluster{% endif %}
-                    </span>
+                <div class="space-y-1.5">
+                    <div class="flex flex-wrap gap-1.5">
+                        <span class="bg-purple-50 text-purple-600 border border-purple-100 px-2 py-0.5 rounded-full text-[8px] font-extrabold uppercase tracking-wider">Premium Processor</span>
+                        <!-- এক্সপায়ারি বা মেয়াদকাল ব্যাজ -->
+                        <span class="bg-blue-50 text-blue-600 border border-blue-100 px-2 py-0.5 rounded-full text-[8px] font-extrabold uppercase tracking-wider flex items-center gap-1">
+                            <i class="fa-regular fa-calendar-days text-[9px]"></i> মেয়াদ: ৩০ দিন
+                        </span>
+                    </div>
                     <h3 class="text-xs font-black text-slate-800 mt-1">{{ pkg.name }}</h3>
                 </div>
                 <!-- কাস্টম হ্যাশরেট স্পিড প্রদর্শন -->
@@ -62,7 +65,7 @@
                 </p>
             </div>
 
-            <!-- প্যাকেজ সুযোগ-সুবিধা বা ফ্যাসিলিটিস তালিকা -->
+            <!-- প্যাকেজ সুযোগ-সুবিধা বা প্রিমিয়াম ফ্যাসিলিটিস -->
             <div class="space-y-2 py-1 text-[10px] text-slate-500 font-medium">
                 <div class="flex items-center gap-2">
                     <i class="fa-solid fa-circle-check text-emerald-500 text-xs"></i>
@@ -74,27 +77,27 @@
                 </div>
                 <div class="flex items-center gap-2">
                     <i class="fa-solid fa-circle-check text-emerald-500 text-xs"></i>
-                    <span>VIP প্রায়োরিটি উইথড্রয়াল সাপোর্ট</span>
+                    <span>টোটাল মেয়াদকাল: ৩০ দিন (নিশ্চিত মাইনিং)</span>
                 </div>
                 <div class="flex items-center gap-2">
                     <i class="fa-solid fa-circle-check text-emerald-500 text-xs"></i>
-                    <span>ইনস্ট্যান্ট নোড অ্যাক্টিভেশন গ্যারান্টি</span>
+                    <span>VIP প্রায়োরিটি উইথড্রয়াল সাপোর্ট</span>
                 </div>
             </div>
         </div>
         
-        <!-- ক্রয় করার বাটন -->
+        <!-- বাই বাটন -->
         <form action="/buy-package" method="POST" class="mt-4 pt-3.5 border-t border-slate-100">
             <input type="hidden" name="package_id" value="{{ pkg.id }}">
             <button type="submit" class="w-full bg-slate-950 hover:bg-slate-800 text-white py-2.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
-                <i class="fa-solid fa-cart-shopping text-[10px]"></i> ক্রয় করুন
+                <i class="fa-solid fa-cart-shopping mr-1 text-[10px]"></i> ক্রয় করুন
             </button>
         </form>
     </div>
     {% endfor %}
 </div>
 
-<!-- নিচের দিকে অ্যাড মানি ও ক্রয়ের হিস্ট্রি সেকশন -->
+<!-- নিচের দিকে হিস্ট্রি প্যানেলসমূহ -->
 <div class="space-y-4 mt-6">
     
     <!-- ১. প্যাকেজ ক্রয়ের রেকর্ড -->
