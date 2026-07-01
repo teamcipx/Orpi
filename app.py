@@ -464,27 +464,45 @@ def agent_withdraw():
     return redirect(url_for('agent_portal'))
 
 
+
+@app.route('/admin/deposits')
+def admin_deposits():
+    if not check_admin_auth():
+        return "Unauthorized Access", 403
+        
+    # পেন্ডিং থাকা ডিপোজিটসমূহ এবং ইউজারের ইউনিক তথ্য সংগ্রহ (Postgrest standard join)
+    pending = supabase.table("deposits") \
+        .select("*, users:user_id(username, email, uid)") \
+        .eq("status", "Pending") \
+        .order("created_at", desc=True).execute().data or []
+        
+    return render_template('admin_deposit.html', pending_deposits=pending)
+
 @app.route('/admin/deposit-action', methods=['POST'])
 def admin_deposit_action():
     if not check_admin_auth():
         return "Unauthorized Action", 403
         
     deposit_id = request.form.get('deposit_id')
-    action = request.form.get('action')
+    action = request.form.get('action') # 'approve' অথবা 'reject'
     
     dep_query = supabase.table("deposits").select("*").eq("id", deposit_id).execute().data
     if not dep_query:
         flash("ডিপোজিট রেকর্ড পাওয়া যায়নি।", "danger")
-        return redirect(url_for('admin_dashboard'))
+        return redirect(url_for('admin_deposits'))
         
     dep = dep_query[0]
     target_user_id = dep['user_id']
     amount = float(dep['amount'])
     
     if action == 'approve':
+        # ১. ডাটাবেজে ডিপোজিট স্ট্যাটাস 'Approved' করা
         supabase.table("deposits").update({"status": "Approved"}).eq("id", deposit_id).execute()
+        
+        # ২. ইউজারের মূল ব্যালেন্সে টাকা যোগ করা
         supabase.rpc("increment_balance", {"user_id": target_user_id, "amount": amount}).execute()
         
+        # ৩. আপলাইন এজেন্ট চেক করে ৫০% কমিশন প্রদান করা
         ref_query = supabase.table("referrals").select("referrer_id").eq("referred_id", target_user_id).execute().data
         if ref_query:
             referrer_id = ref_query[0]['referrer_id']
@@ -495,10 +513,12 @@ def admin_deposit_action():
                 
         flash("ডিপোজিট এপ্রুভ এবং ব্যালেন্স সফলভাবে যোগ করা হয়েছে।", "success")
     elif action == 'reject':
+        # ডিপোজিট বাতিল করা
         supabase.table("deposits").update({"status": "Rejected"}).eq("id", deposit_id).execute()
         flash("ডিপোজিট রিকোয়েস্ট রিজেক্ট করা হয়েছে।", "success")
         
-    return redirect(url_for('admin_dashboard'))
+    # অ্যাকশন শেষ হওয়ার পর পুনরায় ডিপোজিট লিস্ট পেজে রিডাইরেক্ট করা
+    return redirect(url_for('admin_deposits'))
     
 
 @app.route('/admin/reviews/create', methods=['POST'])
