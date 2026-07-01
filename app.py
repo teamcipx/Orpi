@@ -1221,7 +1221,7 @@ def dashboard():
     bal_progress = min(balance / 300, 1.0) * 50
     progress_percent = int(ref_progress + bal_progress)
 
-    notice = "Opti Work এ আপনাকে স্বাগতম! ফ্রি মাইনিং চালু করে প্রতি ৮ ঘণ্টায় ৫ টাকা ক্লেইম করুন। প্রিমিয়াম প্যাকেজ কিনলে আয় আরও বৃদ্ধি পাবে।"
+    notice = "Opti Work এ আপনাকে স্বাগতম! ফ্রি মাইনিং চালু করে প্রতি ৮ ঘণ্টায় 7 টাকা ক্লেইম করুন। প্রিমিয়াম প্যাকেজ কিনলে আয় আরও বৃদ্ধি পাবে।"
 
     return render_template('dashboard.html', 
                            user=user, 
