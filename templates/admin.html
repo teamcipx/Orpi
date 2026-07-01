@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Opti Work - Admin Panel</title>
+    <title>Admin Panel - Home</title>
     <!-- Google Fonts: Plus Jakarta Sans -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Font Awesome -->
+    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -22,9 +22,7 @@
         }
     </script>
     <style>
-        body {
-            background-color: #F8FAFC;
-        }
+        body { background-color: #F8FAFC; }
         .minimal-card {
             background: #FFFFFF;
             border: 1px solid #E2E8F0;
@@ -34,18 +32,62 @@
 </head>
 <body class="text-[#0F172A] min-h-screen">
 
+    <!-- গ্লোবাল নেভিগেশন লিংক বার -->
     <nav class="bg-white border-b border-slate-100 py-3.5 px-4 sticky top-0 z-50 shadow-sm">
         <div class="max-w-5xl mx-auto flex justify-between items-center">
             <span class="text-sm font-extrabold tracking-wider text-slate-800">
                 <i class="fa-solid fa-screwdriver-wrench text-emerald-500 mr-1.5"></i> OPTIWORK ADMIN
             </span>
-            <a href="/dashboard" class="text-xs font-bold text-slate-500 hover:text-slate-900"><i class="fa-solid fa-home mr-1"></i> User App</a>
+            <div class="flex space-x-4">
+                <a href="/admin/deposits" class="text-xs font-bold text-slate-500 hover:text-slate-900"><i class="fa-solid fa-plus-circle"></i> Deposits</a>
+                <a href="/admin/withdrawals" class="text-xs font-bold text-slate-500 hover:text-slate-900"><i class="fa-solid fa-money-bill-transfer"></i> Withdraws</a>
+                <a href="/admin/add" class="text-xs font-bold text-slate-500 hover:text-slate-900"><i class="fa-solid fa-list-check"></i> Tasks</a>
+                <a href="/dashboard" class="text-xs font-bold text-slate-500 hover:text-slate-900"><i class="fa-solid fa-home"></i> App</a>
+            </div>
         </div>
     </nav>
 
-    <main class="max-w-5xl mx-auto p-4 space-y-6">
+    <main class="max-w-5xl mx-auto p-4 space-y-5">
 
-        <!-- ১. মেট্রিক্স গ্রিড (আজকের ও সর্বমোট স্ট্যাটস) -->
+        <!-- ১. পেন্ডিং কমান্ড সেন্টার (Real-time Queues Tracker) -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            
+            <!-- পেন্ডিং ডিপোজিট কুয়েরি -->
+            <a href="/admin/deposits" class="minimal-card p-4 rounded-2xl flex items-center justify-between border-l-4 border-yellow-500 hover:border-yellow-600 transition">
+                <div class="space-y-0.5">
+                    <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider">পেন্ডিং ডিপোজিট</span>
+                    <p class="text-lg font-black text-slate-800">{{ pending_deposits_count }}টি আবেদন ওয়েটিং</p>
+                </div>
+                <div class="w-8 h-8 rounded-full bg-yellow-50 flex items-center justify-center text-yellow-500 text-xs">
+                    <i class="fa-solid fa-hourglass-half"></i>
+                </div>
+            </a>
+
+            <!-- পেন্ডিং উইথড্রয়াল কুয়েরি -->
+            <a href="/admin/withdrawals" class="minimal-card p-4 rounded-2xl flex items-center justify-between border-l-4 border-red-500 hover:border-red-600 transition">
+                <div class="space-y-0.5">
+                    <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider">পেন্ডিং উইথড্রয়াল</span>
+                    <p class="text-lg font-black text-slate-800">{{ pending_withdrawals_count }}টি আবেদন ওয়েটিং</p>
+                </div>
+                <div class="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center text-red-500 text-xs">
+                    <i class="fa-solid fa-money-bill-transfer"></i>
+                </div>
+            </a>
+
+            <!-- পেন্ডিং টাস্ক ভেরিফিকেশন -->
+            <a href="/admin/add" class="minimal-card p-4 rounded-2xl flex items-center justify-between border-l-4 border-blue-500 hover:border-blue-600 transition">
+                <div class="space-y-0.5">
+                    <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider">পেন্ডিং টাস্ক প্রুফ</span>
+                    <p class="text-lg font-black text-slate-800">{{ pending_tasks_count }}টি কাজ ভেরিফাই যোগ্য</p>
+                </div>
+                <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 text-xs">
+                    <i class="fa-solid fa-list-check"></i>
+                </div>
+            </a>
+
+        </div>
+
+        <!-- ২. মেট্রিক্স স্ট্যাটস গ্রিড -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div class="minimal-card p-4 rounded-2xl bg-white">
                 <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider">Today Register</span>
@@ -75,7 +117,7 @@
             {% endif %}
         {% endwith %}
 
-        <!-- ২. ইউজার সার্চ এবং অ্যাকশন প্যানেল -->
+        <!-- ৩. ইউজার সার্চ এবং অ্যাকশন প্যানেল -->
         <div class="minimal-card p-5 rounded-2xl bg-white space-y-4">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-50 pb-3">
                 <h3 class="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
@@ -84,8 +126,8 @@
                 
                 <!-- সার্চ ফরম -->
                 <form action="/admin" method="GET" class="w-full sm:w-auto flex gap-2">
-                    <input type="text" name="search" value="{{ search_query }}" placeholder="ইমেইল বা ইউজারনেম..." class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none w-full sm:w-56">
-                    <button type="submit" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-1.5 rounded-xl text-xs font-bold">Search</button>
+                    <input type="text" name="search" value="{{ search_query }}" placeholder="UID / ইউজারনেম / ইমেইল..." class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none w-full sm:w-56 font-sans">
+                    <button type="submit" class="bg-slate-950 hover:bg-slate-800 text-white px-4 py-1.5 rounded-xl text-xs font-bold">Search</button>
                 </form>
             </div>
 
@@ -94,7 +136,7 @@
                 <table class="w-full text-left">
                     <thead>
                         <tr class="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold uppercase">
-                            <th class="p-2.5">ইউজার তথ্য</th>
+                            <th class="p-2.5">ইউজার তথ্য (UID)</th>
                             <th class="p-2.5">ব্যালেন্স</th>
                             <th class="p-2.5 text-right">কন্ট্রোল অ্যাকশন</th>
                         </tr>
@@ -108,12 +150,12 @@
                                     <span class="ml-1 bg-red-100 text-red-700 text-[8px] font-bold px-1.5 py-0.5 rounded-full">Banned</span>
                                 {% endif %}
                                 <br>
-                                <span class="text-[9px] text-slate-400">{{ u.email }}</span>
+                                <span class="text-[9px] text-slate-400 font-mono">UID: {{ u.uid }} | {{ u.email }}</span>
                             </td>
                             <td class="p-2.5 font-bold text-slate-700">৳ {{ u.balance }}</td>
                             <td class="p-2.5 text-right space-y-2 sm:space-y-0 sm:space-x-1 flex flex-col sm:flex-row justify-end items-end sm:items-center">
                                 
-                                <!-- ব্যালেন্স অ্যাড করার ফরম -->
+                                <!-- ব্যালেন্স অ্যাড ফরম -->
                                 <form action="/admin/user-action" method="POST" class="inline-flex items-center gap-1">
                                     <input type="hidden" name="user_id" value="{{ u.id }}">
                                     <input type="hidden" name="action" value="add_balance">
@@ -162,4 +204,4 @@
     </main>
 
 </body>
-  </html>
+</html>
