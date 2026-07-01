@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Deposit Management</title>
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #F8FAFC; }
+        .minimal-card {
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+        }
+    </style>
+</head>
+<body class="text-[#0F172A] min-h-screen">
+
+    <!-- গ্লোবাল নেভিগেশন লিংক বার (সম্পূর্ণ কানেক্টেড) -->
+    <nav class="bg-white border-b border-slate-100 py-3.5 px-4 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <span class="text-sm font-extrabold tracking-wider text-slate-800">
+                <i class="fa-solid fa-plus-circle text-emerald-500 mr-1"></i> OPTIWORK DEPOSIT MANAGEMENT
+            </span>
+            <div class="flex space-x-4">
+                <a href="/admin" class="text-xs font-bold text-slate-500 hover:text-slate-900"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+                <a href="/admin/withdrawals" class="text-xs font-bold text-slate-500 hover:text-slate-900"><i class="fa-solid fa-money-bill-transfer"></i> Withdraws</a>
+                <a href="/admin/add" class="text-xs font-bold text-slate-500 hover:text-slate-900"><i class="fa-solid fa-list-check"></i> Tasks</a>
+                <a href="/dashboard" class="text-xs font-bold text-slate-500 hover:text-slate-900"><i class="fa-solid fa-home"></i> App</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-3xl mx-auto p-4 space-y-4">
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="p-3 text-xs text-center rounded-xl border {% if category == 'success' %}bg-emerald-50 text-emerald-600 border-emerald-100{% else %}bg-red-50 text-red-600 border-red-100{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- পেন্ডিং রিচার্জ রিকোয়েস্টসমূহ -->
+        <div class="minimal-card p-6 rounded-2xl bg-white">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-4 border-b border-slate-50 pb-2 flex items-center gap-1.5">
+                <i class="fa-solid fa-hourglass-half text-slate-400"></i> পেন্ডিং এড মানি রিকোয়েস্টসমূহ
+            </h2>
+            <div class="space-y-4">
+                {% for d in pending_deposits %}
+                <div class="border border-slate-150 p-4 rounded-xl bg-slate-50/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-xs">
+                    
+                    <div class="space-y-1.5">
+                        <div class="flex items-center gap-2">
+                            <span class="bg-emerald-50 text-emerald-600 border border-emerald-100 text-[8px] font-extrabold px-1.5 py-0.5 rounded">Deposit Request</span>
+                            <span class="text-[10px] text-slate-400">{{ d.created_at[:10] }}</span>
+                        </div>
+                        
+                        <p class="text-sm font-bold text-slate-800">৳ {{ d.amount }}</p>
+                        <p class="text-[10px] text-slate-500">ইউজার: <span class="font-bold text-slate-700">{{ d.users.username }}</span> (UID: {{ d.users.uid }})</p>
+                        <p class="text-[10px] text-slate-500">পেমেন্ট মেথড: <span class="font-bold text-slate-700">{{ d.payment_method }}</span> | Transaction ID: <span class="font-bold text-slate-700 font-mono text-[11px]">{{ d.transaction_id }}</span></p>
+                    </div>
+                    
+                    <!-- এপ্রুভ ও রিজেক্ট বাটন গ্রুপ -->
+                    <div class="flex gap-2 w-full sm:w-auto">
+                        <!-- এপ্রুভ ফর্ম -->
+                        <form action="/admin/deposit-action" method="POST" class="w-full sm:w-auto">
+                            <input type="hidden" name="deposit_id" value="{{ d.id }}">
+                            <input type="hidden" name="action" value="approve">
+                            <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-[10px] px-4 py-2 rounded-xl transition">Approve</button>
+                        </form>
+                        <!-- রিজেক্ট ফর্ম -->
+                        <form action="/admin/deposit-action" method="POST" class="w-full sm:w-auto" onsubmit="return confirm('আপনি কি নিশ্চিত যে এই ডিপোজিট রিকোয়েস্টটি বাতিল করতে চান?');">
+                            <input type="hidden" name="deposit_id" value="{{ d.id }}">
+                            <input type="hidden" name="action" value="reject">
+                            <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold text-[10px] px-4 py-2 rounded-xl transition">Reject</button>
+                        </form>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-xs text-slate-400 text-center py-4">বর্তমানে কোনো এড মানি রিকোয়েস্ট পেন্ডিং নেই।</p>
+                {% endfor %}
+            </div>
+        </div>
+
+    </main>
+
+</body>
+</html>
