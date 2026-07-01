@@ -313,6 +313,83 @@ def about():
     return render_template('about.html', user=user)
 
 
+# (অন্যান্য এডমিন রাউটের সাথে নিচের নতুন রাউট দুটি যুক্ত করুন)
+
+# ১. এডমিন উইথড্রয়াল লিস্ট রাউট
+@app.route('/admin/withdrawals')
+def admin_withdrawals():
+    if not check_admin_auth():
+        return "Unauthorized Access", 403
+        
+    # পেন্ডিং থাকা উইথড্রয়ালগুলো এবং ইউজারের ডেটা রিট্রিভ করা (Postgrest standard join)
+    pending = supabase.table("withdrawals") \
+        .select("*, users:user_id(username, email, uid)") \
+        .eq("status", "Pending") \
+        .order("created_at", desc=True).execute().data or []
+        
+    return render_template('admin_withdraw.html', pending_withdrawals=pending)
+
+
+# ২. উইথড্র এপ্রুভ/রিজেক্ট অ্যাকশন এবং অটোমেটিক টেলিগ্রাম নোটিফিকেশন ট্রিগার
+@app.route('/admin/withdraw-action', methods=['POST'])
+def admin_withdraw_action():
+    if not check_admin_auth():
+        return "Unauthorized Action", 403
+        
+    withdraw_id = request.form.get('withdraw_id')
+    action = request.form.get('action') # 'approve' অথবা 'reject'
+    
+    # উইথড্রয়াল তথ্য ও রেফার করা ইউজারের UID সংগ্রহ করা
+    withdraw_query = supabase.table("withdrawals") \
+        .select("*, users:user_id(uid)") \
+        .eq("id", withdraw_id).execute().data
+        
+    if not withdraw_query:
+        flash("উইথড্র রেকর্ড পাওয়া যায়নি।", "danger")
+        return redirect(url_for('admin_withdrawals'))
+        
+    w = withdraw_query[0]
+    user_id = w['user_id']
+    amount = float(w['amount'])
+    uid = w['users']['uid']
+    method = w['payment_method']
+    number = w['payment_number']
+    is_agent = w.get('is_agent_withdrawal', False)
+    
+    if action == 'approve':
+        # ১. ডাটাবেজে স্ট্যাটাস Approved করা
+        supabase.table("withdrawals").update({"status": "Approved"}).eq("id", withdraw_id).execute()
+        
+        # ২. টেলিগ্রাম চ্যানেলে ইনলাইন বাটন সহ SUCCESS নোটিফিকেশন পাঠানো
+        masked_number = number[:3] + "*****" + number[-3:]
+        success_msg = f"""<b>✅ WITHDRAWAL SUCCESSFUL</b>
+────────────────────
+<b>User UID:</b> <code>#{uid}</code>
+<b>Amount:</b> ৳ {amount}
+<b>Gateway:</b> {method}
+<b>Number:</b> {masked_number}
+<b>Status:</b> 🟢 Completed (Success)
+────────────────────
+<i>Payout processed via Automated Node!</i>"""
+        send_telegram_notification(success_msg)
+        
+        flash("উইথড্র রিকোয়েস্ট সফলভাবে এপ্রুভ এবং টেলিগ্রামে পোস্ট করা হয়েছে।", "success")
+        
+    elif action == 'reject':
+        # ১. ডাটাবেজে স্ট্যাটাস Rejected করা
+        supabase.table("withdrawals").update({"status": "Rejected"}).eq("id", withdraw_id).execute()
+        
+        # ২. টাকা রিফান্ড করা (এজেন্ট উইথড্র হলে এজেন্ট ব্যালেন্সে, সাধারণ উইথড্র হলে মূল ব্যালেন্সে)
+        if is_agent:
+            supabase.rpc("increment_agent_balance", {"user_id": user_id, "amount": amount}).execute()
+        else:
+            supabase.rpc("increment_balance", {"user_id": user_id, "amount": amount}).execute()
+            
+        flash("উইথড্র রিকোয়েস্ট রিজেক্ট করা হয়েছে এবং ব্যালেন্স সফলভাবে রিফান্ড হয়েছে।", "success")
+        
+    return redirect(url_for('admin_withdrawals'))
+    
+
 @app.route('/agent')
 def agent_portal():
     user_id = session.get('user_id')
