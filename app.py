@@ -214,6 +214,7 @@ def check_admin_auth():
     return None
 
 
+
 @app.route('/admin', methods=['GET', 'POST'])
 def admin_dashboard():
     if not check_admin_auth():
@@ -254,7 +255,51 @@ def admin_dashboard():
                            users_list=users_list,
                            search_query=search_query)
 
+# (অন্যান্য এডমিন রাউটের সাথে নিচের সংশোধিত রাউটটি যুক্ত করুন)
 
+@app.route('/admin/payout')
+def admin_payout_generator():
+    if not check_admin_auth():
+        return "Unauthorized Access", 403
+        
+    now_utc = datetime.datetime.now(datetime.timezone.utc)
+    five_hours_ago = (now_utc - datetime.timedelta(hours=5)).isoformat()
+    
+    # ১. বিগত ৫ ঘণ্টার রিয়েল উইথড্রয়াল ডাটা রিট্রিভ করা
+    real_w = supabase.table("withdrawals") \
+        .select("amount, status, user_id") \
+        .gte("created_at", five_hours_ago).execute().data or []
+        
+    # ২. বিগত ৫ ঘণ্টার চ্যানেলের ফেক উইথড্রয়াল ডাটা রিট্রিভ করা
+    fake_w = supabase.table("simulated_transactions") \
+        .select("amount, status, uid") \
+        .eq("type", "Withdraw") \
+        .gte("created_at", five_hours_ago).execute().data or []
+        
+    # ৩. যৌথ পরিসংখ্যান হিসাব করা
+    total_requested = sum(float(w['amount']) for w in real_w) + sum(float(fw['amount']) for fw in fake_w)
+    
+    unique_real_users = set(w['user_id'] for w in real_w)
+    unique_fake_users = set(fw['uid'] for fw in fake_w)
+    total_users = len(unique_real_users) + len(unique_fake_users)
+    
+    total_success = (sum(float(w['amount']) for w in real_w if w['status'] == 'Approved') + 
+                     sum(float(fw['amount']) for fw in fake_w if fw['status'] == 'Success'))
+                     
+    total_failed = (sum(float(w['amount']) for w in real_w if w['status'] == 'Rejected') + 
+                    sum(float(fw['amount']) for fw in fake_w if fw['status'] == 'Rejected'))
+    
+    # ৪. বাংলাদেশ সময় অনুযায়ী (UTC+6) নিখুঁত জেনারেশন সময় ফরম্যাট করা
+    now_bd = now_utc + datetime.timedelta(hours=6)
+    generation_time = now_bd.strftime("%d %b %Y, %I:%M %p")
+    
+    return render_template('admin_payout.html',
+                           total_requested=total_requested,
+                           total_users=total_users,
+                           total_success=total_success,
+                           total_failed=total_failed,
+                           generation_time=generation_time)
+    
 @app.route('/reviews', methods=['GET', 'POST'])
 def reviews_page():
     user_id = session.get('user_id')
