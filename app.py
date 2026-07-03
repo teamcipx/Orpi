@@ -265,41 +265,45 @@ def admin_payout_generator():
     now_utc = datetime.datetime.now(datetime.timezone.utc)
     five_hours_ago = (now_utc - datetime.timedelta(hours=5)).isoformat()
     
-    # ১. বিগত ৫ ঘণ্টার রিয়েল উইথড্রয়াল ডাটা রিট্রিভ করা
+    # ১. বিগত ৫ ঘণ্টার রিয়াল উইথড্রয়াল ডাটা রিট্রিভ করা (Pending বাদে)
     real_w = supabase.table("withdrawals") \
         .select("amount, status, user_id") \
+        .neq("status", "Pending") \
         .gte("created_at", five_hours_ago).execute().data or []
         
-    # ২. বিগত ৫ ঘণ্টার চ্যানেলের ফেক উইথড্রয়াল ডাটা রিট্রিভ করা
+    # ২. বিগত ৫ ঘণ্টার চ্যানেলের ফেক উইথড্রয়াল ডাটা রিট্রিভ করা (Pending বাদে)
     fake_w = supabase.table("simulated_transactions") \
         .select("amount, status, uid") \
         .eq("type", "Withdraw") \
+        .neq("status", "Pending") \
         .gte("created_at", five_hours_ago).execute().data or []
         
-    # ৩. যৌথ পরিসংখ্যান হিসাব করা
-    total_requested = sum(float(w['amount']) for w in real_w) + sum(float(fw['amount']) for fw in fake_w)
+    # ৩. পেন্ডিং সম্পূর্ণ বাদ দিয়ে সফল ও বাতিল পেমেন্টের পৃথক হিসাব
+    success_real = [w for w in real_w if w['status'] == 'Approved']
+    success_fake = [fw for fw in fake_w if fw['status'] == 'Success']
     
-    unique_real_users = set(w['user_id'] for w in real_w)
-    unique_fake_users = set(fw['uid'] for fw in fake_w)
-    total_users = len(unique_real_users) + len(unique_fake_users)
+    rejected_real = [w for w in real_w if w['status'] == 'Rejected']
+    rejected_fake = [fw for fw in fake_w if fw['status'] == 'Rejected']
     
-    total_success = (sum(float(w['amount']) for w in real_w if w['status'] == 'Approved') + 
-                     sum(float(fw['amount']) for fw in fake_w if fw['status'] == 'Success'))
-                     
-    total_failed = (sum(float(w['amount']) for w in real_w if w['status'] == 'Rejected') + 
-                    sum(float(fw['amount']) for fw in fake_w if fw['status'] == 'Rejected'))
+    # ৪. টোটাল সফল বিতরণ ও ট্রানজেকশন কাউন্ট
+    total_success_amount = sum(float(w['amount']) for w in success_real) + sum(float(fw['amount']) for fw in success_fake)
+    total_success_count = len(success_real) + len(success_fake)
     
-    # ৪. বাংলাদেশ সময় অনুযায়ী (UTC+6) নিখুঁত জেনারেশন সময় ফরম্যাট করা
+    # ৫. টোটাল বাতিলকৃত বিতরণ ও ট্রানজেকশন কাউন্ট
+    total_rejected_amount = sum(float(w['amount']) for w in rejected_real) + sum(float(fw['amount']) for fw in rejected_fake)
+    total_rejected_count = len(rejected_real) + len(rejected_fake)
+    
+    # বাংলাদেশ সময় জেনারেশন (UTC+6)
     now_bd = now_utc + datetime.timedelta(hours=6)
     generation_time = now_bd.strftime("%d %b %Y, %I:%M %p")
     
     return render_template('admin_payout.html',
-                           total_requested=total_requested,
-                           total_users=total_users,
-                           total_success=total_success,
-                           total_failed=total_failed,
+                           total_success_amount=total_success_amount,
+                           total_success_count=total_success_count,
+                           total_rejected_amount=total_rejected_amount,
+                           total_rejected_count=total_rejected_count,
                            generation_time=generation_time)
-    
+
 @app.route('/reviews', methods=['GET', 'POST'])
 def reviews_page():
     user_id = session.get('user_id')
