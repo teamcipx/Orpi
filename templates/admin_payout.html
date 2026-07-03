@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<!-- html2canvas লাইব্রেরি সরাসরি স্ক্রিনশট জেনারেট করার জন্য -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<div class="space-y-4">
+    
+    <!-- গ্লোবাল এডমিন নেভিগেশন বার -->
+    <div class="minimal-card p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex justify-between items-center">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+            <i class="fa-solid fa-image text-emerald-500"></i> প্রমোশনাল রিপোর্ট জেনারেটর
+        </h2>
+    </div>
+
+    <!-- ================= ডাউনলোড করার জন্য প্রফেশনাল রিপোর্ট কার্ড পোস্টার ================= -->
+    <div id="payout-poster" class="w-[350px] bg-white border border-slate-200 p-6 rounded-3xl flex flex-col justify-between shadow-2xl relative mx-auto overflow-hidden" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+        <div class="absolute -right-12 -top-12 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl"></div>
+        <div class="absolute -left-12 -bottom-12 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl"></div>
+
+        <div class="z-10 space-y-5">
+            <!-- ব্র্যান্ড এবং রিপোর্টের নাম -->
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <span class="text-xs font-black tracking-wide text-slate-900">OPTI<span class="text-emerald-500">WORK</span> ⚡</span>
+                <span class="bg-emerald-50 text-emerald-700 text-[8px] font-extrabold px-2.5 py-0.5 rounded-full border border-emerald-100/50 uppercase tracking-widest">Live Report</span>
+            </div>
+
+            <!-- রিপোর্ট জেনারেশন সময় প্রদর্শন -->
+            <div class="text-center space-y-1">
+                <h2 class="text-sm font-extrabold text-slate-800">৫ ঘণ্টার পেমেন্ট রিপোর্ট</h2>
+                <p class="text-[8px] text-slate-400 font-bold uppercase tracking-wider">রিপোর্ট জেনারেশন সময়: {{ generation_time }}</p>
+            </div>
+
+            <!-- যৌথ পরিসংখ্যান গ্রিড (রিয়েল + ফেক মিক্সড ডেটা) -->
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-slate-50 border border-slate-100/80 p-3 rounded-2xl">
+                    <span class="text-[8px] text-slate-400 font-bold uppercase tracking-wider block">মোট উত্তোলন আবেদন</span>
+                    <span class="text-sm font-extrabold text-slate-800 block mt-1">৳ {{ total_requested }}</span>
+                </div>
+                <div class="bg-slate-50 border border-slate-100/80 p-3 rounded-2xl">
+                    <span class="text-[8px] text-slate-400 font-bold uppercase tracking-wider block">আবেদনকারী সদস্য</span>
+                    <span class="text-sm font-extrabold text-slate-800 block mt-1">{{ total_users }} জন</span>
+                </div>
+                <div class="bg-slate-50 border border-slate-100/80 p-3 rounded-2xl">
+                    <span class="text-[8px] text-slate-400 font-bold uppercase tracking-wider block">মোট সফল পেমেন্ট</span>
+                    <span class="text-sm font-extrabold text-emerald-600 block mt-1">৳ {{ total_success }}</span>
+                </div>
+                <div class="bg-slate-50 border border-slate-100/80 p-3 rounded-2xl">
+                    <span class="text-[8px] text-slate-400 font-bold uppercase tracking-wider block">বাতিলকৃত পেমেন্ট</span>
+                    <span class="text-sm font-extrabold text-red-500 block mt-1">৳ {{ total_failed }}</span>
+                </div>
+            </div>
+
+            <!-- কাস্টম ফুটার -->
+            <div class="border-t border-slate-100 pt-4 text-center space-y-1">
+                <p class="text-[10px] font-extrabold text-slate-800 flex items-center justify-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> আমাদের অটো পেমেন্ট চালু আছে
+                </p>
+                <p class="text-[9px] text-slate-400 font-bold">বিস্তারিত জানতে যুক্ত হন: <span class="text-emerald-500 font-mono">@ortipay</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ডাউনলোড কন্ট্রোল বাটন -->
+    <div class="text-center pt-2 max-w-[350px] mx-auto">
+        <button onclick="downloadPoster()" class="w-full bg-slate-950 hover:bg-slate-800 text-white font-extrabold text-xs py-2.5 rounded-xl transition flex items-center justify-center gap-1.5 shadow">
+            <i class="fa-solid fa-download"></i> ডাউনলোড পোস্টার (Download PNG)
+        </button>
+    </div>
+
+</div>
+
+<script>
+function downloadPoster() {
+    const poster = document.getElementById('payout-poster');
+    
+    html2canvas(poster, { 
+        scale: 2, // এইচডি ডাউনলোডের জন্য
+        logging: false,
+        useCORS: true
+    }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = `OptiWork-PayoutReport-${Date.now()}.png`;
+        link.href = canvas.toDataURL();
+        link.click();
+    });
+}
+</script>
+
+{% endblock %}
