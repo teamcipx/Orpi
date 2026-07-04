@@ -1,14 +1,49 @@
 {% extends 'base.html' %}
 {% block content %}
 
+<!-- কাস্টম ৩ডি গ্লসি সাইন এবং পালস গ্লো অ্যানিমেশন স্টাইলস -->
+<style>
+    @keyframes shine {
+        100% {
+            left: 125%;
+        }
+    }
+    .shine-card {
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(135deg, #FFFFFF 0%, #F5F9FC 100%);
+        border: 1px solid rgba(226, 232, 240, 0.9);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.01);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .shine-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -75%;
+        width: 50%;
+        height: 100%;
+        background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.4) 100%);
+        transform: skewX(-25deg);
+    }
+    .shine-card:hover {
+        border-color: rgba(16, 185, 129, 0.3);
+        box-shadow: 0 10px 30px rgba(16, 185, 129, 0.04);
+        transform: translateY(-2px);
+    }
+    .shine-card:hover::after {
+        animation: shine 0.8s ease-in-out;
+    }
+</style>
+
 <div class="space-y-5">
     
-    <!-- ১. ওয়ান-টাইম টাস্ক সেকশন (৫টি পূর্ণ হলে সম্পূর্ণ হাইড হবে) -->
+    <!-- ১. ওয়ান-টাইম টাস্ক সেকশন -->
     {% if claimed_one_times|length < 5 %}
-    <div class="premium-card p-6 rounded-3xl border border-white/20 relative overflow-hidden">
+    <div class="premium-card p-6 rounded-3xl border border-white/20 relative overflow-hidden bg-white">
         <div class="absolute -right-8 -top-8 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl"></div>
         
-        <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-700 mb-4 border-b border-slate-100 pb-2.5 flex items-center gap-2">
+        <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-800 mb-4 border-b border-slate-100 pb-2.5 flex items-center gap-2">
             <i class="fa-solid fa-award text-emerald-500 text-sm animate-pulse"></i> One-Time Tasks (বোনাস জোন)
         </h2>
         
@@ -17,13 +52,13 @@
         <div class="space-y-3">
             
             <!-- টাস্ক ১: প্রোফাইল আপডেট -->
-            <div class="flex justify-between items-center bg-slate-50/50 p-4 rounded-2xl border border-slate-100/80 text-xs">
-                <div class="space-y-0.5">
-                    <p class="font-bold text-slate-800">১. প্রোফাইল ইনফো আপডেট করুন</p>
-                    <p class="text-[9px] text-slate-400">শর্ত: সেটিংসে গিয়ে মোবাইল, বয়স এবং জেলা সেভ করুন</p>
+            <div class="shine-card p-4 rounded-2xl flex justify-between items-center text-xs">
+                <div class="space-y-1">
+                    <p class="font-extrabold text-slate-900 text-xs">১. প্রোফাইল ইনফো আপডেট করুন</p>
+                    <p class="text-[9px] text-slate-400 font-semibold">মোবাইল, বয়স এবং জেলা সেভ করুন</p>
                 </div>
                 <div class="flex items-center gap-3">
-                    <span class="text-xs font-extrabold text-emerald-600">৳ ৫.০০</span>
+                    <span class="text-xs font-black text-emerald-600">৳ ৫.০০</span>
                     
                     {% if 'profile_update' in claimed_one_times %}
                         <span class="text-[9px] bg-slate-100 text-slate-400 border border-slate-200 px-3 py-1 rounded-full font-bold flex items-center gap-1">
@@ -31,9 +66,9 @@
                         </span>
                     {% else %}
                         {% if is_profile_complete %}
-                            <button onclick="claimOneTime('profile_update', this)" class="bg-slate-950 hover:bg-slate-800 text-white text-[10px] font-bold px-4 py-1.5 rounded-xl transition shadow-sm">Claim</button>
+                            <button onclick="claimOneTime('profile_update', this)" class="bg-slate-950 hover:bg-slate-800 text-white text-[10px] font-extrabold px-4 py-1.5 rounded-xl transition shadow-sm">Claim</button>
                         {% else %}
-                            <span class="text-[9px] bg-red-50 text-red-500 border border-red-100/50 px-3 py-1 rounded-full font-bold flex items-center gap-1">
+                            <span class="text-[9px] bg-red-50 text-red-500 border border-red-100/50 px-3 py-1 rounded-full font-extrabold flex items-center gap-1">
                                 <i class="fa-solid fa-lock"></i> Locked
                             </span>
                         {% endif %}
@@ -42,20 +77,20 @@
             </div>
 
             <!-- টাস্ক ২: টেলিগ্রাম জয়েন -->
-            <div class="flex justify-between items-center bg-slate-50/50 p-4 rounded-2xl border border-slate-100/80 text-xs">
-                <div class="space-y-0.5">
-                    <p class="font-bold text-slate-800">২. টেলিগ্রাম চ্যানেলে যুক্ত হন</p>
-                    <a href="https://t.me/ortiwokr" target="_blank" onclick="unlockClaim('join_channel')" class="text-[9px] text-sky-500 hover:underline font-bold flex items-center gap-1">চ্যানেল লিংক <i class="fa-solid fa-external-link text-[8px]"></i></a>
+            <div class="shine-card p-4 rounded-2xl flex justify-between items-center text-xs">
+                <div class="space-y-1">
+                    <p class="font-extrabold text-slate-900 text-xs">২. টেলিগ্রাম চ্যানেলে যুক্ত হন</p>
+                    <a href="https://t.me/ortiwokr" target="_blank" onclick="unlockClaim('join_channel')" class="text-[9px] text-sky-500 hover:underline font-extrabold flex items-center gap-1">চ্যানেল লিংক <i class="fa-solid fa-external-link text-[8px]"></i></a>
                 </div>
                 <div class="flex items-center gap-3">
-                    <span class="text-xs font-extrabold text-emerald-600">৳ ৫.০০</span>
+                    <span class="text-xs font-black text-emerald-600">৳ ৫.০০</span>
                     
                     {% if 'join_channel' in claimed_one_times %}
                         <span class="text-[9px] bg-slate-100 text-slate-400 border border-slate-200 px-3 py-1 rounded-full font-bold flex items-center gap-1">
                             <i class="fa-solid fa-circle-check text-emerald-500"></i> Claimed
                         </span>
                     {% else %}
-                        <button id="claim-join_channel" disabled data-claimed="false" onclick="claimOneTime('join_channel', this)" class="bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed text-[10px] font-bold px-4 py-1.5 rounded-xl transition">
+                        <button id="claim-join_channel" disabled data-claimed="false" onclick="claimOneTime('join_channel', this)" class="bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed text-[10px] font-extrabold px-4 py-1.5 rounded-xl transition">
                             Claim
                         </button>
                     {% endif %}
@@ -63,20 +98,20 @@
             </div>
 
             <!-- টাস্ক ৩: টিউটোরিয়াল ভিডিও -->
-            <div class="flex justify-between items-center bg-slate-50/50 p-4 rounded-xl border border-slate-100/80 text-xs">
-                <div class="space-y-0.5">
-                    <p class="font-bold text-slate-800">৩. টিউটোরিয়াল ভিডিওটি দেখুন</p>
-                    <a href="https://youtube.com" target="_blank" onclick="unlockClaim('watch_tutorial')" class="text-[9px] text-red-500 hover:underline font-bold flex items-center gap-1">ভিডিও লিংক <i class="fa-solid fa-external-link text-[8px]"></i></a>
+            <div class="shine-card p-4 rounded-2xl flex justify-between items-center text-xs">
+                <div class="space-y-1">
+                    <p class="font-extrabold text-slate-900 text-xs">৩. টিউটোরিয়াল ভিডিওটি দেখুন</p>
+                    <a href="https://youtube.com" target="_blank" onclick="unlockClaim('watch_tutorial')" class="text-[9px] text-red-500 hover:underline font-extrabold flex items-center gap-1">ভিডিও লিংক <i class="fa-solid fa-external-link text-[8px]"></i></a>
                 </div>
                 <div class="flex items-center gap-3">
-                    <span class="text-xs font-extrabold text-emerald-600">৳ ৫.০০</span>
+                    <span class="text-xs font-black text-emerald-600">৳ ৫.০০</span>
                     
                     {% if 'watch_tutorial' in claimed_one_times %}
                         <span class="text-[9px] bg-slate-100 text-slate-400 border border-slate-200 px-3 py-1 rounded-full font-bold flex items-center gap-1">
                             <i class="fa-solid fa-circle-check text-emerald-500"></i> Claimed
                         </span>
                     {% else %}
-                        <button id="claim-watch_tutorial" disabled data-claimed="false" onclick="claimOneTime('watch_tutorial', this)" class="bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed text-[10px] font-bold px-4 py-1.5 rounded-xl transition">
+                        <button id="claim-watch_tutorial" disabled data-claimed="false" onclick="claimOneTime('watch_tutorial', this)" class="bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed text-[10px] font-extrabold px-4 py-1.5 rounded-xl transition">
                             Claim
                         </button>
                     {% endif %}
@@ -84,13 +119,13 @@
             </div>
 
             <!-- টাস্ক ৪: ৩ সফল রেফারেল -->
-            <div class="flex justify-between items-center bg-slate-50/50 p-4 rounded-2xl border border-slate-100/80 text-xs">
-                <div class="space-y-0.5">
-                    <p class="font-bold text-slate-800">৪. ৩ জন সফল রেফারেল সম্পন্ন করুন</p>
-                    <p class="text-[9px] text-slate-400">আপনার রেফারেল অগ্রগতি: {{ success_ref_count }} / 3</p>
+            <div class="shine-card p-4 rounded-2xl flex justify-between items-center text-xs">
+                <div class="space-y-1">
+                    <p class="font-extrabold text-slate-900 text-xs">৪. ৩ জন সফল রেফারেল সম্পন্ন করুন</p>
+                    <p class="text-[9px] text-slate-400 font-semibold">আপনার রেফারেল অগ্রগতি: {{ success_ref_count }} / 3</p>
                 </div>
                 <div class="flex items-center gap-3">
-                    <span class="text-xs font-extrabold text-emerald-600">৳ ৫০.০০</span>
+                    <span class="text-xs font-black text-emerald-600">৳ ৫০.০০</span>
                     
                     {% if 'refer_3' in claimed_one_times %}
                         <span class="text-[9px] bg-slate-100 text-slate-400 border border-slate-200 px-3 py-1 rounded-full font-bold flex items-center gap-1">
@@ -98,9 +133,9 @@
                         </span>
                     {% else %}
                         {% if success_ref_count >= 3 %}
-                            <button onclick="claimOneTime('refer_3', this)" class="bg-slate-950 hover:bg-slate-800 text-white text-[10px] font-bold px-4 py-1.5 rounded-xl transition shadow-sm">Claim</button>
+                            <button onclick="claimOneTime('refer_3', this)" class="bg-slate-950 hover:bg-slate-800 text-white text-[10px] font-extrabold px-4 py-1.5 rounded-xl transition shadow-sm">Claim</button>
                         {% else %}
-                            <span class="text-[9px] bg-red-50 text-red-500 border border-red-100/50 px-3 py-1 rounded-full font-bold flex items-center gap-1">
+                            <span class="text-[9px] bg-red-50 text-red-500 border border-red-100/50 px-3 py-1 rounded-full font-extrabold flex items-center gap-1">
                                 <i class="fa-solid fa-lock"></i> Locked
                             </span>
                         {% endif %}
@@ -109,13 +144,13 @@
             </div>
 
             <!-- টাস্ক ৫: ১০ সফল রেফারেল -->
-            <div class="flex justify-between items-center bg-slate-50/50 p-4 rounded-2xl border border-slate-100/80 text-xs">
-                <div class="space-y-0.5">
-                    <p class="font-bold text-slate-800">৫. ১০ জন সফল রেফারেল সম্পন্ন করুন</p>
-                    <p class="text-[9px] text-slate-400">আপনার রেফারেল অগ্রগতি: {{ success_ref_count }} / 10</p>
+            <div class="shine-card p-4 rounded-2xl flex justify-between items-center text-xs">
+                <div class="space-y-1">
+                    <p class="font-extrabold text-slate-900 text-xs">৫. ১০ জন সফল রেফারেল সম্পন্ন করুন</p>
+                    <p class="text-[9px] text-slate-400 font-semibold">আপনার রেফারেল অগ্রগতি: {{ success_ref_count }} / 10</p>
                 </div>
                 <div class="flex items-center gap-3">
-                    <span class="text-xs font-extrabold text-emerald-600">৳ ১৫০.০০</span>
+                    <span class="text-xs font-black text-emerald-600">৳ ১৫০.০০</span>
                     
                     {% if 'refer_10' in claimed_one_times %}
                         <span class="text-[9px] bg-slate-100 text-slate-400 border border-slate-200 px-3 py-1 rounded-full font-bold flex items-center gap-1">
@@ -123,9 +158,9 @@
                         </span>
                     {% else %}
                         {% if success_ref_count >= 10 %}
-                            <button onclick="claimOneTime('refer_10', this)" class="bg-slate-950 hover:bg-slate-800 text-white text-[10px] font-bold px-4 py-1.5 rounded-xl transition shadow-sm">Claim</button>
+                            <button onclick="claimOneTime('refer_10', this)" class="bg-slate-950 hover:bg-slate-800 text-white text-[10px] font-extrabold px-4 py-1.5 rounded-xl transition shadow-sm">Claim</button>
                         {% else %}
-                            <span class="text-[9px] bg-red-50 text-red-500 border border-red-100/50 px-3 py-1 rounded-full font-bold flex items-center gap-1">
+                            <span class="text-[9px] bg-red-50 text-red-500 border border-red-100/50 px-3 py-1 rounded-full font-extrabold flex items-center gap-1">
                                 <i class="fa-solid fa-lock"></i> Locked
                             </span>
                         {% endif %}
@@ -137,9 +172,9 @@
     {% endif %}
 
     <!-- ২. নরমাল টাস্ক পুল সেকশন -->
-    <div class="premium-card p-5 rounded-3xl border border-white/20 shadow-sm">
+    <div class="premium-card p-5 rounded-3xl border border-white/20 shadow-sm bg-white">
         <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-700 mb-4 border-b border-slate-100 pb-2.5 flex items-center gap-1.5">
-            <i class="fa-solid fa-list-check text-slate-400"></i> Daily Task Pool (নরমাল টাস্কসমূহ)
+            <i class="fa-solid fa-list-check text-slate-500"></i> Daily Task Pool (নরমাল টাস্কসমূহ)
         </h2>
         
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -154,53 +189,45 @@
 
         <div class="space-y-4">
             {% for task in all_normal_tasks %}
-            <div class="border border-slate-200 p-5 rounded-2xl bg-slate-50/40 space-y-3.5">
+            <div class="shine-card p-5 rounded-2xl space-y-3.5">
                 <div class="flex justify-between items-start">
                     <div class="space-y-1">
-                        <h3 class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                        <h3 class="text-xs font-black text-slate-900 flex items-center gap-1.5">
                             {{ task.title }}
                             {% if task.id in submission_map and submission_map[task.id] == 'Rejected' %}
-                                <span class="bg-red-100 text-red-700 text-[8px] font-extrabold px-2 py-0.5 rounded border border-red-200">Rejected / Resubmit</span>
+                                <span class="bg-red-100 text-red-700 text-[8px] font-extrabold px-2 py-0.5 rounded border border-red-200 leading-none">Rejected / Resubmit</span>
                             {% endif %}
                         </h3>
-                        <p class="text-[10px] text-slate-400 leading-relaxed">{{ task.description }}</p>
+                        <p class="text-[10px] text-slate-500 font-medium leading-relaxed">{{ task.description }}</p>
                     </div>
                     <span class="text-xs font-black text-emerald-600">৳ {{ task.reward }}</span>
                 </div>
                 
-                <a href="{{ task.link }}" target="_blank" class="text-[10px] text-blue-500 hover:underline font-bold inline-block">কাজের লিংকটি খুলুন <i class="fa-solid fa-external-link text-[8px] ml-0.5"></i></a>
+                <a href="{{ task.link }}" target="_blank" class="text-[10px] text-blue-500 hover:underline font-extrabold inline-block">কাজের লিংকটি খুলুন <i class="fa-solid fa-external-link text-[8px] ml-0.5"></i></a>
                 
-                {% if task.id in submission_map and submission_map[task.id] != 'Rejected' %}
-                    <div class="text-center py-1.5">
-                        <span class="text-[8px] uppercase font-bold tracking-wider px-3 py-1 rounded-full border {% if submission_map[task.id] == 'Pending' %}bg-yellow-50 text-yellow-600 border-yellow-100{% elif submission_map[task.id] == 'Approved' %}bg-emerald-50 text-emerald-600 border-emerald-100{% endif %}">
-                            Status: {{ submission_map[task.id] }}
-                        </span>
-                    </div>
-                {% else %}
-                    <!-- প্রুফ সাবমিশন ফর্ম -->
-                    <form action="/tasks/submit-normal" method="POST" class="pt-3.5 border-t border-slate-100 space-y-3">
-                        <input type="hidden" name="task_id" value="{{ task.id }}">
-                        <input type="hidden" name="proof_image_url" id="proof-input-{{ task.id }}">
-                        
-                        <div class="flex flex-col gap-2.5">
-                            <div class="flex items-center gap-3">
-                                <label for="file-{{ task.id }}" class="cursor-pointer bg-slate-200 hover:bg-slate-300 text-slate-700 text-[10px] font-bold px-3.5 py-2.5 rounded-xl transition flex items-center gap-1.5 shadow-sm">
-                                    <i class="fa-solid fa-cloud-arrow-up text-xs"></i> Select Proof Screenshot
-                                </label>
-                                <input type="file" id="file-{{ task.id }}" class="hidden" accept="image/*" onchange="uploadProof(this, '{{ task.id }}')">
-                                
-                                <span id="label-{{ task.id }}" class="text-[9px] text-slate-400 font-bold">স্ক্রিনশট সিলেক্ট করা হয়নি</span>
-                            </div>
-
-                            <!-- রিয়েল-টাইম আপলোড প্রোগ্রেস বার -->
-                            <div id="progress-container-{{ task.id }}" class="hidden w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mt-1">
-                                <div id="progress-bar-{{ task.id }}" class="bg-emerald-500 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
-                            </div>
+                <!-- প্রুফ সাবমিশন ফর্ম -->
+                <form action="/tasks/submit-normal" method="POST" class="pt-3.5 border-t border-slate-150 space-y-3">
+                    <input type="hidden" name="task_id" value="{{ task.id }}">
+                    <input type="hidden" name="proof_image_url" id="proof-input-{{ task.id }}">
+                    
+                    <div class="flex flex-col gap-2.5">
+                        <div class="flex items-center gap-3">
+                            <label for="file-{{ task.id }}" class="cursor-pointer bg-slate-200 hover:bg-slate-300 text-slate-700 text-[10px] font-extrabold px-3.5 py-2.5 rounded-xl transition flex items-center gap-1.5 shadow-sm">
+                                <i class="fa-solid fa-cloud-arrow-up text-xs"></i> Select Proof Screenshot
+                            </label>
+                            <input type="file" id="file-{{ task.id }}" class="hidden" accept="image/*" onchange="uploadProof(this, '{{ task.id }}')">
+                            
+                            <span id="label-{{ task.id }}" class="text-[9px] text-slate-500 font-extrabold">স্ক্রিনশট সিলেক্ট করা হয়নি</span>
                         </div>
-                        
-                        <button type="submit" id="submit-{{ task.id }}" disabled class="w-full bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed text-[10px] font-extrabold py-2.5 rounded-xl transition shadow-none">জমা দিন</button>
-                    </form>
-                {% endif %}
+
+                        <!-- রিয়েল-টাইম আপলোড প্রোগ্রেস বার -->
+                        <div id="progress-container-{{ task.id }}" class="hidden w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mt-1">
+                            <div id="progress-bar-{{ task.id }}" class="bg-emerald-500 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" id="submit-{{ task.id }}" disabled class="w-full bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed text-[10px] font-extrabold py-2.5 rounded-xl transition shadow-none">জমা দিন</button>
+                </form>
             </div>
             {% else %}
             <p class="text-xs text-slate-400 text-center py-4">বর্তমানে কোনো নরমাল টাস্ক উপলব্ধ নেই।</p>
@@ -210,7 +237,7 @@
 </div>
 
 <script>
-// ১. ওয়ান-টাইম ক্লেইম রিকোয়েস্ট স্ক্রিপ্ট
+// ওয়ান-টাইম ক্লেইম রিকোয়েস্ট স্ক্রিপ্ট
 async function claimOneTime(taskName, btnElement) {
     const msg = document.getElementById('ot-message');
     msg.classList.add('hidden');
@@ -242,21 +269,20 @@ async function claimOneTime(taskName, btnElement) {
     }
 }
 
-// ২. লিংক ক্লিক ক্লেইম আনলক স্ক্রিপ্ট
+// লিংক ক্লিক ক্লেইম আনলক স্ক্রিপ্ট
 function unlockClaim(taskName) {
     const btn = document.getElementById(`claim-${taskName}`);
     if (btn && btn.getAttribute('data-claimed') !== 'true') {
         btn.removeAttribute('disabled');
-        btn.className = "bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] font-bold px-4 py-1.5 rounded-xl transition cursor-pointer shadow-[0_4px_14px_rgba(16,185,129,0.15)]";
+        btn.className = "bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] font-extrabold px-4 py-1.5 rounded-xl transition cursor-pointer shadow-[0_4px_14px_rgba(16,185,129,0.15)]";
     }
 }
 
-// ৩. সর্বাধুনিক ও শতভাগ কার্যকরী ইমেজেস আপলোড স্ক্রিপ্ট (Progress Bar সহ)
+// ইমেজেস আপলোড স্ক্রিপ্ট (Progress Bar সহ)
 function uploadProof(input, taskId) {
     const file = input.files[0];
     if (!file) return;
 
-    // আপনার দেওয়া ImgBB API Key
     const IMGBB_API_KEY = "1cb6f7d4b65dfd982d0435de86bb8aff"; 
 
     const formData = new FormData();
@@ -271,7 +297,7 @@ function uploadProof(input, taskId) {
     progressBar.style.width = '0%';
     
     label.innerText = "Uploading: 0%";
-    label.className = "text-[9px] text-slate-500 font-bold";
+    label.className = "text-[9px] text-slate-500 font-extrabold animate-pulse";
 
     const xhr = new XMLHttpRequest();
     
@@ -294,22 +320,22 @@ function uploadProof(input, taskId) {
                 label.className = "text-[9px] text-emerald-500 font-extrabold";
                 
                 submitBtn.removeAttribute('disabled');
-                submitBtn.className = "w-full bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] font-extrabold py-2 rounded-xl transition cursor-pointer shadow";
+                submitBtn.className = "w-full bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] font-extrabold py-2.5 rounded-xl transition cursor-pointer shadow";
             } else {
                 label.innerText = "Upload Failed. Please try again.";
-                label.className = "text-[9px] text-red-500 font-bold";
+                label.className = "text-[9px] text-red-500 font-extrabold";
                 progressContainer.classList.add('hidden');
             }
         } else {
             label.innerText = "Error: Invalid API Key or network issue.";
-            label.className = "text-[9px] text-red-500 font-bold";
+            label.className = "text-[9px] text-red-500 font-extrabold";
             progressContainer.classList.add('hidden');
         }
     };
 
     xhr.onerror = function() {
         label.innerText = "Network connection failed.";
-        label.className = "text-[9px] text-red-500 font-bold";
+        label.className = "text-[9px] text-red-500 font-extrabold";
         progressContainer.classList.add('hidden');
     };
 
