@@ -1,315 +1,210 @@
-{% extends 'base.html' %}
-{% block content %}
-
-<!-- ১. স্ক্রলিং নোটিশ -->
-<div class="bg-slate-100 border border-slate-200 text-slate-700 p-2.5 px-4 mb-4 rounded-xl flex items-center gap-2 shadow-sm">
-    <i class="fa-solid fa-bullhorn text-xs text-emerald-500 animate-bounce"></i>
-    <marquee class="font-semibold text-xs tracking-wide" scrollamount="3">{{ notice }}</marquee>
-</div>
-
-<!-- ডেস্কটপের জন্য কলাম বিভাজন গ্রিড (মোবাইলে সিঙ্গেল কলাম, ডেস্কটপে সাইড-বাই-সাইড) -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Opti Work</title>
     
-    <!-- বাম পাশের ২-কলাম (ইউজার কার্ড ও সক্রিয় প্রসেসরসমূহ) -->
-    <div class="md:col-span-2 space-y-4">
-        
-        <!-- ইউজার ব্যালেন্স কার্ড -->
-        <div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
-            <div class="flex items-center gap-3.5">
-                <div class="relative">
-                    <img src="{{ user.avatar_url }}" alt="Profile" class="w-12 h-12 rounded-full object-cover border-2 border-emerald-100 shadow-sm">
-                    <span class="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full"></span>
-                </div>
-                <div>
-                    <h2 class="text-sm font-extrabold text-slate-800 flex items-center gap-1">
-                        {{ user.username }}
-                    </h2>
-                    <span class="text-[9px] bg-slate-100 text-slate-500 font-bold uppercase tracking-wider px-2 py-0.5 rounded-full">UID: {{ user.uid }}</span>
-                </div>
-            </div>
-            <div class="text-right">
-                <span class="text-[9px] text-slate-400 uppercase tracking-wider font-bold">ব্যালেন্স</span>
-                <p class="text-2xl font-black text-emerald-600">৳ {{ user.balance }}</p>
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* মডার্ন টেকনোলজি ডট গ্রিড মেস ব্যাকগ্রাউন্ড */
+        body {
+            background-color: #f8fafc;
+            background-image: radial-gradient(#e2e8f0 1.2px, transparent 1.2px), radial-gradient(#e2e8f0 1.2px, #f8fafc 1.2px);
+            background-size: 24px 24px;
+            background-position: 0 0, 12px 12px;
+        }
+        .premium-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.015);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .premium-card:hover {
+            border-color: rgba(16, 185, 129, 0.25);
+            box-shadow: 0 12px 35px rgba(16, 185, 129, 0.03);
+            transform: translateY(-2px);
+        }
+        .glow-btn-light {
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.2);
+            transition: all 0.3s ease;
+        }
+        .glow-btn-light:hover {
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+        .minimal-select {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2364748b"><path d="M7 10l5 5 5-5z"/></svg>');
+            background-size: 18px;
+            background-position: right 12px center;
+            background-repeat: no-repeat;
+            appearance: none;
+        }
+    </style>
+</head>
+<body class="text-[#0F172A] min-h-screen flex flex-col md:flex-row pb-28 md:pb-0">
+
+    <!-- ================= ১. ডেস্কটপ সাইডবার (লাক্সারি ডার্ক থিম) ================= -->
+    <aside class="hidden md:flex flex-col justify-between w-64 bg-[#070A13] border-r border-[#111726] h-screen fixed left-0 top-0 p-5 z-40">
+        <div class="space-y-6">
+            <!-- ব্র্যান্ড লোগো এবং লাইভ নিওন ডট -->
+            <a href="/dashboard" class="flex items-center space-x-2.5 px-2">
+                <div class="w-2.5 h-2.5 bg-emerald-400 rounded-full shadow-[0_0_10px_#10b981] animate-pulse"></div>
+                <span class="text-base font-extrabold tracking-wider text-white">
+                    OPTI<span class="text-emerald-400">WORK</span>
+                </span>
+            </a>
+
+            <!-- প্রিমিয়াম ক্যাটাগরি মেনু -->
+            <div class="space-y-2 text-xs font-bold uppercase tracking-wider text-gray-400">
+                <a href="/dashboard" class="flex items-center gap-3 px-3.5 py-3 rounded-xl hover:bg-[#111726] hover:text-white transition-all duration-200">
+                    <i class="fa-solid fa-chart-line text-sm text-slate-500"></i> Dashboard
+                </a>
+                <a href="/tasks" class="flex items-center gap-3 px-3.5 py-3 rounded-xl hover:bg-[#111726] hover:text-white transition-all duration-200">
+                    <i class="fa-solid fa-list-check text-sm text-slate-500"></i> Task Pool
+                </a>
+                <a href="/withdraw" class="flex items-center gap-3 px-3.5 py-3 rounded-xl hover:bg-[#111726] hover:text-white transition-all duration-200">
+                    <i class="fa-solid fa-money-bill-transfer text-sm text-slate-500"></i> Withdrawal
+                </a>
+                <a href="/referrals" class="flex items-center gap-3 px-3.5 py-3 rounded-xl hover:bg-[#111726] hover:text-white transition-all duration-200">
+                    <i class="fa-solid fa-gift text-sm text-slate-500"></i> Referrals
+                </a>
+                <a href="/store" class="flex items-center gap-3 px-3.5 py-3 rounded-xl hover:bg-[#111726] hover:text-white transition-all duration-200">
+                    <i class="fa-solid fa-store text-sm text-slate-500"></i> Hardware Store
+                </a>
             </div>
         </div>
 
-        <!-- ডেইলি চেক-ইন উইজেট -->
-        {% if is_daily_eligible %}
-        <div class="minimal-card p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-500 text-sm shadow-sm animate-pulse">
-                    <i class="fa-solid fa-gift"></i>
-                </div>
+        <!-- সাইডবার প্রোফাইল সেকশন -->
+        {% if user %}
+        <div class="border-t border-[#111726] pt-4 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+                <img src="{{ user.avatar_url }}" alt="Profile" class="w-9 h-9 rounded-full object-cover border border-gray-800 shadow-sm">
                 <div>
-                    <h4 class="text-xs font-bold text-slate-700">ডেইলি চেক-ইন বোনাস</h4>
-                    <p class="text-[9px] text-slate-400 mt-0.5">প্রতিদিন লগইন করে ৳ ৫.০০ বোনাস নিন</p>
+                    <h4 class="text-xs font-bold text-gray-200 leading-none">{{ user.username }}</h4>
+                    <span class="text-[9px] text-slate-500 font-bold block mt-1">UID: {{ user.uid }}</span>
                 </div>
             </div>
-            <button id="daily-btn" onclick="runDailyCheckin()" class="glow-btn-light bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-extrabold px-4 py-2 rounded-xl transition shadow">
-                CLAIM ৳৫
-            </button>
+            <a href="/logout" class="text-slate-500 hover:text-red-400 transition text-sm p-1"><i class="fa-solid fa-sign-out-alt"></i></a>
         </div>
         {% endif %}
+    </aside>
 
-        <!-- বহুমাত্রিক মাইনিং টার্মিনাল -->
-        <div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-4">
-            <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
-                <i class="fa-solid fa-server text-emerald-500 animate-pulse"></i>
-                <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-700">সক্রিয় মাইনিং ডিভাইসসমূহ</h3>
-            </div>
+    <!-- ================= ২. মোবাইল হেডার বার (ফ্রস্টেড গ্লাস ইফেক্ট) ================= -->
+    <nav class="bg-white/80 border-b border-slate-100 sticky top-0 z-50 md:hidden w-full backdrop-blur-md">
+        <div class="px-4 py-3.5 flex justify-between items-center">
+            <a href="/dashboard" class="flex items-center space-x-2">
+                <span class="text-base font-extrabold tracking-tight text-slate-900">
+                    OPTI<span class="text-emerald-500">WORK</span>
+                </span>
+            </a>
+            
+            <button onclick="toggleTopMenu()" class="text-slate-600 focus:outline-none p-1 hover:text-slate-900 transition">
+                <i id="menu-icon" class="fa-solid fa-bars text-lg"></i>
+            </button>
+        </div>
 
-            <div id="claim-api-message" class="hidden p-3 text-xs rounded-xl text-center font-bold border"></div>
+        <!-- মোবাইল মেনু টগল ড্রপডাউন -->
+        <div id="top-dropdown-menu" class="hidden border-b border-slate-100 bg-white/95 backdrop-blur-md px-5 py-3.5 space-y-2 text-xs font-semibold uppercase tracking-wider text-slate-500 w-full mx-auto">
+            <a href="/dashboard" class="block py-2 hover:text-emerald-500 transition"><i class="fa-solid fa-chart-line mr-2"></i> Dashboard</a>
+            <a href="/store" class="block py-2 hover:text-emerald-500 transition"><i class="fa-solid fa-store mr-2"></i> Store</a>
+            <a href="/withdraw" class="block py-2 hover:text-emerald-500 transition"><i class="fa-solid fa-money-bill-transfer mr-2"></i> Withdrawal</a>
+            <a href="/referrals" class="block py-2 hover:text-emerald-500 transition"><i class="fa-solid fa-users mr-2"></i> Referrals</a>
+            <a href="/profile" class="block py-2 hover:text-emerald-500 transition"><i class="fa-solid fa-user-gear mr-2"></i> Account</a>
+            <a href="/logout" class="block py-2 text-red-500 hover:text-red-600 transition"><i class="fa-solid fa-sign-out-alt mr-2"></i> Logout</a>
+        </div>
+    </nav>
 
-            <div class="space-y-4">
-                {% for item in owned_packages %}
-                <div class="bg-slate-50 border border-slate-100 p-4 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative overflow-hidden">
+    <!-- ================= ৩. ফ্লোটিং টেলিগ্রাম কাস্টমার সাপোর্ট বাটন ================= -->
+    <div class="fixed bottom-24 right-4 z-50 md:bottom-6 md:right-6">
+        <a href="https://t.me/Optiworkhelp" target="_blank" class="w-11 h-11 bg-[#229ED9] hover:bg-[#1d82c4] text-white rounded-full flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110 relative">
+            <span class="absolute inset-0 rounded-full bg-[#229ED9]/30 animate-ping"></span>
+            <i class="fa-brands fa-telegram text-xl relative z-10"></i>
+        </a>
+    </div>
+
+    <!-- ================= ৪. ফ্লোটিং মোবাইল বটম পিল-ডক (Pill-Style Floating Dock) ================= -->
+    <div class="fixed bottom-4 left-0 right-0 z-40 px-4 max-w-sm mx-auto md:hidden">
+        <div class="bg-white/95 backdrop-blur-md border border-slate-200/80 py-3 rounded-full shadow-[0_10px_35px_rgba(0,0,0,0.08)] flex justify-around text-[10px] uppercase font-bold text-slate-400">
+            <!-- হোম -->
+            <a href="/dashboard" class="bottom-nav-link flex flex-col items-center gap-1 hover:text-emerald-500 transition text-slate-400 relative">
+                <i class="fa-solid fa-chart-line text-base"></i> Home
+            </a>
+            <!-- টাস্ক -->
+            <a href="/tasks" class="bottom-nav-link flex flex-col items-center gap-1 hover:text-emerald-500 transition text-slate-400 relative">
+                <i class="fa-solid fa-list-check text-base"></i> Task
+            </a>
+            <!-- উইথড্র -->
+            <a href="/withdraw" class="bottom-nav-link flex flex-col items-center gap-1 hover:text-emerald-500 transition text-slate-400 relative">
+                <i class="fa-solid fa-money-bill-transfer text-base"></i> Withdraw
+            </a>
+            <!-- রেফার -->
+            <a href="/referrals" class="bottom-nav-link flex flex-col items-center gap-1 hover:text-emerald-500 transition text-slate-400 relative">
+                <i class="fa-solid fa-gift text-base"></i> Refer
+            </a>
+            <!-- প্রোফাইল -->
+            <a href="/profile" class="bottom-nav-link flex flex-col items-center gap-1 hover:text-emerald-500 transition text-slate-400 relative">
+                <i class="fa-solid fa-circle-user text-base"></i> Account
+            </a>
+        </div>
+    </div>
+
+    <!-- মেইন কন্টেন্ট উইন্ডো -->
+    <main class="max-w-5xl mx-auto p-4 mt-2 w-full flex-grow md:pl-64 lg:pl-64 shadow-none">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script>
+        function toggleTopMenu() {
+            const menu = document.getElementById('top-dropdown-menu');
+            const icon = document.getElementById('menu-icon');
+            if (menu.classList.contains('hidden')) {
+                menu.classList.remove('hidden');
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-xmark');
+            } else {
+                menu.classList.add('hidden');
+                icon.classList.remove('fa-xmark');
+                icon.classList.add('fa-bars');
+            }
+        }
+
+        // ব্রাউজারের লাইভ URL ট্র্যাক করে স্বয়ংক্রিয়ভাবে একটিভ বাটন নিয়ন ডট সহ গ্লো করার স্ক্রিপ্ট
+        document.addEventListener("DOMContentLoaded", function() {
+            const path = window.location.pathname;
+            const navLinks = document.querySelectorAll('.bottom-nav-link');
+            
+            navLinks.forEach(link => {
+                const href = link.getAttribute('href');
+                // রুট পাথ বা ড্যাশবোর্ড পাথ মিললে হোম আইকনকে একটিভ করবে
+                if (path === href || (path === '/' && href === '/dashboard')) {
+                    link.classList.remove('text-slate-400');
+                    link.classList.add('text-emerald-500');
                     
-                    <div class="flex items-center gap-3 z-10">
-                        <div class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-emerald-500 shadow-sm">
-                            <i class="fa-solid fa-microchip text-base animate-pulse"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-slate-800 text-xs">{{ item.packages.name }} (৳ {{ item.packages.yield_amount }})</h4>
-                            <p class="text-[9px] text-slate-400 font-semibold mt-0.5 uppercase tracking-wide">
-                                {% if item.packages.is_premium %}
-                                    মেয়اد শেষ হবে: {% if item.expires_at %}{{ item.expires_at[:10] }}{% else %}৩০ দিন{% endif %}
-                                {% else %}
-                                    মেয়اد শেষ হবে: {% if item.expires_at %}{{ item.expires_at[:10] }}{% else %}১ বছর{% endif %}
-                                {% endif %}
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center justify-between w-full md:w-auto gap-4 pt-3 md:pt-0 border-t md:border-t-0 border-slate-200/50 z-10">
-                        <div class="flex items-center gap-1.5 bg-white border border-slate-200 px-3 py-1.5 rounded-xl shadow-inner font-mono text-xs font-black">
-                            <i id="clock-{{ item.id }}" class="fa-regular fa-clock text-slate-400"></i>
-                            <span class="countdown-timer text-slate-800" 
-                                  id="timer-{{ item.id }}"
-                                  data-last-claimed="{{ item.last_claimed_at }}" 
-                                  data-duration="{{ item.packages.duration_hours }}"
-                                  data-id="{{ item.id }}">
-                                00:00:00
-                            </span>
-                        </div>
-
-                        <button id="claim-btn-{{ item.id }}" onclick="runClaim('{{ item.id }}')" disabled 
-                                class="bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed font-extrabold text-[10px] px-4 py-2 rounded-xl transition shadow-none">
-                            <i class="fa-solid fa-lock text-[9px]"></i> CLAIM
-                        </button>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-
-    </div>
-
-    <!-- ডান পাশের ১-কলাম (কুইক নেভিগেশন ও হেল্প ব্যানারসমূহ) -->
-    <div class="space-y-4">
-        
-        <!-- কুইক নেভিগেশন গ্রিড -->
-        <div class="grid grid-cols-3 gap-3">
-            <a href="/history" class="minimal-card p-3 rounded-xl flex flex-col items-center justify-center text-center hover:border-slate-300 transition bg-white border border-slate-200 shadow-sm">
-                <i class="fa-solid fa-clock-rotate-left text-slate-500 text-sm mb-1.5"></i>
-                <span class="text-[9px] font-bold text-slate-600 uppercase tracking-wider">History</span>
-            </a>
-            <a href="https://t.me/ortiwokr" target="_blank" class="minimal-card p-3 rounded-xl flex flex-col items-center justify-center text-center hover:border-slate-300 transition bg-white border border-slate-200 shadow-sm">
-                <i class="fa-brands fa-telegram text-sky-500 text-sm mb-1.5"></i>
-                <span class="text-[9px] font-bold text-slate-600 uppercase tracking-wider">Telegram</span>
-            </a>
-            <a href="/tasks" class="minimal-card p-3 rounded-xl flex flex-col items-center justify-center text-center hover:border-slate-300 transition bg-white border border-slate-200 shadow-sm">
-                <i class="fa-solid fa-list-check text-slate-500 text-sm mb-1.5"></i>
-                <span class="text-[9px] font-bold text-slate-600 uppercase tracking-wider">Task</span>
-            </a>
-            <a href="/referrals" class="minimal-card p-3 rounded-xl flex flex-col items-center justify-center text-center hover:border-slate-300 transition bg-white border border-slate-200 shadow-sm">
-                <i class="fa-solid fa-gift text-slate-500 text-sm mb-1.5"></i>
-                <span class="text-[9px] font-bold text-slate-600 uppercase tracking-wider">Refer</span>
-            </a>
-            <a href="/profile" class="minimal-card p-3 rounded-xl flex flex-col items-center justify-center text-center hover:border-slate-300 transition bg-white border border-slate-200 shadow-sm">
-                <i class="fa-solid fa-circle-user text-slate-500 text-sm mb-1.5"></i>
-                <span class="text-[9px] font-bold text-slate-600 uppercase tracking-wider">Account</span>
-            </a>
-            <a href="/withdraw" class="minimal-card p-3 rounded-xl flex flex-col items-center justify-center text-center hover:border-slate-300 transition bg-white border border-slate-200 shadow-sm">
-                <i class="fa-solid fa-money-bill-transfer text-slate-500 text-sm mb-1.5"></i>
-                <span class="text-[9px] font-bold text-slate-600 uppercase tracking-wider">Withdraw</span>
-            </a>
-        </div>
-
-        <!-- হেল্প ও সাপোর্ট সেকশন -->
-        <div class="space-y-3">
-            <a href="/about" class="minimal-card p-4 rounded-xl flex items-center justify-between hover:border-slate-300 transition bg-white border border-slate-200 shadow-sm">
-                <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-500 text-sm shadow-sm">
-                        <i class="fa-solid fa-server"></i>
-                    </div>
-                    <div class="text-left">
-                        <p class="font-bold text-slate-800 text-xs">কাজের পদ্ধতি ও ব্যবসায়িক মডেল</p>
-                        <p class="text-[9px] text-slate-400 mt-0.5">আমরা কীভাবে আপনাদেরকে টাকা দিবো?</p>
-                    </div>
-                </div>
-                <i class="fa-solid fa-chevron-right text-slate-300 text-xs"></i>
-            </a>
-
-            <a href="https://www.youtube.com/watch?v=YOUR_VIDEO_ID" target="_blank" class="minimal-card p-4 rounded-xl flex items-center justify-between hover:border-slate-300 transition bg-white border border-slate-200 shadow-sm">
-                <div class="flex items-center gap-3">
-                    <div class="text-red-500 text-lg">
-                        <i class="fa-solid fa-circle-play animate-pulse"></i>
-                    </div>
-                    <div class="text-left">
-                        <p class="font-bold text-slate-800 text-xs">কীভাবে কাজ করবেন? ভিডিও দেখুন!</p>
-                        <p class="text-[9px] text-slate-400">সহজ উপায়ে কাজ শিখে ইনকাম শুরু করুন</p>
-                    </div>
-                </div>
-                <span class="text-[9px] bg-red-50 text-red-600 border border-red-100 px-2.5 py-0.5 rounded-full font-bold">ভিডিও</span>
-            </a>
-
-            <a href="https://t.me/ortipay" target="_blank" class="minimal-card p-4 rounded-xl flex items-center justify-between hover:border-slate-300 transition bg-white border border-slate-200 shadow-sm">
-                <div class="flex items-center gap-3">
-                    <div class="text-emerald-500 text-base">
-                        <i class="fa-solid fa-receipt"></i>
-                    </div>
-                    <div class="text-left">
-                        <p class="font-bold text-slate-800 text-xs">পেমেন্ট প্রুফ চ্যানেল (Live Payouts)</p>
-                        <p class="text-[9px] text-slate-400 mt-0.5">আমাদের স্বয়ংক্রিয় পেমেন্ট প্রুফ হিস্ট্রি দেখুন</p>
-                    </div>
-                </div>
-                <span class="text-[9px] bg-emerald-50 text-emerald-600 border border-emerald-100 px-2.5 py-0.5 rounded-full font-bold">পেমেন্ট প্রুফ</span>
-            </a>
-
-            <a href="/reviews" class="minimal-card p-4 rounded-xl flex items-center justify-between bg-white border border-slate-200 shadow-sm hover:border-slate-300 transition">
-                <div class="flex items-center gap-3">
-                    <div class="text-amber-400 text-sm">
-                        <i class="fa-solid fa-star"></i>
-                    </div>
-                    <div class="text-left">
-                        <p class="font-bold text-slate-800 text-xs">আমাদের রিভিউ দেখুন</p>
-                        <p class="text-[9px] text-slate-400">১০০% বিশ্বস্ত এবং নিয়মিত পেমেন্ট করা হয়</p>
-                    </div>
-                </div>
-                <div class="flex gap-0.5 text-amber-400 text-[10px]">
-                    <i class="fa-solid fa-star"></i>
-                    <i class="fa-solid fa-star"></i>
-                    <i class="fa-solid fa-star"></i>
-                    <i class="fa-solid fa-star"></i>
-                    <i class="fa-solid fa-star"></i>
-                </div>
-            </a>
-
-            <a href="https://t.me/optiwork_help" target="_blank" class="minimal-card p-4 rounded-xl flex items-center justify-between hover:border-slate-300 transition bg-white border border-slate-200 shadow-sm">
-                <div class="flex items-center gap-3">
-                    <div class="text-sky-500 text-sm">
-                        <i class="fa-solid fa-headset text-base"></i>
-                    </div>
-                    <div class="text-left">
-                        <p class="font-bold text-slate-800 text-xs">সাপোর্ট চ্যানেল</p>
-                        <p class="text-[9px] text-slate-400">২৪ ঘণ্টা যেকোনো সমস্যায় হেল্পডেস্ক রয়েছে</p>
-                    </div>
-                </div>
-                <span class="text-[9px] bg-sky-50 text-sky-600 border border-sky-100 px-2.5 py-0.5 rounded-full font-bold">হেল্পডেস্ক</span>
-            </a>
-        </div>
-
-    </div>
-
-</div>
-
-<script>
-async function runDailyCheckin() {
-    const btn = document.getElementById('daily-btn');
-    btn.setAttribute('disabled', 'true');
-    btn.innerText = "Claiming...";
-
-    try {
-        const res = await fetch('/claim-daily', { method: 'POST' });
-        const data = await res.json();
-
-        if (res.status === 200) {
-            alert(data.message);
-            location.reload();
-        } else {
-            alert(data.message);
-            btn.className = "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed text-[11px] font-bold px-3 py-2 rounded-xl shadow-none";
-            btn.innerText = "Claimed Today";
-        }
-    } catch (e) {
-        alert("কানেকশন ত্রুটি!");
-        btn.removeAttribute('disabled');
-        btn.innerText = "CLAIM ৳৫";
-    }
-}
-
-function updateDashboardTimers() {
-    const timers = document.querySelectorAll('.countdown-timer');
-    const now = new Date();
-
-    timers.forEach(timer => {
-        const id = timer.getAttribute('data-id');
-        const lastClaimedStr = timer.getAttribute('data-last-claimed');
-        const durationHours = parseInt(timer.getAttribute('data-duration'));
-        
-        const claimBtn = document.getElementById(`claim-btn-${id}`);
-        const clockIcon = document.getElementById(`clock-${id}`);
-
-        const lastClaimed = new Date(lastClaimedStr.replace('Z', '+00:00'));
-        const nextClaimTime = new Date(lastClaimed.getTime() + (durationHours * 60 * 60 * 1000));
-        
-        const diffMs = nextClaimTime - now;
-
-        if (diffMs <= 0) {
-            timer.innerText = "READY";
-            timer.className = "countdown-timer text-emerald-500 animate-pulse";
-            clockIcon.className = "text-emerald-500 animate-spin text-[10px]";
-
-            claimBtn.removeAttribute('disabled');
-            claimBtn.className = "glow-btn-light bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-[10px] px-4 py-2 rounded-xl transition flex items-center gap-1 shadow cursor-pointer";
-            claimBtn.innerHTML = '<i class="fa-solid fa-bolt text-[9px]"></i> CLAIM';
-        } else {
-            const hours = Math.floor(diffMs / (1000 * 60 * 60));
-            const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
-
-            const pad = (num) => String(num).padStart(2, '0');
-            timer.innerText = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
-            timer.className = "countdown-timer text-slate-800";
-
-            clockIcon.className = "text-slate-400";
-            claimBtn.setAttribute('disabled', 'true');
-            claimBtn.className = "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed font-extrabold text-[10px] px-4 py-2 rounded-xl transition flex items-center gap-1 shadow-none";
-            claimBtn.innerHTML = '<i class="fa-solid fa-lock text-[9px]"></i> CLAIM';
-        }
-    });
-}
-
-setInterval(updateDashboardTimers, 1000);
-updateDashboardTimers();
-
-async function runClaim(userPackageId) {
-    const alertBox = document.getElementById('claim-api-message');
-    alertBox.classList.add('hidden');
-    
-    try {
-        const res = await fetch('/claim-mining', { 
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_package_id: userPackageId })
+                    // একটিভ ইন্ডিকেটর নিওন ডট তৈরি করা হচ্ছে
+                    const dot = document.createElement('span');
+                    dot.className = "w-1 h-1 bg-emerald-500 rounded-full mt-0.5 absolute -bottom-1.5 shadow-[0_0_6px_#10b981]";
+                    link.appendChild(dot);
+                }
+            });
         });
-        const data = await res.json();
-        
-        alertBox.classList.remove('hidden', 'bg-red-50', 'text-red-600', 'border-red-100', 'bg-emerald-50', 'text-emerald-600', 'border-emerald-100');
-        alertBox.classList.add('border');
-        
-        if (data.status === 'success') {
-            alertBox.classList.add('bg-emerald-50', 'text-emerald-600', 'border-emerald-100');
-            alertBox.innerText = data.message;
-            setTimeout(() => { location.reload(); }, 1500);
-        } else {
-            alertBox.classList.add('bg-red-50', 'text-red-600', 'border-red-100');
-            alertBox.innerText = data.message;
-        }
-    } catch (e) {
-        alert("কানেকশন ত্রুটি!");
-    }
-}
-</script>
-
-{% endblock %}
+    </script>
+</body>
+</html>
