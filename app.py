@@ -1099,7 +1099,6 @@ def add_money():
     history = supabase.table("deposits").select("*").eq("user_id", user_id).order("created_at", desc=True).execute().data
     return render_template('add_money.html', history=history)
 
-
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     ref_by = request.args.get('ref', '')
@@ -1118,7 +1117,7 @@ def register():
             referrer_res = supabase.table("users").select("id").eq("uid", ref_uid).execute()
             if referrer_res.data:
                 referrer_id = referrer_res.data[0]['id']
-                initial_balance = 100.00
+                initial_balance = 70.00 # নতুন মেম্বার পাবেন ৭০ টাকা
         
         user_data = {
             "username": username,
@@ -1140,35 +1139,25 @@ def register():
                 }).execute()
                 
                 if referrer_id:
-                    existing_refs = supabase.table("referrals").select("id").eq("referrer_id", referrer_id).execute().data
-                    ref_count = len(existing_refs)
-                    
-                    if ref_count == 0:
-                        delay_hours = 1
-                    elif ref_count == 1:
-                        delay_hours = 24
-                    elif ref_count == 2:
-                        delay_hours = 40
-                    else:
-                        delay_hours = 42
-                        
-                    scheduled_time = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=delay_hours)
-                    
+                    now_str = datetime.datetime.now(datetime.timezone.utc).isoformat()
+                    # ১. কোনো পেন্ডিং ছাড়াই সরাসরি Success স্ট্যাটাসে রেফারেল যুক্ত হবে
                     supabase.table("referrals").insert({
                         "referrer_id": referrer_id,
                         "referred_id": new_user_id,
-                        "status": "Processing",
-                        "scheduled_payout_at": scheduled_time.isoformat()
+                        "status": "Success",
+                        "scheduled_payout_at": now_str,
+                        "processed_at": now_str
                     }).execute()
+                    
+                    # ২. রেফারকারী সাথে সাথে ১৫ টাকা বোনাস পাবেন
+                    supabase.rpc("increment_balance", {"user_id": referrer_id, "amount": 15.00}).execute()
                         
                 flash("নিবন্ধন সফল হয়েছে। লগইন করুন।", "success")
                 return redirect(url_for('login'))
         except Exception:
-            flash("ইউজারনেম অথবা ইমেইলটি ইতিমধ্যে ব্যবহৃত হয়েছে।", "danger")
+            flash("ইমেইলটি ইতিমধ্যে ব্যবহৃত হয়েছে।", "danger")
             
     return render_template('register.html', ref_by=ref_by)
-
-
 
 @app.route('/claim-daily', methods=['POST'])
 def claim_daily():
