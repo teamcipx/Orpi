@@ -174,7 +174,7 @@
     <!-- ২. নরমাল টাস্ক পুল সেকশন -->
     <div class="premium-card p-5 rounded-3xl border border-white/20 shadow-sm bg-white">
         <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-700 mb-4 border-b border-slate-100 pb-2.5 flex items-center gap-1.5">
-            <i class="fa-solid fa-list-check text-slate-500"></i> Daily Task Pool (নরমাল টাস্কসমূহ)
+            <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping"></span> Daily Task Pool (নরমাল টাস্কসমূহ)
         </h2>
         
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -189,16 +189,41 @@
 
         <div class="space-y-4">
             {% for task in all_normal_tasks %}
+            
+            <!-- ডাইনামিক কি-ওয়ার্ড ভিত্তিক আইকন লজিক -->
+            {% set t_title_lower = task.title | lower %}
+            {% set t_desc_lower = task.description | lower %}
+            
+            {% if 'google' in t_title_lower or 'google' in t_desc_lower %}
+                {% set task_icon = '<i class="fa-brands fa-google text-red-500 text-base"></i>' %}
+            {% elif 'fb' in t_title_lower or 'fb' in t_desc_lower or 'facebook' in t_title_lower or 'facebook' in t_desc_lower %}
+                {% set task_icon = '<i class="fa-brands fa-facebook text-blue-600 text-base"></i>' %}
+            {% elif 'tiktok' in t_title_lower or 'tiktok' in t_desc_lower %}
+                {% set task_icon = '<i class="fa-brands fa-tiktok text-slate-900 text-base"></i>' %}
+            {% elif 'web' in t_title_lower or 'web' in t_desc_lower or 'website' in t_title_lower or 'website' in t_desc_lower %}
+                {% set task_icon = '<i class="fa-solid fa-globe text-cyan-500 text-base"></i>' %}
+            {% elif 'share' in t_title_lower or 'share' in t_desc_lower %}
+                {% set task_icon = '<i class="fa-solid fa-share-nodes text-indigo-500 text-base"></i>' %}
+            {% else %}
+                {% set task_icon = '<i class="fa-solid fa-cloud-arrow-up text-emerald-500 text-base"></i>' %}
+            {% endif %}
+
             <div class="shine-card p-5 rounded-2xl space-y-3.5">
                 <div class="flex justify-between items-start">
-                    <div class="space-y-1">
-                        <h3 class="text-xs font-black text-slate-900 flex items-center gap-1.5">
-                            {{ task.title }}
-                            {% if task.id in submission_map and submission_map[task.id] == 'Rejected' %}
-                                <span class="bg-red-100 text-red-700 text-[8px] font-extrabold px-2 py-0.5 rounded border border-red-200 leading-none">Rejected / Resubmit</span>
-                            {% endif %}
-                        </h3>
-                        <p class="text-[10px] text-slate-500 font-medium leading-relaxed">{{ task.description }}</p>
+                    <div class="flex items-start gap-3">
+                        <!-- ডাইনামিক আইকন বক্স রেন্ডারিং -->
+                        <div class="w-10 h-10 rounded-xl bg-white border border-slate-200/80 flex items-center justify-center shadow-sm">
+                            {{ task_icon | safe }}
+                        </div>
+                        <div class="space-y-0.5">
+                            <h3 class="text-xs font-black text-slate-900 flex items-center gap-1.5">
+                                {{ task.title }}
+                                {% if task.id in submission_map and submission_map[task.id] == 'Rejected' %}
+                                    <span class="bg-red-100 text-red-700 text-[8px] font-extrabold px-2 py-0.5 rounded border border-red-200 leading-none">Rejected / Resubmit</span>
+                                {% endif %}
+                            </h3>
+                            <p class="text-[10px] text-slate-500 font-medium leading-relaxed">{{ task.description }}</p>
+                        </div>
                     </div>
                     <span class="text-xs font-black text-emerald-600">৳ {{ task.reward }}</span>
                 </div>
@@ -206,18 +231,18 @@
                 <a href="{{ task.link }}" target="_blank" class="text-[10px] text-blue-500 hover:underline font-extrabold inline-block">কাজের লিংকটি খুলুন <i class="fa-solid fa-external-link text-[8px] ml-0.5"></i></a>
                 
                 <!-- প্রুফ সাবমিশন ফর্ম -->
-                <form action="/tasks/submit-normal" method="POST" class="pt-3.5 border-t border-slate-150 space-y-3">
+                <form action="/tasks/submit-normal" method="POST" class="pt-3.5 border-t border-slate-100 space-y-3">
                     <input type="hidden" name="task_id" value="{{ task.id }}">
                     <input type="hidden" name="proof_image_url" id="proof-input-{{ task.id }}">
                     
                     <div class="flex flex-col gap-2.5">
                         <div class="flex items-center gap-3">
-                            <label for="file-{{ task.id }}" class="cursor-pointer bg-slate-200 hover:bg-slate-300 text-slate-700 text-[10px] font-extrabold px-3.5 py-2.5 rounded-xl transition flex items-center gap-1.5 shadow-sm">
+                            <label for="file-{{ task.id }}" class="cursor-pointer bg-slate-200 hover:bg-slate-300 text-slate-700 text-[10px] font-bold px-3.5 py-2.5 rounded-xl transition flex items-center gap-1.5 shadow-sm">
                                 <i class="fa-solid fa-cloud-arrow-up text-xs"></i> Select Proof Screenshot
                             </label>
                             <input type="file" id="file-{{ task.id }}" class="hidden" accept="image/*" onchange="uploadProof(this, '{{ task.id }}')">
                             
-                            <span id="label-{{ task.id }}" class="text-[9px] text-slate-500 font-extrabold">স্ক্রিনশট সিলেক্ট করা হয়নি</span>
+                            <span id="label-{{ task.id }}" class="text-[9px] text-slate-500 font-bold">স্ক্রিনশট সিলেক্ট করা হয়নি</span>
                         </div>
 
                         <!-- রিয়েল-টাইম আপলোড প্রোগ্রেস বার -->
@@ -274,7 +299,7 @@ function unlockClaim(taskName) {
     const btn = document.getElementById(`claim-${taskName}`);
     if (btn && btn.getAttribute('data-claimed') !== 'true') {
         btn.removeAttribute('disabled');
-        btn.className = "bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] font-extrabold px-4 py-1.5 rounded-xl transition cursor-pointer shadow-[0_4px_14px_rgba(16,185,129,0.15)]";
+        btn.className = "bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] font-bold px-4 py-1.5 rounded-xl transition cursor-pointer shadow-[0_4px_14px_rgba(16,185,129,0.15)]";
     }
 }
 
@@ -283,6 +308,7 @@ function uploadProof(input, taskId) {
     const file = input.files[0];
     if (!file) return;
 
+    // আপনার দেওয়া ImgBB API Key
     const IMGBB_API_KEY = "1cb6f7d4b65dfd982d0435de86bb8aff"; 
 
     const formData = new FormData();
@@ -297,7 +323,7 @@ function uploadProof(input, taskId) {
     progressBar.style.width = '0%';
     
     label.innerText = "Uploading: 0%";
-    label.className = "text-[9px] text-slate-500 font-extrabold animate-pulse";
+    label.className = "text-[9px] text-slate-500 font-bold animate-pulse";
 
     const xhr = new XMLHttpRequest();
     
@@ -323,19 +349,19 @@ function uploadProof(input, taskId) {
                 submitBtn.className = "w-full bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] font-extrabold py-2.5 rounded-xl transition cursor-pointer shadow";
             } else {
                 label.innerText = "Upload Failed. Please try again.";
-                label.className = "text-[9px] text-red-500 font-extrabold";
+                label.className = "text-[9px] text-red-500 font-bold animate-none";
                 progressContainer.classList.add('hidden');
             }
         } else {
             label.innerText = "Error: Invalid API Key or network issue.";
-            label.className = "text-[9px] text-red-500 font-extrabold";
+            label.className = "text-[9px] text-red-500 font-bold animate-none";
             progressContainer.classList.add('hidden');
         }
     };
 
     xhr.onerror = function() {
         label.innerText = "Network connection failed.";
-        label.className = "text-[9px] text-red-500 font-extrabold";
+        label.className = "text-[9px] text-red-500 font-bold animate-none";
         progressContainer.classList.add('hidden');
     };
 
