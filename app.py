@@ -1098,7 +1098,7 @@ def add_money():
             
     history = supabase.table("deposits").select("*").eq("user_id", user_id).order("created_at", desc=True).execute().data
     return render_template('add_money.html', history=history)
-
+# (অন্যান্য কোড অপরিবর্তিত থাকবে, /register রাউটটি নিচের কোড দ্বারা প্রতিস্থাপন করুন)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -1108,6 +1108,27 @@ def register():
         email = request.form.get('email')
         password = request.form.get('password')
         referrer_code = request.form.get('referrer')
+        device_fingerprint = request.form.get('device_fingerprint')
+
+        # ১. ভার্সেল প্রক্সি হেডার থেকে ইউজারের আসল আইপি অ্যাড্রেস বের করা
+        ip_address = request.headers.get('x-forwarded-for', request.remote_addr)
+        if ip_address:
+            ip_address = ip_address.split(',')[0].strip() # প্রথম অরিজিনাল আইপি নেওয়া হলো
+
+        # ২. ডিভাইস ফিঙ্গারপ্রিন্ট ইউনিকনেস চেক
+        if device_fingerprint and device_fingerprint.strip() != "":
+            device_exists = supabase.table("users").select("id").eq("device_fingerprint", device_fingerprint.strip()).execute().data
+            if device_exists:
+                flash("নিরাপত্তা সতর্কতা: আপনার ডিভাইস থেকে ইতিমধ্যে একটি অ্যাকাউন্ট তৈরি করা হয়েছে। একই ডিভাইস থেকে একাধিক অ্যাকাউন্ট খোলা সম্পূর্ণ নিষিদ্ধ।", "danger")
+                return redirect(url_for('register', ref=ref_by))
+
+        # ৩. আইপি ডুপ্লিকেশন চেক (ভিপিএন এবং প্রক্সি স্প্যামিং রোধে একই আইপি থেকে সর্বোচ্চ ২ অ্যাকাউন্ট)
+        if ip_address:
+            ip_count_res = supabase.table("users").select("id", count="exact").eq("ip_address", ip_address).execute()
+            ip_count = ip_count_res.count if ip_count_res.count is not None else 0
+            if ip_count >= 2:
+                flash("আপনার নেটওয়ার্ক থেকে অতিরিক্ত অ্যাকাউন্ট খোলার চেষ্টা করা হয়েছে। দয়া করে মোবাইল ডাটা অন করুন বা অন্য নেটওয়ার্ক ব্যবহার করুন।", "danger")
+                return redirect(url_for('register', ref=ref_by))
 
         hashed_password = generate_password_hash(password)
         initial_balance = 0.00
@@ -1124,7 +1145,9 @@ def register():
             "username": username,
             "email": email,
             "password_hash": hashed_password,
-            "balance": initial_balance
+            "balance": initial_balance,
+            "device_fingerprint": device_fingerprint,
+            "ip_address": ip_address # আইপি সেভ করা হচ্ছে
         }
         
         try:
@@ -1167,8 +1190,7 @@ def register():
             flash("ইউজারনেম অথবা ইমেইলটি ইতিমধ্যে ব্যবহৃত হয়েছে।", "danger")
             
     return render_template('register.html', ref_by=ref_by)
-
-
+    
 
 @app.route('/claim-daily', methods=['POST'])
 def claim_daily():
