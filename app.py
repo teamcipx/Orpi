@@ -965,8 +965,7 @@ def referrals():
                            processing_count=processing_count,
                            failed_count=failed_count,
                            total_earnings=total_earnings)
-    
-@app.route('/profile', methods=['GET', 'POST'])
+    @app.route('/profile', methods=['GET', 'POST'])
 def profile():
     user_id = session.get('user_id')
     if not user_id:
@@ -977,8 +976,10 @@ def profile():
         age = request.form.get('age')
         district = request.form.get('district')
         proof_url = request.form.get('avatar_url')
+        username = request.form.get('username')
         
         update_data = {}
+        if username: update_data['username'] = username
         if phone: update_data['phone_number'] = phone
         if age: update_data['age'] = int(age) if age.isdigit() else None
         if district: update_data['district'] = district
@@ -990,7 +991,6 @@ def profile():
             return redirect(url_for('profile'))
             
     user = supabase.table("users").select("*").eq("id", user_id).execute().data[0]
-    
     ref_link = request.url_root + "register?ref=" + str(user['uid'])
     
     return render_template('profile.html', user=user, ref_link=ref_link)
@@ -1073,6 +1073,7 @@ def store():
                            premium_packages=premium_pkgs,
                            deposit_history=deposit_history,
                            purchase_history=purchase_history)    
+    
 @app.route('/add-money', methods=['GET', 'POST'])
 def add_money():
     user_id = session.get('user_id')
