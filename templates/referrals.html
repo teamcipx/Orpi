@@ -1,52 +1,87 @@
 {% extends 'base.html' %}
 {% block content %}
 
+<!-- কাস্টম ৩ডি গ্লসি সাইন এবং পালস গ্লো অ্যানিমেশন স্টাইলস -->
+<style>
+    @keyframes shine {
+        100% {
+            left: 125%;
+        }
+    }
+    .shine-card {
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(135deg, #FFFFFF 0%, #F5F9FC 100%);
+        border: 1px solid rgba(226, 232, 240, 0.9);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.01);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .shine-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -75%;
+        width: 50%;
+        height: 100%;
+        background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.4) 100%);
+        transform: skewX(-25deg);
+    }
+    .shine-card:hover {
+        border-color: rgba(16, 185, 129, 0.3);
+        box-shadow: 0 10px 30px rgba(16, 185, 129, 0.04);
+        transform: translateY(-2px);
+    }
+    .shine-card:hover::after {
+        animation: shine 0.8s ease-in-out;
+    }
+</style>
+
 <div class="space-y-4">
     
-    <!-- ১. লাইভ রেফারেল পরিসংখ্যান (Statistics Grid) -->
+    <!-- ১. লাইভ রেফারেল পরিসংখ্যান (Glossy Stats Grid) -->
     <div class="grid grid-cols-2 gap-3">
         <!-- মোট আয় -->
-        <div class="minimal-card p-4 rounded-2xl bg-white border border-slate-200 flex flex-col justify-center">
-            <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider">রেফারেল থেকে মোট আয়</span>
+        <div class="shine-card p-4 rounded-2xl flex flex-col justify-center">
+            <span class="text-[9px] text-slate-400 uppercase font-extrabold tracking-wider">মোট রেফারেল আয়</span>
             <p class="text-xl font-black text-emerald-600 mt-0.5">৳ {{ total_earnings }}</p>
         </div>
         <!-- সফল আমন্ত্রণ -->
-        <div class="minimal-card p-4 rounded-2xl bg-white border border-slate-200 flex flex-col justify-center">
-            <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider">সফল আমন্ত্রণ (Success)</span>
+        <div class="shine-card p-4 rounded-2xl flex flex-col justify-center">
+            <span class="text-[9px] text-slate-400 uppercase font-extrabold tracking-wider">সফল আমন্ত্রণ (Success)</span>
             <p class="text-xl font-black text-slate-800 mt-0.5 flex items-center gap-1.5">
-                <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span> {{ success_count }}
+                <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full shadow-[0_0_6px_#10b981]"></span> {{ success_count }}
             </p>
         </div>
         <!-- প্রক্রিয়াধীন আমন্ত্রণ -->
-        <div class="minimal-card p-4 rounded-2xl bg-white border border-slate-200 flex flex-col justify-center">
-            <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider">প্রক্রিয়াধীন (Processing)</span>
+        <div class="shine-card p-4 rounded-2xl flex flex-col justify-center">
+            <span class="text-[9px] text-slate-400 uppercase font-extrabold tracking-wider">প্রক্রিয়াধীন (Processing)</span>
             <p class="text-xl font-black text-yellow-500 mt-0.5 flex items-center gap-1.5">
-                <span class="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-pulse"></span> {{ processing_count }}
+                <span class="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-pulse shadow-[0_0_6px_#fbbf24]"></span> {{ processing_count }}
             </p>
         </div>
         <!-- ব্যর্থ আমন্ত্রণ -->
-        <div class="minimal-card p-4 rounded-2xl bg-white border border-slate-200 flex flex-col justify-center">
-            <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider">ব্যর্থ আমন্ত্রণ (Failed)</span>
+        <div class="shine-card p-4 rounded-2xl flex flex-col justify-center">
+            <span class="text-[9px] text-slate-400 uppercase font-extrabold tracking-wider">ব্যর্থ আমন্ত্রণ (Failed)</span>
             <p class="text-xl font-black text-red-500 mt-0.5 flex items-center gap-1.5">
-                <span class="w-1.5 h-1.5 bg-red-500 rounded-full"></span> {{ failed_count }}
+                <span class="w-1.5 h-1.5 bg-red-500 rounded-full shadow-[0_0_6px_#ef4444]"></span> {{ failed_count }}
             </p>
         </div>
     </div>
 
-    <!-- ২. স্লিক রেফারেল পুরস্কার নীতি (Reward Policy) -->
-    <div class="minimal-card p-4 rounded-2xl bg-white border border-slate-200 flex items-center justify-between text-xs">
-        <div class="text-center w-full border-r border-slate-100">
-            <span class="text-[9px] text-slate-400 font-bold uppercase block mb-1">আপনি পাবেন (Referrer)</span>
-            <span class="text-base font-black text-emerald-600">৳ ৩০.০০</span>
+    <!-- ২. স্লিক রেফারেল পুরস্কার নীতি (Reward Grid) -->
+    <div class="shine-card p-4 rounded-2xl flex items-center justify-between text-xs">
+        <div class="text-center w-full border-r border-slate-150">
+            <span class="text-[9px] text-slate-400 font-extrabold uppercase block mb-1">আপনি পাবেন (Referrer)</span>
+            <span class="text-base font-black text-emerald-600">৳ ১৫.০০</span>
         </div>
         <div class="text-center w-full">
-            <span class="text-[9px] text-slate-400 font-bold uppercase block mb-1">আপনার বন্ধু পাবে (Friend)</span>
-            <span class="text-base font-black text-blue-500">৳ ১০০.০০</span>
+            <span class="text-[9px] text-slate-400 font-extrabold uppercase block mb-1">আপনার বন্ধু পাবে (Friend)</span>
+            <span class="text-base font-black text-blue-500">৳ ৭০.০০</span>
         </div>
     </div>
 
     <!-- ৩. রেফার লিংক কপি উইজেট -->
-    <div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm relative overflow-hidden">
+    <div class="shine-card p-5 rounded-3xl relative overflow-hidden">
         <div class="absolute -right-8 -top-8 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl"></div>
         
         <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-3 flex items-center gap-1.5">
@@ -54,9 +89,9 @@
         </h2>
         
         <div class="bg-slate-50 border border-slate-100 p-4 rounded-xl">
-            <p class="text-xs text-slate-500 font-medium flex items-center gap-1.5">
+            <p class="text-xs text-slate-500 font-bold flex items-center gap-1.5">
                 <i class="fa-solid fa-circle-check text-emerald-500 text-xs"></i> 
-                Success হলেই রেফার কাউন্ট হবে এবং ব্যালেন্স যোগ হবে।
+                আমন্ত্রণ সফল হলেই সাথে সাথে আপনার ব্যালেন্স যোগ হবে।
             </p>
             
             <div class="flex items-center gap-2 mt-4">
@@ -72,7 +107,7 @@
     </div>
 
     <!-- ৪. রেফারেল হিস্ট্রি টেবিল -->
-    <div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200">
+    <div class="premium-card p-5 rounded-3xl bg-white border border-slate-200">
         <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-3 flex items-center gap-1.5">
             <i class="fa-solid fa-list text-slate-400"></i> আমার রেফারেল তালিকা
         </h3>
@@ -90,11 +125,11 @@
                     <tr class="border-b border-slate-50 text-slate-600">
                         <td class="p-2.5">
                             <span class="font-bold text-slate-700">{{ ref.users.username }}</span><br>
-                            <span class="text-[9px] text-slate-400 font-mono">{{ ref.users.email | mask_email }}</span>
+                            <span class="text-[9px] text-slate-400">{{ ref.users.email | mask_email }}</span>
                         </td>
-                        <td class="p-2.5 text-slate-500">{{ ref.created_at[:10] }}</td>
+                        <td class="p-2.5 text-slate-500 font-medium">{{ ref.created_at[:10] }}</td>
                         <td class="p-2.5 text-right">
-                            <span class="px-2.5 py-1 rounded-full text-[8px] font-bold uppercase tracking-wide {% if ref.status == 'Processing' %}bg-yellow-50 text-yellow-600 border border-yellow-100{% elif ref.status == 'Success' %}bg-emerald-50 text-emerald-600 border-emerald-100{% else %}bg-red-50 text-red-600 border-red-100{% endif %}">
+                            <span class="px-2.5 py-1 rounded-full text-[8px] font-bold uppercase tracking-wide {% if ref.status == 'Success' %}bg-emerald-50 text-emerald-600 border border-emerald-100{% elif ref.status == 'Processing' %}bg-yellow-50 text-yellow-600 border border-yellow-100{% else %}bg-red-50 text-red-600 border-red-100{% endif %}">
                                 {{ ref.status }}
                             </span>
                         </td>
@@ -111,6 +146,7 @@
 </div>
 
 <script>
+// কপি এবং বাটন স্ট্যাটাস পরিবর্তনের ডাইনামিক স্ক্রিপ্ট
 function copyLink() {
     const linkInput = document.getElementById('referral-link');
     linkInput.select();
