@@ -214,6 +214,7 @@ def check_admin_auth():
     return None
 
 
+
 @app.route('/admin', methods=['GET', 'POST'])
 def admin_dashboard():
     if not check_admin_auth():
@@ -234,28 +235,15 @@ def admin_dashboard():
     today_dep_query = supabase.table("deposits").select("amount").eq("status", "Approved").gte("created_at", today_start).execute().data
     today_deposits = sum(float(d['amount']) for d in today_dep_query)
     
-    pending_dep_res = supabase.table("deposits").select("id", count="exact").eq("status", "Pending").execute()
-    pending_deposits_count = pending_dep_res.count if pending_dep_res.count is not None else 0
-    
-    pending_with_res = supabase.table("withdrawals").select("id", count="exact").eq("status", "Pending").execute()
-    pending_withdrawals_count = pending_with_res.count if pending_with_res.count is not None else 0
-    
-    pending_tasks_res = supabase.table("task_submissions").select("id", count="exact").eq("status", "Pending").execute()
-    pending_tasks_count = pending_tasks_res.count if pending_tasks_res.count is not None else 0
-    
     search_query = request.args.get('search', '').strip()
     users_list = []
     
     if search_query:
-        u_data = supabase.table("users").select("id, uid, username, email, balance, is_banned") \
+        u_data = supabase.table("users").select("id, username, email, balance, is_banned") \
             .or_(f"email.ilike.%{search_query}%,username.ilike.%{search_query}%").execute().data
-            
-        if not u_data and search_query.isdigit():
-            u_data = supabase.table("users").select("id, uid, username, email, balance, is_banned").eq("uid", int(search_query)).execute().data
-            
         users_list = u_data
     else:
-        u_data = supabase.table("users").select("id, uid, username, email, balance, is_banned") \
+        u_data = supabase.table("users").select("id, username, email, balance, is_banned") \
             .order("created_at", desc=True).limit(10).execute().data
         users_list = u_data
 
@@ -264,12 +252,57 @@ def admin_dashboard():
                            today_users=today_users, 
                            total_deposits=total_deposits, 
                            today_deposits=today_deposits, 
-                           pending_deposits_count=pending_deposits_count,
-                           pending_withdrawals_count=pending_withdrawals_count,
-                           pending_tasks_count=pending_tasks_count,
                            users_list=users_list,
                            search_query=search_query)
 
+# (অন্যান্য এডমিন রাউটের সাথে নিচের সংশোধিত রাউটটি যুক্ত করুন)
+
+@app.route('/admin/payout')
+def admin_payout_generator():
+    if not check_admin_auth():
+        return "Unauthorized Access", 403
+        
+    now_utc = datetime.datetime.now(datetime.timezone.utc)
+    five_hours_ago = (now_utc - datetime.timedelta(hours=5)).isoformat()
+    
+    # ১. বিগত ৫ ঘণ্টার রিয়াল উইথড্রয়াল ডাটা রিট্রিভ করা (Pending বাদে)
+    real_w = supabase.table("withdrawals") \
+        .select("amount, status, user_id") \
+        .neq("status", "Pending") \
+        .gte("created_at", five_hours_ago).execute().data or []
+        
+    # ২. বিগত ৫ ঘণ্টার চ্যানেলের ফেক উইথড্রয়াল ডাটা রিট্রিভ করা (Pending বাদে)
+    fake_w = supabase.table("simulated_transactions") \
+        .select("amount, status, uid") \
+        .eq("type", "Withdraw") \
+        .neq("status", "Pending") \
+        .gte("created_at", five_hours_ago).execute().data or []
+        
+    # ৩. পেন্ডিং সম্পূর্ণ বাদ দিয়ে সফল ও বাতিল পেমেন্টের পৃথক হিসাব
+    success_real = [w for w in real_w if w['status'] == 'Approved']
+    success_fake = [fw for fw in fake_w if fw['status'] == 'Success']
+    
+    rejected_real = [w for w in real_w if w['status'] == 'Rejected']
+    rejected_fake = [fw for fw in fake_w if fw['status'] == 'Rejected']
+    
+    # ৪. টোটাল সফল বিতরণ ও ট্রানজেকশন কাউন্ট
+    total_success_amount = sum(float(w['amount']) for w in success_real) + sum(float(fw['amount']) for fw in success_fake)
+    total_success_count = len(success_real) + len(success_fake)
+    
+    # ৫. টোটাল বাতিলকৃত বিতরণ ও ট্রানজেকশন কাউন্ট
+    total_rejected_amount = sum(float(w['amount']) for w in rejected_real) + sum(float(fw['amount']) for fw in rejected_fake)
+    total_rejected_count = len(rejected_real) + len(rejected_fake)
+    
+    # বাংলাদেশ সময় জেনারেশন (UTC+6)
+    now_bd = now_utc + datetime.timedelta(hours=6)
+    generation_time = now_bd.strftime("%d %b %Y, %I:%M %p")
+    
+    return render_template('admin_payout.html',
+                           total_success_amount=total_success_amount,
+                           total_success_count=total_success_count,
+                           total_rejected_amount=total_rejected_amount,
+                           total_rejected_count=total_rejected_count,
+                           generation_time=generation_time)
 
 @app.route('/reviews', methods=['GET', 'POST'])
 def reviews_page():
@@ -328,6 +361,83 @@ def about():
     user = supabase.table("users").select("*").eq("id", user_id).execute().data[0]
     return render_template('about.html', user=user)
 
+
+# (অন্যান্য এডমিন রাউটের সাথে নিচের নতুন রাউট দুটি যুক্ত করুন)
+
+# ১. এডমিন উইথড্রয়াল লিস্ট রাউট
+@app.route('/admin/withdrawals')
+def admin_withdrawals():
+    if not check_admin_auth():
+        return "Unauthorized Access", 403
+        
+    # পেন্ডিং থাকা উইথড্রয়ালগুলো এবং ইউজারের ডেটা রিট্রিভ করা (Postgrest standard join)
+    pending = supabase.table("withdrawals") \
+        .select("*, users:user_id(username, email, uid)") \
+        .eq("status", "Pending") \
+        .order("created_at", desc=True).execute().data or []
+        
+    return render_template('admin_withdraw.html', pending_withdrawals=pending)
+
+
+# ২. উইথড্র এপ্রুভ/রিজেক্ট অ্যাকশন এবং অটোমেটিক টেলিগ্রাম নোটিফিকেশন ট্রিগার
+@app.route('/admin/withdraw-action', methods=['POST'])
+def admin_withdraw_action():
+    if not check_admin_auth():
+        return "Unauthorized Action", 403
+        
+    withdraw_id = request.form.get('withdraw_id')
+    action = request.form.get('action') # 'approve' অথবা 'reject'
+    
+    # উইথড্রয়াল তথ্য ও রেফার করা ইউজারের UID সংগ্রহ করা
+    withdraw_query = supabase.table("withdrawals") \
+        .select("*, users:user_id(uid)") \
+        .eq("id", withdraw_id).execute().data
+        
+    if not withdraw_query:
+        flash("উইথড্র রেকর্ড পাওয়া যায়নি।", "danger")
+        return redirect(url_for('admin_withdrawals'))
+        
+    w = withdraw_query[0]
+    user_id = w['user_id']
+    amount = float(w['amount'])
+    uid = w['users']['uid']
+    method = w['payment_method']
+    number = w['payment_number']
+    is_agent = w.get('is_agent_withdrawal', False)
+    
+    if action == 'approve':
+        # ১. ডাটাবেজে স্ট্যাটাস Approved করা
+        supabase.table("withdrawals").update({"status": "Approved"}).eq("id", withdraw_id).execute()
+        
+        # ২. টেলিগ্রাম চ্যানেলে ইনলাইন বাটন সহ SUCCESS নোটিফিকেশন পাঠানো
+        masked_number = number[:3] + "*****" + number[-3:]
+        success_msg = f"""<b>✅ WITHDRAWAL SUCCESSFUL</b>
+────────────────────
+<b>User UID:</b> <code>#{uid}</code>
+<b>Amount:</b> ৳ {amount}
+<b>Gateway:</b> {method}
+<b>Number:</b> {masked_number}
+<b>Status:</b> 🟢 Completed (Success)
+────────────────────
+<i>Payout processed via Automated Node!</i>"""
+        send_telegram_notification(success_msg)
+        
+        flash("উইথড্র রিকোয়েস্ট সফলভাবে এপ্রুভ এবং টেলিগ্রামে পোস্ট করা হয়েছে।", "success")
+        
+    elif action == 'reject':
+        # ১. ডাটাবেজে স্ট্যাটাস Rejected করা
+        supabase.table("withdrawals").update({"status": "Rejected"}).eq("id", withdraw_id).execute()
+        
+        # ২. টাকা রিফান্ড করা (এজেন্ট উইথড্র হলে এজেন্ট ব্যালেন্সে, সাধারণ উইথড্র হলে মূল ব্যালেন্সে)
+        if is_agent:
+            supabase.rpc("increment_agent_balance", {"user_id": user_id, "amount": amount}).execute()
+        else:
+            supabase.rpc("increment_balance", {"user_id": user_id, "amount": amount}).execute()
+            
+        flash("উইথড্র রিকোয়েস্ট রিজেক্ট করা হয়েছে এবং ব্যালেন্স সফলভাবে রিফান্ড হয়েছে।", "success")
+        
+    return redirect(url_for('admin_withdrawals'))
+    
 
 @app.route('/agent')
 def agent_portal():
@@ -403,13 +513,27 @@ def agent_withdraw():
     return redirect(url_for('agent_portal'))
 
 
+
+@app.route('/admin/deposits')
+def admin_deposits():
+    if not check_admin_auth():
+        return "Unauthorized Access", 403
+        
+    # পেন্ডিং থাকা ডিপোজিটসমূহ এবং ইউজারের ইউনিক তথ্য সংগ্রহ (Postgrest standard join)
+    pending = supabase.table("deposits") \
+        .select("*, users:user_id(username, email, uid)") \
+        .eq("status", "Pending") \
+        .order("created_at", desc=True).execute().data or []
+        
+    return render_template('admin_deposit.html', pending_deposits=pending)
+
 @app.route('/admin/deposit-action', methods=['POST'])
 def admin_deposit_action():
     if not check_admin_auth():
         return "Unauthorized Action", 403
         
     deposit_id = request.form.get('deposit_id')
-    action = request.form.get('action')
+    action = request.form.get('action') # 'approve' অথবা 'reject'
     
     dep_query = supabase.table("deposits").select("*").eq("id", deposit_id).execute().data
     if not dep_query:
@@ -421,9 +545,13 @@ def admin_deposit_action():
     amount = float(dep['amount'])
     
     if action == 'approve':
+        # ১. ডাটাবেজে ডিপোজিট স্ট্যাটাস 'Approved' করা
         supabase.table("deposits").update({"status": "Approved"}).eq("id", deposit_id).execute()
+        
+        # ২. ইউজারের মূল ব্যালেন্সে টাকা যোগ করা
         supabase.rpc("increment_balance", {"user_id": target_user_id, "amount": amount}).execute()
         
+        # ৩. আপলাইন এজেন্ট চেক করে ৫০% কমিশন প্রদান করা
         ref_query = supabase.table("referrals").select("referrer_id").eq("referred_id", target_user_id).execute().data
         if ref_query:
             referrer_id = ref_query[0]['referrer_id']
@@ -434,91 +562,13 @@ def admin_deposit_action():
                 
         flash("ডিপোজিট এপ্রুভ এবং ব্যালেন্স সফলভাবে যোগ করা হয়েছে।", "success")
     elif action == 'reject':
+        # ডিপোজিট বাতিল করা
         supabase.table("deposits").update({"status": "Rejected"}).eq("id", deposit_id).execute()
         flash("ডিপোজিট রিকোয়েস্ট রিজেক্ট করা হয়েছে।", "success")
         
+    # অ্যাকশন শেষ হওয়ার পর পুনরায় ডিপোজিট লিস্ট পেজে রিডাইরেক্ট করা
     return redirect(url_for('admin_deposits'))
-
-
-@app.route('/admin/withdrawals')
-def admin_withdrawals():
-    if not check_admin_auth():
-        return "Unauthorized Access", 403
-        
-    pending = supabase.table("withdrawals") \
-        .select("*, users:user_id(username, email, uid)") \
-        .eq("status", "Pending") \
-        .order("created_at", desc=True).execute().data or []
-        
-    return render_template('admin_withdraw.html', pending_withdrawals=pending)
-
-
-@app.route('/admin/withdraw-action', methods=['POST'])
-def admin_withdraw_action():
-    if not check_admin_auth():
-        return "Unauthorized Action", 403
-        
-    withdraw_id = request.form.get('withdraw_id')
-    action = request.form.get('action')
     
-    withdraw_query = supabase.table("withdrawals") \
-        .select("*, users:user_id(uid)") \
-        .eq("id", withdraw_id).execute().data
-        
-    if not withdraw_query:
-        flash("উইথড্র রেকর্ড পাওয়া যায়নি।", "danger")
-        return redirect(url_for('admin_withdrawals'))
-        
-    w = withdraw_query[0]
-    user_id = w['user_id']
-    amount = float(w['amount'])
-    uid = w['users']['uid']
-    method = w['payment_method']
-    number = w['payment_number']
-    is_agent = w.get('is_agent_withdrawal', False)
-    
-    if action == 'approve':
-        supabase.table("withdrawals").update({"status": "Approved"}).eq("id", withdraw_id).execute()
-        
-        masked_number = number[:3] + "*****" + number[-3:]
-        success_msg = f"""<b>✅ WITHDRAWAL SUCCESSFUL</b>
-────────────────────
-<b>User UID:</b> <code>#{uid}</code>
-<b>Amount:</b> ৳ {amount}
-<b>Gateway:</b> {method}
-<b>Number:</b> {masked_number}
-<b>Status:</b> 🟢 Completed (Success)
-────────────────────
-<i>Payout processed via Automated Node!</i>"""
-        send_telegram_notification(success_msg)
-        
-        flash("উইথড্র রিকোয়েস্ট সফলভাবে এপ্রুভ এবং টেলিগ্রামে পোস্ট করা হয়েছে।", "success")
-        
-    elif action == 'reject':
-        supabase.table("withdrawals").update({"status": "Rejected"}).eq("id", withdraw_id).execute()
-        
-        if is_agent:
-            supabase.rpc("increment_agent_balance", {"user_id": user_id, "amount": amount}).execute()
-        else:
-            supabase.rpc("increment_balance", {"user_id": user_id, "amount": amount}).execute()
-            
-        flash("উইথড্র রিকোয়েস্ট রিজেক্ট করা হয়েছে এবং ব্যালেন্স সফলভাবে রিফান্ড হয়েছে।", "success")
-        
-    return redirect(url_for('admin_withdrawals'))
-
-
-@app.route('/admin/deposits')
-def admin_deposits():
-    if not check_admin_auth():
-        return "Unauthorized Access", 403
-        
-    pending = supabase.table("deposits") \
-        .select("*, users:user_id(username, email, uid)") \
-        .eq("status", "Pending") \
-        .order("created_at", desc=True).execute().data or []
-        
-    return render_template('admin_deposit.html', pending_deposits=pending)
-
 
 @app.route('/admin/reviews/create', methods=['POST'])
 def admin_create_fake_review():
@@ -574,8 +624,7 @@ def admin_delete_review():
         flash("রিভিউটি ডিলিট করা যায়নি।", "danger")
         
     return redirect(url_for('reviews_page'))
-
-
+    
 @app.route('/tasks')
 def tasks():
     user_id = session.get('user_id')
@@ -656,8 +705,7 @@ def history():
         .eq("user_id", user_id).order("created_at", desc=True).execute().data
     
     return render_template('history.html', deposits=deposits, withdrawals=withdrawals, task_history=task_history)
-
-
+    
 @app.route('/admin/user-action', methods=['POST'])
 def admin_user_action():
     if not check_admin_auth():
@@ -846,7 +894,10 @@ def login():
             
         flash("ভুল ইমেইল অথবা পাসওয়ার্ড।", "danger")
     return render_template('login.html')
+    
+    
 
+# (অন্যান্য কোড অপরিবর্তিত থাকবে, /referrals এবং /profile রাউট দুটি প্রতিস্থাপন করুন)
 
 @app.route('/referrals')
 def referrals():
@@ -864,6 +915,7 @@ def referrals():
         .lte("scheduled_payout_at", now.isoformat()) \
         .execute().data
 
+    # এই ইউজারের প্রথম রেফারেল আইডি খুঁজে বের করা (অটো-সাকসেস চেক করার জন্য)
     first_ref_query = supabase.table("referrals") \
         .select("id") \
         .eq("referrer_id", user_id) \
@@ -875,6 +927,7 @@ def referrals():
     for ref in due_referrals:
         referred_id = ref['referred_id']
         
+        # যদি এটি প্রথম রেফারেল হয়, তবে ১ ঘণ্টা পার হলেই সরাসরি Success (কোনো একটিভ শর্ত ছাড়াই)
         if first_ref_id and ref['id'] == first_ref_id:
             new_status = "Success"
         else:
@@ -912,8 +965,7 @@ def referrals():
                            processing_count=processing_count,
                            failed_count=failed_count,
                            total_earnings=total_earnings)
-
-
+    
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
     user_id = session.get('user_id')
@@ -942,8 +994,7 @@ def profile():
     ref_link = request.url_root + "register?ref=" + str(user['uid'])
     
     return render_template('profile.html', user=user, ref_link=ref_link)
-
-
+    
 @app.route('/withdraw', methods=['GET', 'POST'])
 def withdraw():
     user_id = session.get('user_id')
@@ -999,7 +1050,8 @@ def withdraw():
                            meets_balance_cond=meets_balance_cond,
                            can_withdraw=can_withdraw,
                            history=history)
-
+    
+    
 
 @app.route('/store')
 def store():
@@ -1020,9 +1072,7 @@ def store():
                            balance=user['balance'], 
                            premium_packages=premium_pkgs,
                            deposit_history=deposit_history,
-                           purchase_history=purchase_history)
-
-
+                           purchase_history=purchase_history)    
 @app.route('/add-money', methods=['GET', 'POST'])
 def add_money():
     user_id = session.get('user_id')
@@ -1050,6 +1100,76 @@ def add_money():
     return render_template('add_money.html', history=history)
 
 
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    ref_by = request.args.get('ref', '')
+    if request.method == 'POST':
+        username = request.form.get('username')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        referrer_code = request.form.get('referrer')
+
+        hashed_password = generate_password_hash(password)
+        initial_balance = 0.00
+        referrer_id = None
+
+        if referrer_code and referrer_code.isdigit():
+            ref_uid = int(referrer_code)
+            referrer_res = supabase.table("users").select("id").eq("uid", ref_uid).execute()
+            if referrer_res.data:
+                referrer_id = referrer_res.data[0]['id']
+                initial_balance = 100.00
+        
+        user_data = {
+            "username": username,
+            "email": email,
+            "password_hash": hashed_password,
+            "balance": initial_balance
+        }
+        
+        try:
+            new_user_res = supabase.table("users").insert(user_data).execute()
+            if new_user_res.data:
+                new_user_id = new_user_res.data[0]['id']
+                
+                free_expiry = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=30)
+                supabase.table("user_packages").insert({
+                    "user_id": new_user_id,
+                    "package_id": 1,
+                    "expires_at": free_expiry.isoformat()
+                }).execute()
+                
+                if referrer_id:
+                    existing_refs = supabase.table("referrals").select("id").eq("referrer_id", referrer_id).execute().data
+                    ref_count = len(existing_refs)
+                    
+                    if ref_count == 0:
+                        delay_hours = 1
+                    elif ref_count == 1:
+                        delay_hours = 24
+                    elif ref_count == 2:
+                        delay_hours = 40
+                    else:
+                        delay_hours = 42
+                        
+                    scheduled_time = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=delay_hours)
+                    
+                    supabase.table("referrals").insert({
+                        "referrer_id": referrer_id,
+                        "referred_id": new_user_id,
+                        "status": "Processing",
+                        "scheduled_payout_at": scheduled_time.isoformat()
+                    }).execute()
+                        
+                flash("নিবন্ধন সফল হয়েছে। লগইন করুন।", "success")
+                return redirect(url_for('login'))
+        except Exception:
+            flash("ইউজারনেম অথবা ইমেইলটি ইতিমধ্যে ব্যবহৃত হয়েছে।", "danger")
+            
+    return render_template('register.html', ref_by=ref_by)
+
+
+
 @app.route('/claim-daily', methods=['POST'])
 def claim_daily():
     user_id = session.get('user_id')
@@ -1072,6 +1192,8 @@ def claim_daily():
             cooldown = datetime.timedelta(hours=24)
             
             if now < last_checkin + cooldown:
+                time_left = (last_checkin + cooldown) - now
+                seconds_left = int(time_left.total_seconds())
                 return jsonify({
                     "status": "error", 
                     "message": "আপনি ইতিমধ্যে আজকের ডেইলি বোনাস ক্লেইম করেছেন।"
@@ -1087,12 +1209,162 @@ def claim_daily():
     except Exception as e:
         return jsonify({"status": "error", "message": f"ডাটাবেজ ত্রুটি: {str(e)}"}), 500
 
+# (অন্যান্য কোড অপরিবর্তিত থাকবে, কেবল /dashboard রাউটটি নিচের কোড দ্বারা প্রতিস্থাপন করুন)
+# app.py ফাইলের ড্যাশবোর্ড রাউটটি নিচের কোড দ্বারা সম্পূর্ণ আপডেট করে নিন:
+@app.route('/dashboard')
+def dashboard():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+        
+    now = datetime.datetime.now(datetime.timezone.utc)
+    
+    # মেয়াদোত্তীর্ণ প্যাকেজ ডিলিট (নিরাপদ চেকিং)
+    try:
+        supabase.table("user_packages").delete().eq("user_id", user_id).not_.is_("expires_at", "null").lt("expires_at", now.isoformat()).execute()
+    except Exception:
+        pass
+        
+    user = supabase.table("users").select("*").eq("id", user_id).execute().data[0]
+    balance = float(user['balance'])
+    
+    # ডেইলি চেক-ইন ভ্যালিডেশন
+    is_daily_eligible = True
+    last_checkin_str = user.get('last_daily_checkin')
+    if last_checkin_str:
+        last_checkin = datetime.datetime.fromisoformat(last_checkin_str.replace('Z', '+00:00'))
+        cooldown = datetime.timedelta(hours=24)
+        if now < last_checkin + cooldown:
+            is_daily_eligible = False
+    
+    # মেয়াদ (expires_at) সহ ইউজারের সক্রিয় প্যাকেজগুলোর তালিকা রিট্রিভ করা
+    all_pkgs = supabase.table("user_packages") \
+        .select("id, last_claimed_at, expires_at, packages(name, duration_hours, yield_amount, is_premium)") \
+        .eq("user_id", user_id).execute().data or []
+        
+    # সেলফ-হিলিং কন্ডিশন: যদি ইউজারের কোনো প্যাকেজই সচল না থাকে
+    if not all_pkgs:
+        free_expiry = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=365)
+        supabase.table("user_packages").insert({
+            "user_id": user_id,
+            "package_id": 1,
+            "expires_at": free_expiry.isoformat()
+        }).execute()
+        
+        all_pkgs = supabase.table("user_packages") \
+            .select("id, last_claimed_at, expires_at, packages(name, duration_hours, yield_amount, is_premium)") \
+            .eq("user_id", user_id).execute().data or []
 
+    owned_pkgs = []
+    for p in all_pkgs:
+        # যদি কোনো প্যাকেজের মূল ইনফরমেশন ডাটাবেজে না পাওয়া যায় তবে ক্র্যাশ এড়াতে স্কিপ করবে
+        if not p.get('packages'):
+            continue
+        owned_pkgs.append(p)
+        
+    has_premium_pkg = any(p['packages']['is_premium'] for p in owned_pkgs if p.get('packages'))
+    success_refs_query = supabase.table("referrals").select("id").eq("referrer_id", user_id).eq("status", "Success").execute().data
+    success_ref_count = len(success_refs_query)
+    
+    ref_progress = 50 if (success_ref_count >= 3 or has_premium_pkg) else min(success_ref_count / 3, 1.0) * 50
+    bal_progress = min(balance / 300, 1.0) * 50
+    progress_percent = int(ref_progress + bal_progress)
+
+    notice = "Opti Work এ আপনাকে স্বাগতম! ফ্রি মাইনিং চালু করে প্রতি ৮ ঘণ্টায় 7 টাকা ক্লেইম করুন। প্রিমিয়াম প্যাকেজ কিনলে আয় আরও বৃদ্ধি পাবে।"
+
+    return render_template('dashboard.html', 
+                           user=user, 
+                           owned_packages=owned_pkgs, 
+                           notice=notice,
+                           progress_percent=progress_percent,
+                           is_daily_eligible=is_daily_eligible)
+    
+@app.route('/buy-package', methods=['POST'])
+def buy_package():
+    user_id = session.get('user_id')
+    package_id = request.form.get('package_id')
+    if not user_id:
+        return redirect(url_for('login'))
+        
+    pkg = supabase.table("packages").select("*").eq("id", package_id).execute()
+    if not pkg.data:
+        flash("প্যাকেজ পাওয়া যায়নি।", "danger")
+        return redirect(url_for('store'))
+        
+    cost = float(pkg.data[0]['cost'])
+    pkg_name = pkg.data[0]['name']
+    
+    user = supabase.table("users").select("balance").eq("id", user_id).execute().data[0]
+    balance = float(user['balance'])
+    
+    if balance >= cost:
+        supabase.table("user_packages").delete().eq("user_id", user_id).eq("package_id", 1).execute()
+        
+        supabase.rpc("increment_balance", {"user_id": user_id, "amount": -cost}).execute()
+        
+        expiry_date = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=30)
+        
+        supabase.table("user_packages").insert({
+            "user_id": user_id,
+            "package_id": package_id,
+            "last_claimed_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "expires_at": expiry_date.isoformat()
+        }).execute()
+        
+        flash(f"{pkg_name} প্যাকেজটি সফলভাবে সক্রিয় করা হয়েছে। মেয়াদ ৩০ দিন।", "success")
+    else:
+        shortage = cost - balance
+        flash(f"ব্যালেন্স অপর্যাপ্ত! {pkg_name} প্যাকেজটি কিনতে আপনার আরও ৳ {shortage:.2f} লাগবে। দয়া করে এড মানি করুন।", "danger")
+        
+    return redirect(url_for('store'))
+
+
+@app.route('/claim-mining', methods=['POST'])
+def claim_mining():
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"status": "error", "message": "Unauthorized"}), 401
+        
+    user_package_id = request.json.get('user_package_id')
+    if not user_package_id:
+        return jsonify({"status": "error", "message": "অবৈধ মাইনিং রিকোয়েস্ট।"}), 400
+        
+    pkg_query = supabase.table("user_packages") \
+        .select("id, last_claimed_at, expires_at, packages(yield_amount, duration_hours)") \
+        .eq("id", user_package_id).eq("user_id", user_id).execute().data
+        
+    if not pkg_query:
+        return jsonify({"status": "error", "message": "প্যাকেজটি পাওয়া যায়নি বা মেয়াদ শেষ হয়ে গেছে।"}), 404
+        
+    record = pkg_query[0]
+    now = datetime.datetime.now(datetime.timezone.utc)
+    
+    if record.get('expires_at'):
+        expires_at = datetime.datetime.fromisoformat(record['expires_at'].replace('Z', '+00:00'))
+        if now > expires_at:
+            supabase.table("user_packages").delete().eq("id", user_package_id).execute()
+            return jsonify({"status": "error", "message": "এই মাইনিং প্যাকেজটির মেয়াদ শেষ হয়ে গেছে।"}), 400
+            
+    last_claim = datetime.datetime.fromisoformat(record['last_claimed_at'].replace('Z', '+00:00'))
+    cooldown = datetime.timedelta(hours=record['packages']['duration_hours'])
+    
+    if now >= last_claim + cooldown:
+        supabase.table("user_packages").update({"last_claimed_at": now.isoformat()}).eq("id", user_package_id).execute()
+        yield_amount = float(record['packages']['yield_amount'])
+        supabase.rpc("increment_balance", {"user_id": user_id, "amount": yield_amount}).execute()
+        
+        return jsonify({"status": "success", "message": f"৳ {yield_amount} সফলভাবে ক্লেইমড!"})
+    else:
+        return jsonify({"status": "error", "message": "এই নোডের মাইনিং প্রসেস এখনও সম্পন্ন হয়নি।"})
+
+
+# (অন্যান্য কোড অপরিবর্তিত থাকবে, /referrals এবং /profile রাউট দুটি প্রতিস্থাপন করুন)
+
+# ৮. লগআউট
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for('login'))
-
 
 if __name__ == '__main__':
     app.run(debug=True)
