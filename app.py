@@ -896,75 +896,35 @@ def login():
     return render_template('login.html')
     
     
-
-# (অন্যান্য কোড অপরিবর্তিত থাকবে, /referrals এবং /profile রাউট দুটি প্রতিস্থাপন করুন)
-
-@app.route('/referrals')
-def referrals():
+@app.route('/profile', methods=['GET', 'POST'])
+def profile():
     user_id = session.get('user_id')
     if not user_id:
         return redirect(url_for('login'))
         
-    now = datetime.datetime.now(datetime.timezone.utc)
-    user = supabase.table("users").select("uid").eq("id", user_id).execute().data[0]
-    
-    due_referrals = supabase.table("referrals") \
-        .select("id, referred_id") \
-        .eq("referrer_id", user_id) \
-        .eq("status", "Processing") \
-        .lte("scheduled_payout_at", now.isoformat()) \
-        .execute().data
-
-    # এই ইউজারের প্রথম রেফারেল আইডি খুঁজে বের করা (অটো-সাকসেস চেক করার জন্য)
-    first_ref_query = supabase.table("referrals") \
-        .select("id") \
-        .eq("referrer_id", user_id) \
-        .order("created_at", desc=False) \
-        .limit(1).execute().data
-
-    first_ref_id = first_ref_query[0]['id'] if first_ref_query else None
-
-    for ref in due_referrals:
-        referred_id = ref['referred_id']
+    if request.method == 'POST':
+        phone = request.form.get('phone_number')
+        age = request.form.get('age')
+        district = request.form.get('district')
+        proof_url = request.form.get('avatar_url')
+        username = request.form.get('username')
         
-        # যদি এটি প্রথম রেফারেল হয়, তবে ১ ঘণ্টা পার হলেই সরাসরি Success (কোনো একটিভ শর্ত ছাড়াই)
-        if first_ref_id and ref['id'] == first_ref_id:
-            new_status = "Success"
-        else:
-            ref_user = supabase.table("users").select("last_login").eq("id", referred_id).execute().data
-            if ref_user:
-                last_login_str = ref_user[0]['last_login']
-                last_login = datetime.datetime.fromisoformat(last_login_str.replace('Z', '+00:00'))
-                twelve_hours_ago = now - datetime.timedelta(hours=12)
-                new_status = "Success" if last_login >= twelve_hours_ago else "Failed"
-            else:
-                new_status = "Failed"
+        update_data = {}
+        if username: update_data['username'] = username
+        if phone: update_data['phone_number'] = phone
+        if age: update_data['age'] = int(age) if age.isdigit() else None
+        if district: update_data['district'] = district
+        if proof_url: update_data['avatar_url'] = proof_url
+        
+        if update_data:
+            supabase.table("users").update(update_data).eq("id", user_id).execute()
+            flash("প্রোফাইল তথ্য সফলভাবে আপডেট করা হয়েছে।", "success")
+            return redirect(url_for('profile'))
             
-        supabase.rpc("process_referral_payout", {
-            "p_referral_id": ref['id'],
-            "p_referrer_id": user_id,
-            "p_new_status": new_status,
-            "p_reward_amount": 30.00
-        }).execute()
-            
-    referrals_data = supabase.table("referrals") \
-        .select("status, created_at, users:referred_id(username, email)") \
-        .eq("referrer_id", user_id).execute().data
-        
-    success_count = sum(1 for r in referrals_data if r['status'] == 'Success')
-    processing_count = sum(1 for r in referrals_data if r['status'] == 'Processing')
-    failed_count = sum(1 for r in referrals_data if r['status'] == 'Failed')
-    total_earnings = success_count * 30.00
-        
+    user = supabase.table("users").select("*").eq("id", user_id).execute().data[0]
     ref_link = request.url_root + "register?ref=" + str(user['uid'])
     
-    return render_template('referrals.html', 
-                           referrals=referrals_data, 
-                           ref_link=ref_link,
-                           success_count=success_count,
-                           processing_count=processing_count,
-                           failed_count=failed_count,
-                           total_earnings=total_earnings)
+    return render_template('profile.html', user=user, ref_link=ref_link)
     @app.route('/profile', methods=['GET', 'POST'])
 def profile():
     user_id = session.get('user_id')
