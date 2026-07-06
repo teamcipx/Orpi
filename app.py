@@ -795,35 +795,6 @@ def submit_normal():
         flash("এই কাজটি ইতিমধ্যে প্রক্রিয়াধীন (Pending) অথবা অনুমোদিত (Approved) আছে।", "danger")
         
     return redirect(url_for('tasks'))
-    
-@app.route('/tasks/submit-normal', methods=['POST'])
-def submit_normal():
-    user_id = session.get('user_id')
-    if not user_id:
-        return redirect(url_for('login'))
-        
-    task_id = request.form.get('task_id')
-    proof_url = request.form.get('proof_image_url')
-    
-    if not proof_url:
-        flash("দয়া করে কাজের প্রুফ (স্ক্রিনশট) আপলোড করুন।", "danger")
-        return redirect(url_for('tasks'))
-        
-    try:
-        supabase.table("task_submissions").delete() \
-            .eq("user_id", user_id).eq("task_id", task_id).eq("status", "Rejected").execute()
-        
-        supabase.table("task_submissions").insert({
-            "user_id": user_id,
-            "task_id": task_id,
-            "proof_image_url": proof_url,
-            "status": "Pending"
-        }).execute()
-        flash("কাজের প্রুফ সফলভাবে জমা দেওয়া হয়েছে। এডমিন ভেরিফাই করবে।", "success")
-    except Exception:
-        flash("এই কাজটি ইতিমধ্যে প্রক্রিয়াধীন (Pending) অথবা অনুমোদিত (Approved) আছে।", "danger")
-        
-    return redirect(url_for('tasks'))
 
 
 @app.route('/history')
