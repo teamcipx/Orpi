@@ -392,6 +392,44 @@ def about():
     return render_template('about.html', user=user)
 
 
+@app.route('/referrals')
+def referrals():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+        
+    user = supabase.table("users").select("uid").eq("id", user_id).execute().data[0]
+    
+    # ডাটাবেজ থেকে সরাসরি রেফারেল হিস্ট্রি ডেটা রিট্রিভ করা হচ্ছে
+    referrals_data = supabase.table("referrals") \
+        .select("status, created_at, users:referred_id(username, email)") \
+        .eq("referrer_id", user_id).execute().data or []
+        
+    success_count = 0
+    processing_count = 0
+    failed_count = 0
+    
+    for r in referrals_data:
+        status = r.get('status', 'Processing')
+        if status == 'Success':
+            success_count += 1
+        elif status == 'Processing':
+            processing_count += 1
+        elif status == 'Failed':
+            failed_count += 1
+            
+    # রেফার প্রতি ১৫ টাকা বোনাস হিসাব
+    total_earnings = success_count * 15.00
+    ref_link = request.url_root + "register?ref=" + str(user['uid'])
+    
+    return render_template('referrals.html', 
+                           referrals=referrals_data, 
+                           ref_link=ref_link,
+                           success_count=success_count,
+                           processing_count=processing_count,
+                           failed_count=failed_count,
+                           total_earnings=total_earnings)
+    
 # (অন্যান্য এডমিন রাউটের সাথে নিচের নতুন রাউট দুটি যুক্ত করুন)
 
 # ১. এডমিন উইথড্রয়াল লিস্ট রাউট
