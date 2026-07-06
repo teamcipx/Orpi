@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="space-y-4">
+    <!-- ১. টাস্ক হেডার কার্ড -->
+    <div class="blockio-card p-5 flex justify-between items-center bg-white border border-slate-200 shadow-sm">
+        <div class="space-y-1">
+            <h2 class="text-sm font-extrabold text-slate-800 flex items-center gap-1.5">
+                <i class="fa-solid fa-circle-info text-[#fba82f]"></i> কাজের বিবরণ ও সাবমিশন প্যানেল
+            </h2>
+            <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">টাস্ক টাইটেল: {{ task.title }}</p>
+        </div>
+        <span class="bg-emerald-50 text-emerald-700 border border-emerald-100 px-3 py-1.5 rounded-xl text-xs font-black">
+            পুরস্কার: ৳ {{ task.reward }}
+        </span>
+    </div>
+
+    <!-- ২. ৪-ধাপের ইন্টারেক্টিভ কন্টেন্ট গাইড এবং স্ক্রিনশট আপলোডার -->
+    <div class="blockio-card p-6 bg-white border border-slate-200">
+        <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-700 mb-4 border-b border-slate-100 pb-2.5">
+            <i class="fa-solid fa-list-check"></i> Step-By-Step Guide (ধাপসমূহ অনুসরণ করুন)
+        </h3>
+
+        <!-- সাবমিশন হয়ে থাকলে স্ট্যাটাস দেখাবে -->
+        {% if status %}
+            <div class="text-center py-6 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                <i class="fa-solid fa-circle-check text-emerald-500 mb-2 text-2xl block"></i>
+                <p class="text-xs font-bold text-slate-800">কাজটি সফলভাবে জমা দেওয়া হয়েছে!</p>
+                <div class="mt-4">
+                    <span class="text-[10px] uppercase font-black tracking-wider px-3.5 py-1.5 rounded-full border {% if status == 'Pending' %}bg-yellow-50 text-yellow-600 border-yellow-100{% elif status == 'Approved' %}bg-emerald-50 text-emerald-600 border-emerald-100{% else %}bg-red-50 text-red-600 border-red-100{% endif %}">
+                        ভেরিফিকেশন স্ট্যাটাস: {{ status }}
+                    </span>
+                </div>
+            </div>
+        {% else %}
+            <!-- ৪-ধাপের প্রসেস ফর্ম -->
+            <form action="/tasks/submit-normal" method="POST" class="space-y-5">
+                <input type="hidden" name="task_id" value="{{ task.id }}">
+                <input type="hidden" name="proof_image_url" id="proof-image-url-input">
+
+                <!-- ধাপ ১ -->
+                <div class="flex items-start gap-3 text-xs leading-relaxed">
+                    <span class="w-5 h-5 bg-slate-100 border border-slate-200 rounded-full flex items-center justify-center font-bold text-slate-600 text-[10px] shrink-0 mt-0.5">১</span>
+                    <div class="space-y-2">
+                        <p class="text-slate-800 font-bold">নিচের বাটনটিতে ক্লিক করে কাজের আসল লিংকটি ভিজিট করুন:</p>
+                        <!-- ক্লিকে ধাপ ৩ আনলক করার জাভাস্ক্রিপ্ট -->
+                        <a href="{{ task.link }}" target="_blank" onclick="unlockUploadStep()" class="bg-black hover:opacity-90 text-white text-[10px] font-bold px-4 py-2 rounded-full inline-flex items-center gap-1 shadow">
+                            কাজের লিংক খুলুন <i class="fa-solid fa-external-link text-[8px]"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- ধাপ ২ -->
+                <div class="flex items-start gap-3 text-xs leading-relaxed">
+                    <span class="w-5 h-5 bg-slate-100 border border-slate-200 rounded-full flex items-center justify-center font-bold text-slate-600 text-[10px] shrink-0 mt-0.5">২</span>
+                    <div>
+                        <p class="text-slate-800 font-bold">কাজটি সফলভাবে সম্পন্ন করার পর একটি স্ক্রিনশট (Screenshot) তুলে নিন।</p>
+                    </div>
+                </div>
+
+                <!-- ধাপ ৩ (লিংক ক্লিক করার আগে লক থাকবে) -->
+                <div class="flex items-start gap-3 text-xs leading-relaxed">
+                    <span class="w-5 h-5 bg-slate-100 border border-slate-200 rounded-full flex items-center justify-center font-bold text-slate-600 text-[10px] shrink-0 mt-0.5">৩</span>
+                    <div class="space-y-3 w-full">
+                        <p class="text-slate-800 font-bold">কাজের প্রমাণ হিসেবে স্ক্রিনশটটি আপলোড করুন:</p>
+                        
+                        <div class="flex flex-col gap-2">
+                            <div class="flex items-center gap-3">
+                                <!-- ডিফল্টভাবে এই ইনপুট ও লেবেল লকড থাকবে -->
+                                <label id="upload-label-btn" class="cursor-not-allowed bg-slate-100 text-slate-400 border border-slate-200 text-[10px] font-bold px-3.5 py-2.5 rounded-xl flex items-center gap-1.5 shadow-none">
+                                    <i class="fa-solid fa-cloud-arrow-up"></i> Select Screenshot
+                                </label>
+                                <input type="file" id="proof-file" disabled class="hidden" accept="image/*" onchange="uploadTaskProof(this)">
+                                
+                                <span id="upload-status-label" class="text-[9px] text-slate-400 font-bold">ধাপ ১ সম্পন্ন করুন</span>
+                            </div>
+
+                            <!-- রিয়েল-টাইম লাইভ প্রোগ্রেস বার -->
+                            <div id="upload-progress-container" class="hidden w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mt-1">
+                                <div id="upload-progress-bar" class="bg-emerald-500 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ধাপ ৪ (আপলোড শেষ হওয়ার আগে লক থাকবে) -->
+                <div class="flex items-start gap-3 text-xs leading-relaxed">
+                    <span class="w-5 h-5 bg-slate-100 border border-slate-200 rounded-full flex items-center justify-center font-bold text-slate-600 text-[10px] shrink-0 mt-0.5">৪</span>
+                    <div class="w-full">
+                        <p class="text-slate-800 font-bold mb-2.5">নিচের বোতামে ক্লিক করে প্রুফটি ভেরিফিকেশনের জন্য সাবমিট করুন:</p>
+                        <button type="submit" id="submit-btn" disabled class="w-full bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed text-[10px] font-extrabold py-2.5 rounded-xl transition shadow-none">
+                            কাজটি সাবমিট করুন
+                        </button>
+                    </div>
+                </div>
+
+            </form>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// ধাপ ৩ (আপলোড বাটন) আনলক করার জাভাস্ক্রিপ্ট লজিক
+function unlockUploadStep() {
+    const fileInput = document.getElementById('proof-file');
+    const uploadLabelBtn = document.getElementById('upload-label-btn');
+    const statusLabel = document.getElementById('upload-status-label');
+    
+    if (fileInput && uploadLabelBtn) {
+        fileInput.removeAttribute('disabled');
+        uploadLabelBtn.className = "cursor-pointer bg-slate-200 hover:bg-slate-300 text-slate-700 text-[10px] font-bold px-3.5 py-2.5 rounded-xl transition flex items-center gap-1.5 shadow-sm";
+        uploadLabelBtn.setAttribute('for', 'proof-file'); // ফাইল ইনপুটের সাথে লেবেল সংযুক্ত করা হলো
+        statusLabel.innerText = "স্ক্রিনশট আপলোড করুন";
+    }
+}
+
+// প্রোগ্রেস বার ট্র্যাকিং সহ ইমেজেস আপলোড স্ক্রিপ্ট (ImgBB)
+function uploadTaskProof(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    const IMGBB_API_KEY = "1cb6f7d4b65dfd982d0435de86bb8aff"; 
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const statusLabel = document.getElementById('upload-status-label');
+    const submitBtn = document.getElementById('submit-btn');
+    const progressContainer = document.getElementById('upload-progress-container');
+    const progressBar = document.getElementById('upload-progress-bar');
+    
+    progressContainer.classList.remove('hidden');
+    progressBar.style.width = '0%';
+    
+    statusLabel.innerText = "Uploading: 0%";
+    statusLabel.className = "text-[9px] text-slate-500 font-bold animate-pulse";
+
+    const xhr = new XMLHttpRequest();
+    
+    xhr.upload.addEventListener("progress", function(e) {
+        if (e.lengthComputable) {
+            const percentComplete = Math.round((e.loaded / e.total) * 100);
+            progressBar.style.width = percentComplete + '%';
+            statusLabel.innerText = "Uploading: " + percentComplete + "%";
+        }
+    }, false);
+
+    xhr.open("POST", `https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, true);
+
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            const data = JSON.parse(xhr.responseText);
+            if (data.success) {
+                document.getElementById('proof-image-url-input').value = data.data.url;
+                statusLabel.innerText = "Screenshot Uploaded Successfully! ✓";
+                statusLabel.className = "text-[9px] text-emerald-500 font-extrabold animate-none";
+                
+                // ধাপ ৪ (সাবমিট বাটন) সাকসেসফুলি এক্টিভেট করা হচ্ছে
+                submitBtn.removeAttribute('disabled');
+                submitBtn.className = "w-full bg-black hover:opacity-90 text-white text-[10px] font-extrabold py-2.5 rounded-xl transition cursor-pointer shadow";
+            } else {
+                statusLabel.innerText = "Upload Failed. Please try again.";
+                statusLabel.className = "text-[9px] text-red-500 font-bold animate-none";
+                progressContainer.classList.add('hidden');
+            }
+        } else {
+            statusLabel.innerText = "Connection or API Key Error.";
+            statusLabel.className = "text-[9px] text-red-500 font-bold animate-none";
+            progressContainer.classList.add('hidden');
+        }
+    };
+
+    xhr.onerror = function() {
+        statusLabel.innerText = "Network connection failed.";
+        statusLabel.className = "text-[9px] text-red-500 font-bold animate-none";
+        progressContainer.classList.add('hidden');
+    };
+
+    xhr.send(formData);
+}
+</script>
+
+{% endblock %}
