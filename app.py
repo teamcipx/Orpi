@@ -896,65 +896,6 @@ def login():
     return render_template('login.html')
     
     
-@app.route('/profile', methods=['GET', 'POST'])
-def profile():
-    user_id = session.get('user_id')
-    if not user_id:
-        return redirect(url_for('login'))
-        
-    if request.method == 'POST':
-        phone = request.form.get('phone_number')
-        age = request.form.get('age')
-        district = request.form.get('district')
-        proof_url = request.form.get('avatar_url')
-        username = request.form.get('username')
-        
-        update_data = {}
-        if username: update_data['username'] = username
-        if phone: update_data['phone_number'] = phone
-        if age: update_data['age'] = int(age) if age.isdigit() else None
-        if district: update_data['district'] = district
-        if proof_url: update_data['avatar_url'] = proof_url
-        
-        if update_data:
-            supabase.table("users").update(update_data).eq("id", user_id).execute()
-            flash("প্রোফাইল তথ্য সফলভাবে আপডেট করা হয়েছে।", "success")
-            return redirect(url_for('profile'))
-            
-    user = supabase.table("users").select("*").eq("id", user_id).execute().data[0]
-    ref_link = request.url_root + "register?ref=" + str(user['uid'])
-    
-    return render_template('profile.html', user=user, ref_link=ref_link)
-    @app.route('/profile', methods=['GET', 'POST'])
-def profile():
-    user_id = session.get('user_id')
-    if not user_id:
-        return redirect(url_for('login'))
-        
-    if request.method == 'POST':
-        phone = request.form.get('phone_number')
-        age = request.form.get('age')
-        district = request.form.get('district')
-        proof_url = request.form.get('avatar_url')
-        username = request.form.get('username')
-        
-        update_data = {}
-        if username: update_data['username'] = username
-        if phone: update_data['phone_number'] = phone
-        if age: update_data['age'] = int(age) if age.isdigit() else None
-        if district: update_data['district'] = district
-        if proof_url: update_data['avatar_url'] = proof_url
-        
-        if update_data:
-            supabase.table("users").update(update_data).eq("id", user_id).execute()
-            flash("প্রোফাইল তথ্য সফলভাবে আপডেট করা হয়েছে।", "success")
-            return redirect(url_for('profile'))
-            
-    user = supabase.table("users").select("*").eq("id", user_id).execute().data[0]
-    ref_link = request.url_root + "register?ref=" + str(user['uid'])
-    
-    return render_template('profile.html', user=user, ref_link=ref_link)
-    
 @app.route('/withdraw', methods=['GET', 'POST'])
 def withdraw():
     user_id = session.get('user_id')
