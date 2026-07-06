@@ -2,97 +2,85 @@
 {% block content %}
 
 <!-- ১. স্ক্রলিং নোটিশ -->
-<div class="premium-card p-3 px-4 mb-5 rounded-2xl flex items-center gap-2 border-l-2 border-emerald-500 shadow-[0_4px_20px_rgba(16,185,129,0.02)] overflow-hidden">
-    <i class="fa-solid fa-bullhorn text-xs text-emerald-500 animate-bounce"></i>
+<div class="premium-card p-3 px-4 mb-4 rounded-2xl flex items-center gap-2 border-l-2 border-black">
+    <i class="fa-solid fa-bullhorn text-xs text-black animate-bounce"></i>
     <marquee class="font-semibold text-xs tracking-wide" scrollamount="3">{{ notice }}</marquee>
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- মোবাইল ও ডেস্কটপ রেসপন্সিভ সাইড-বাই-সাইড গ্রিড -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-5">
     
     <!-- বাম পাশের ২-কলাম (কার্ড ও টার্মিনাল) -->
-    <div class="md:col-span-2 space-y-5">
+    <div class="md:col-span-2 space-y-4">
         
-        <!-- প্রিমিয়াম গ্লাস-মরফিজম ইউজার কার্ড -->
-        <div class="premium-card p-6 rounded-3xl relative overflow-hidden flex items-center justify-between border border-white/20">
-            <!-- রিয়েল-টাইম ব্যাকগ্রাউন্ড নিয়ন গ্লো -->
-            <div class="absolute -right-10 -top-10 w-36 h-32 bg-gradient-to-br from-emerald-400/10 to-teal-400/5 rounded-full blur-3xl animate-pulse"></div>
-            
-            <div class="flex items-center gap-4 z-10">
+        <!-- প্রিমিয়াম মিনিমাল ইউজার কার্ড -->
+        <div class="premium-card p-5 rounded-3xl flex items-center justify-between">
+            <div class="flex items-center gap-3.5">
                 <div class="relative">
-                    <img src="{{ user.avatar_url }}" alt="Profile" class="w-14 h-12 rounded-full object-cover border-2 border-white/40 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
-                    <span class="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full shadow-[0_0_8px_#10b981]"></span>
+                    <img src="{{ user.avatar_url }}" alt="Profile" class="w-12 h-12 rounded-full object-cover border border-slate-200">
+                    <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-black border-2 border-white rounded-full"></span>
                 </div>
-                <div class="space-y-1">
-                    <h2 class="text-sm font-extrabold text-slate-800 flex items-center gap-1.5 leading-none">
+                <div>
+                    <h2 class="text-sm font-extrabold text-slate-900 leading-none">
                         {{ user.username }}
                     </h2>
-                    <span class="text-[9px] bg-slate-100/80 backdrop-blur-md text-slate-500 border border-slate-200/50 font-bold uppercase tracking-wider px-2 py-0.5 rounded-full inline-block leading-none">UID: {{ user.uid }}</span>
+                    <span class="text-[9px] bg-slate-100 text-slate-500 font-bold uppercase tracking-wider px-2 py-0.5 rounded-full mt-1.5 inline-block">UID: {{ user.uid }}</span>
                 </div>
             </div>
-            <div class="text-right z-10 space-y-1">
-                <span class="text-[9px] text-slate-400 uppercase tracking-widest font-bold block leading-none">ব্যালেন্স</span>
-                <p class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-600 leading-none">
-                    ৳ {{ user.balance }}
-                </p>
+            <div class="text-right">
+                <span class="text-[9px] text-slate-400 uppercase tracking-wider font-bold">ব্যালেন্স</span>
+                <p class="text-2xl font-black text-black">৳ {{ user.balance }}</p>
             </div>
         </div>
 
-        <!-- ডেইলি চেক-ইন উইজেট (গ্লাস থিম) -->
+        <!-- ডেইলি চেক-ইন উইজেট (সলিড ব্ল্যাক থিম বাটন) -->
         {% if is_daily_eligible %}
-        <div class="premium-card p-5 rounded-3xl flex items-center justify-between border border-white/20">
+        <div class="premium-card p-4 rounded-3xl flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 text-sm animate-pulse shadow-sm">
-                    <i class="fa-solid fa-gift"></i>
+                <div class="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-black text-sm shadow-sm">
+                    <i class="fa-solid fa-gift animate-pulse"></i>
                 </div>
                 <div>
-                    <h4 class="text-xs font-bold text-slate-700">ডেইলি চেক-ইন বোনাস</h4>
+                    <h4 class="text-xs font-bold text-slate-800">ডেইলি চেক-ইন বোনাস</h4>
                     <p class="text-[9px] text-slate-400 mt-0.5">প্রতিদিন লগইন করে ৳ ৫.০০ বোনাস নিন</p>
                 </div>
             </div>
-            <button id="daily-btn" onclick="runDailyCheckin()" class="glow-btn-light bg-gradient-to-r from-amber-500 to-orange-400 hover:opacity-95 text-white text-[11px] font-extrabold px-4 py-2 rounded-xl transition shadow">
+            <button id="daily-btn" onclick="runDailyCheckin()" class="bg-black hover:opacity-90 text-white text-[11px] font-extrabold px-4 py-2 rounded-xl transition shadow-sm">
                 CLAIM ৳৫
             </button>
         </div>
         {% endif %}
 
-        <!-- ৩ডি থ্রি-ডি নিয়ন মাইনিং টার্মিনাল -->
-        <div class="premium-card p-6 rounded-3xl space-y-5 border border-white/20 relative overflow-hidden">
+        <!-- বহুমাত্রিক মাইনিং টার্মিনাল -->
+        <div class="premium-card p-5 rounded-3xl space-y-4">
             <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
-                <i class="fa-solid fa-square-poll-vertical text-emerald-500 animate-pulse"></i>
-                <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-700">সক্রিয় মাইনিং নোডস</h3>
+                <i class="fa-solid fa-server text-black"></i>
+                <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-700">সক্রিয় মাইনিং ডিভাইসসমূহ</h3>
             </div>
 
             <div id="claim-api-message" class="hidden p-3 text-xs rounded-xl text-center font-bold border"></div>
 
             <div class="space-y-4">
                 {% for item in owned_packages %}
-                <div class="bg-gradient-to-r from-slate-50/50 to-white/30 border border-slate-100 p-4 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative overflow-hidden group">
-                    <!-- কন্টেইনার গ্লো -->
-                    <div class="absolute -right-8 -top-8 w-20 h-24 bg-emerald-500/5 rounded-full blur-2xl group-hover:bg-emerald-500/10 transition"></div>
-                    
-                    <div class="flex items-center gap-3.5 z-10">
-                        <div class="w-11 h-11 rounded-2xl bg-white border border-slate-200/80 flex items-center justify-center text-emerald-500 shadow-sm relative">
-                            <span class="absolute -top-1 -right-1 flex h-2 w-2">
-                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                            </span>
-                            <i class="fa-solid fa-microchip text-lg"></i>
+                <div class="bg-slate-50 border border-slate-100 p-4 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative overflow-hidden group">
+                    <div class="flex items-center gap-3 z-10">
+                        <div class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-black shadow-sm">
+                            <i class="fa-solid fa-microchip text-base"></i>
                         </div>
-                        <div class="space-y-1">
-                            <h4 class="font-extrabold text-slate-800 text-xs leading-none">{{ item.packages.name }}</h4>
-                            <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider leading-none">
-                                ৳ {{ item.packages.yield_amount }} | 
+                        <div>
+                            <h4 class="font-bold text-slate-850 text-xs">{{ item.packages.name }} (৳ {{ item.packages.yield_amount }})</h4>
+                            <p class="text-[9px] text-slate-400 font-semibold mt-0.5 uppercase tracking-wide">
                                 {% if item.packages.is_premium %}
-                                    মেয়াদ: {% if item.expires_at %}{{ item.expires_at[:10] }}{% else %}৩০ দিন{% endif %}
+                                    মেয়اد শেষ হবে: {% if item.expires_at %}{{ item.expires_at[:10] }}{% else %}৩০ দিন{% endif %}
                                 {% else %}
-                                    মেয়াদ: {% if item.expires_at %}{{ item.expires_at[:10] }}{% else %}১ বছর{% endif %}
+                                    মেয়اد শেষ হবে: {% if item.expires_at %}{{ item.expires_at[:10] }}{% else %}১ বছর{% endif %}
                                 {% endif %}
                             </p>
                         </div>
                     </div>
 
-                    <!-- টাইমার এবং পৃথক ক্লেইম বাটন গ্রুপ -->
-                    <div class="flex items-center justify-between w-full md:w-auto gap-4 pt-3 md:pt-0 border-t md:border-t-0 border-slate-200/40 z-10">
+                    <!-- টাইমার এবং পৃথক ক্লেইম বাটন গ্রুপ (সলিড ব্ল্যাক এক্টিভ বাটন) -->
+                    <div class="flex items-center justify-between w-full md:w-auto gap-4 pt-3 md:pt-0 border-t md:border-t-0 border-slate-200/50 z-10">
                         <div class="flex items-center gap-1.5 bg-white border border-slate-200 px-3 py-1.5 rounded-xl shadow-inner font-mono text-xs font-black">
                             <i id="clock-{{ item.id }}" class="fa-regular fa-clock text-slate-400"></i>
                             <span class="countdown-timer text-slate-800" 
@@ -119,29 +107,29 @@
     <!-- ডান পাশের ১-কলাম (শর্টকাট ও সাপোর্টস) -->
     <div class="space-y-4">
         
-        <!-- ৩ডি টাচ শর্টকাট গ্রিড -->
+        <!-- কুইক নেভিগেশন গ্রিড -->
         <div class="grid grid-cols-3 gap-3">
-            <a href="/history" class="premium-card p-3.5 rounded-2xl flex flex-col items-center justify-center text-center hover:scale-[1.03] active:scale-[0.98] transition">
+            <a href="/history" class="premium-card p-3 rounded-xl flex flex-col items-center justify-center text-center hover:scale-105 transition">
                 <i class="fa-solid fa-clock-rotate-left text-slate-500 text-sm mb-1.5"></i>
                 <span class="text-[9px] font-bold text-slate-600 uppercase tracking-wider">History</span>
             </a>
-            <a href="https://t.me/ortiwokr" target="_blank" class="premium-card p-3.5 rounded-2xl flex flex-col items-center justify-center text-center hover:scale-[1.03] active:scale-[0.98] transition">
+            <a href="https://t.me/ortiwokr" target="_blank" class="premium-card p-3 rounded-xl flex flex-col items-center justify-center text-center hover:scale-105 transition">
                 <i class="fa-brands fa-telegram text-sky-500 text-sm mb-1.5"></i>
                 <span class="text-[9px] font-bold text-slate-600 uppercase tracking-wider">Telegram</span>
             </a>
-            <a href="/tasks" class="premium-card p-3.5 rounded-2xl flex flex-col items-center justify-center text-center hover:scale-[1.03] active:scale-[0.98] transition">
+            <a href="/tasks" class="premium-card p-3 rounded-xl flex flex-col items-center justify-center text-center hover:scale-105 transition">
                 <i class="fa-solid fa-list-check text-slate-500 text-sm mb-1.5"></i>
                 <span class="text-[9px] font-bold text-slate-600 uppercase tracking-wider">Task</span>
             </a>
-            <a href="/referrals" class="premium-card p-3.5 rounded-2xl flex flex-col items-center justify-center text-center hover:scale-105 transition bg-white border border-slate-200 shadow-sm">
+            <a href="/referrals" class="premium-card p-3 rounded-xl flex flex-col items-center justify-center text-center hover:scale-105 transition">
                 <i class="fa-solid fa-gift text-slate-500 text-sm mb-1.5"></i>
                 <span class="text-[9px] font-bold text-slate-600 uppercase tracking-wider">Refer</span>
             </a>
-            <a href="/profile" class="premium-card p-3 rounded-xl flex flex-col items-center justify-center text-center hover:scale-105 transition bg-white border border-slate-200 shadow-sm">
+            <a href="/profile" class="premium-card p-3 rounded-xl flex flex-col items-center justify-center text-center hover:scale-105 transition">
                 <i class="fa-solid fa-circle-user text-slate-500 text-sm mb-1.5"></i>
                 <span class="text-[9px] font-bold text-slate-600 uppercase tracking-wider">Account</span>
             </a>
-            <a href="/withdraw" class="premium-card p-3 rounded-xl flex flex-col items-center justify-center text-center hover:scale-105 transition bg-white border border-slate-200 shadow-sm">
+            <a href="/withdraw" class="premium-card p-3 rounded-xl flex flex-col items-center justify-center text-center hover:scale-105 transition">
                 <i class="fa-solid fa-money-bill-transfer text-slate-500 text-sm mb-1.5"></i>
                 <span class="text-[9px] font-bold text-slate-600 uppercase tracking-wider">Withdraw</span>
             </a>
@@ -149,7 +137,7 @@
 
         <!-- হেল্প ও সাপোর্ট সেকশন -->
         <div class="space-y-3">
-            <a href="/about" class="premium-card p-4 rounded-xl flex items-center justify-between bg-white border border-slate-200 shadow-sm">
+            <a href="/about" class="premium-card p-4 rounded-xl flex items-center justify-between hover:border-slate-350 transition">
                 <div class="flex items-center gap-3">
                     <div class="w-9 h-9 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-500 text-sm shadow-sm">
                         <i class="fa-solid fa-server"></i>
@@ -162,7 +150,7 @@
                 <i class="fa-solid fa-chevron-right text-slate-300 text-xs"></i>
             </a>
 
-            <a href="https://www.youtube.com/watch?v=YOUR_VIDEO_ID" target="_blank" class="premium-card p-4 rounded-xl flex items-center justify-between bg-white border border-slate-200 shadow-sm">
+            <a href="https://www.youtube.com/watch?v=YOUR_VIDEO_ID" target="_blank" class="premium-card p-4 rounded-xl flex items-center justify-between hover:border-slate-350 transition">
                 <div class="flex items-center gap-3">
                     <div class="text-red-500 text-lg">
                         <i class="fa-solid fa-circle-play animate-pulse"></i>
@@ -175,20 +163,20 @@
                 <span class="text-[9px] bg-red-50 text-red-600 border border-red-100 px-2.5 py-0.5 rounded-full font-bold">ভিডিও</span>
             </a>
 
-            <a href="https://t.me/ortipay" target="_blank" class="premium-card p-4 rounded-xl flex items-center justify-between bg-white border border-slate-200 shadow-sm">
+            <a href="https://t.me/ortipay" target="_blank" class="premium-card p-4 rounded-xl flex items-center justify-between hover:border-slate-350 transition">
                 <div class="flex items-center gap-3">
                     <div class="text-emerald-500 text-base">
                         <i class="fa-solid fa-receipt"></i>
                     </div>
                     <div class="text-left">
                         <p class="font-bold text-slate-800 text-xs">পেমেন্ট প্রুফ চ্যানেল (Live Payouts)</p>
-                        <p class="text-[9px] text-slate-400 mt-0.5">আমাদের স্বয়ংক্রিয় পেমেন্ট প্রুফ হিস্ট্রি দেখুন</p>
+                        <p class="text-[9px] text-slate-400 mt-0.5">Swyambhara payment records</p>
                     </div>
                 </div>
                 <span class="text-[9px] bg-emerald-50 text-emerald-600 border border-emerald-100 px-2.5 py-0.5 rounded-full font-bold">পেমেন্ট প্রুফ</span>
             </a>
 
-            <a href="/reviews" class="premium-card p-4 rounded-xl flex items-center justify-between">
+            <a href="/reviews" class="premium-card p-4 rounded-xl flex items-center justify-between hover:border-slate-350 transition">
                 <div class="flex items-center gap-3">
                     <div class="text-amber-400 text-sm">
                         <i class="fa-solid fa-star"></i>
@@ -207,7 +195,7 @@
                 </div>
             </a>
 
-            <a href="/store" class="premium-card p-4 rounded-xl flex items-center justify-between bg-white border border-slate-200 shadow-sm">
+            <a href="/store" class="premium-card p-4 rounded-xl flex items-center justify-between hover:border-slate-350 transition">
                 <div class="flex items-center gap-3">
                     <div class="text-purple-500 text-sm">
                         <i class="fa-solid fa-circle-arrow-up animate-bounce"></i>
@@ -220,7 +208,7 @@
                 <span class="text-[9px] bg-purple-50 text-purple-600 border border-purple-100 px-2.5 py-0.5 rounded-full font-bold">আপগ্রেড</span>
             </a>
 
-            <a href="https://t.me/ortiwokr" target="_blank" class="premium-card p-4 rounded-xl flex items-center justify-between bg-white border border-slate-200 shadow-sm">
+            <a href="https://t.me/ortiwokr" target="_blank" class="premium-card p-4 rounded-xl flex items-center justify-between hover:border-slate-350 transition">
                 <div class="flex items-center gap-3">
                     <div class="text-sky-500 text-base">
                         <i class="fa-brands fa-telegram"></i>
@@ -233,7 +221,7 @@
                 <span class="text-[9px] bg-sky-50 text-sky-600 border border-sky-100 px-2.5 py-0.5 rounded-full font-bold">মেইন চ্যানেল</span>
             </a>
 
-            <a href="https://t.me/Optiworkhelp" target="_blank" class="premium-card p-4 rounded-xl flex items-center justify-between bg-white border border-slate-200 shadow-sm">
+            <a href="https://t.me/Optiworkhelp" target="_blank" class="premium-card p-4 rounded-xl flex items-center justify-between hover:border-slate-350 transition">
                 <div class="flex items-center gap-3">
                     <div class="text-sky-500 text-sm">
                         <i class="fa-solid fa-headset text-base"></i>
@@ -301,7 +289,8 @@ function updateDashboardTimers() {
             clockIcon.className = "text-emerald-500 animate-spin text-[10px]";
 
             claimBtn.removeAttribute('disabled');
-            claimBtn.className = "glow-btn-light bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-[10px] px-4 py-2 rounded-xl transition flex items-center gap-1 shadow cursor-pointer";
+            // একটিভ বাটন সলিড ব্ল্যাক ও কুয়ারি গ্লোয়িং বর্ডার
+            claimBtn.className = "bg-black hover:opacity-90 text-white font-extrabold text-[10px] px-4 py-2 rounded-xl transition flex items-center gap-1 shadow cursor-pointer border border-black";
             claimBtn.innerHTML = '<i class="fa-solid fa-bolt text-[9px]"></i> CLAIM';
         } else {
             const hours = Math.floor(diffMs / (1000 * 60 * 60));
@@ -314,7 +303,7 @@ function updateDashboardTimers() {
 
             clockIcon.className = "text-slate-400";
             claimBtn.setAttribute('disabled', 'true');
-            claimBtn.className = "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed font-extrabold text-[10px] px-4 py-2 rounded-xl transition flex items-center gap-1 shadow-none";
+            claimBtn.className = "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed font-extrabold text-[10px] px-4.5 py-2.5 rounded-xl transition flex items-center gap-1 shadow-none";
             claimBtn.innerHTML = '<i class="fa-solid fa-lock text-[9px]"></i> CLAIM';
         }
     });
