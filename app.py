@@ -693,6 +693,9 @@ def admin_delete_review():
         
     return redirect(url_for('reviews_page'))
     
+# (অন্যান্য কোড অপরিবর্তিত থাকবে, টাস্ক সম্পর্কিত রাউটগুলো নিচের কোড দ্বারা প্রতিস্থাপন করুন)
+
+# ১. টাস্ক তালিকা রাউট (/tasks)
 @app.route('/tasks')
 def tasks():
     user_id = session.get('user_id')
@@ -701,20 +704,26 @@ def tasks():
         
     user = supabase.table("users").select("*").eq("id", user_id).execute().data[0]
     
+    # ইউজার ইতিমধ্যে ক্লেইম করা ওয়ান-টাইম টাস্কগুলোর তালিকা
     completed_one_times = supabase.table("user_one_time_tasks") \
         .select("task_name").eq("user_id", user_id).execute().data
     claimed_one_times = [t['task_name'] for t in completed_one_times]
     
+    # সফল রেফারেল সংখ্যা যাচাই
     success_refs_query = supabase.table("referrals").select("id").eq("referrer_id", user_id).eq("status", "Success").execute().data
     success_ref_count = len(success_refs_query)
     
+    # প্রোফাইল সম্পূর্ণ করা হয়েছে কিনা যাচাই করা
     is_profile_complete = bool(user.get('phone_number') and user.get('age') and user.get('district'))
     
+    # ইউজারের সাবমিট করা পূর্ববর্তী নরমাল টাস্কের ডাটা
     submissions = supabase.table("task_submissions").select("task_id, status").eq("user_id", user_id).execute().data
     submission_map = {s['task_id']: s['status'] for s in submissions}
     
+    # এডমিনের তৈরি সমস্ত নরমাল টাস্কসমূহ
     all_normal_tasks = supabase.table("tasks").select("*").order("created_at", desc=True).execute().data
     
+    # ফিল্টারিং লজিক: কেবল সেই কাজগুলোই দেখাবে যা ইউজার সাবমিট করেনি অথবা পূর্বে 'Rejected' হয়েছে
     active_normal_tasks = []
     for task in all_normal_tasks:
         status = submission_map.get(task['id'])
@@ -729,6 +738,64 @@ def tasks():
                            submission_map=submission_map)
 
 
+# ২. ডেডিকেটেড টাস্ক ডিটেইলস ও স্টেপ-বাই-স্টেপ সাবমিশন রাউট (/tasks/<task_id>)
+@app.route('/tasks/<task_id>')
+def task_detail(task_id):
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+        
+    user = supabase.table("users").select("username").eq("id", user_id).execute().data[0]
+    
+    # নির্দিষ্ট টাস্ক আইডি দিয়ে ডাটা কুয়েরি
+    task_query = supabase.table("tasks").select("*").eq("id", task_id).execute().data
+    if not task_query:
+        flash("টাস্কটি খুঁজে পাওয়া যায়নি।", "danger")
+        return redirect(url_for('tasks'))
+        
+    task = task_query[0]
+    
+    # এই কাজের জন্য পূর্বে কোনো সাবমিশন করা হয়েছে কিনা চেক করা
+    submission_query = supabase.table("task_submissions") \
+        .select("status, proof_image_url") \
+        .eq("user_id", user_id).eq("task_id", task_id).execute().data
+        
+    status = submission_query[0]['status'] if submission_query else None
+    proof_url = submission_query[0]['proof_image_url'] if submission_query else None
+    
+    return render_template('task_detail.html', task=task, status=status, proof_url=proof_url)
+
+
+# ৩. নরমাল টাস্ক সাবমিট এপিআই (ডিটেইলস পেজ থেকে ট্রিগার হবে)
+@app.route('/tasks/submit-normal', methods=['POST'])
+def submit_normal():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+        
+    task_id = request.form.get('task_id')
+    proof_url = request.form.get('proof_image_url')
+    
+    if not proof_url:
+        flash("দয়া করে কাজের প্রুফ (স্ক্রিনশট) আপলোড করুন।", "danger")
+        return redirect(url_for('task_detail', task_id=task_id))
+        
+    try:
+        supabase.table("task_submissions").delete() \
+            .eq("user_id", user_id).eq("task_id", task_id).eq("status", "Rejected").execute()
+        
+        supabase.table("task_submissions").insert({
+            "user_id": user_id,
+            "task_id": task_id,
+            "proof_image_url": proof_url,
+            "status": "Pending"
+        }).execute()
+        flash("কাজের প্রুফ সফলভাবে জমা দেওয়া হয়েছে। এডমিন ভেরিফাই করবে।", "success")
+    except Exception:
+        flash("এই কাজটি ইতিমধ্যে প্রক্রিয়াধীন (Pending) অথবা অনুমোদিত (Approved) আছে।", "danger")
+        
+    return redirect(url_for('tasks'))
+    
 @app.route('/tasks/submit-normal', methods=['POST'])
 def submit_normal():
     user_id = session.get('user_id')
