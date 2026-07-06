@@ -22,7 +22,7 @@
     </script>
     <style>
         body {
-            background-color: #EDEDF0; /* Blockio ম্যাট অফ-হোয়াইট ব্যাকগ্রাউন্ড */
+            background-color: #EDEDF0; 
         }
         .premium-card {
             background: #FFFFFF;
@@ -53,10 +53,8 @@
 </head>
 <body class="text-[#000000] min-h-screen flex flex-col md:flex-row pb-28 md:pb-0">
 
-    <!-- ================= ১. ডেস্কটপ সাইডবার (Blockio প্রিমিয়াম হোয়াইট থিম) ================= -->
     <aside class="hidden md:flex flex-col justify-between w-64 bg-white border-r border-[#E5E5E9] h-screen fixed left-0 top-0 p-5 z-40">
         <div class="space-y-6">
-            <!-- Blockio কাস্টম ২x২ লোগো গ্রিড -->
             <a href="/dashboard" class="flex items-center space-x-2.5 px-2">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="animate-pulse">
                     <rect x="2" y="2" width="8" height="8" rx="2" fill="black"/>
@@ -64,12 +62,11 @@
                     <rect x="14" y="14" width="8" height="8" rx="2" fill="black"/>
                     <path d="M14 2H18C20.2091 2 22 3.79086 22 6V10C22 12.2091 20.2091 14 18 14H14V2Z" fill="black"/>
                 </svg>
-                <span class="text-base font-extrabold tracking-wider text-black">
+                <span class="text-base font-extrabold tracking-tight text-black">
                     OPTI<span class="text-slate-500">WORK</span>
                 </span>
             </a>
 
-            <!-- প্রিমিয়াম ক্যাটাগরি মেনু -->
             <div class="space-y-2 text-xs font-bold uppercase tracking-wider text-slate-500">
                 <a href="/dashboard" class="flex items-center gap-3 px-3.5 py-3 rounded-xl hover:bg-slate-900 hover:text-white transition-all duration-200">
                     <i class="fa-solid fa-chart-line text-sm"></i> Dashboard
@@ -89,7 +86,6 @@
             </div>
         </div>
 
-        <!-- সাইডবার প্রোফাইল সেকশন -->
         {% if user %}
         <div class="border-t border-slate-100 pt-4 flex items-center justify-between">
             <div class="flex items-center gap-2.5">
@@ -104,7 +100,6 @@
         {% endif %}
     </aside>
 
-    <!-- ================= ২. মোবাইল ফ্লোটিং ক্যাপসুল হেডার ================= -->
     <div class="md:hidden sticky top-0 z-50 w-full px-4 pt-3.5 pb-1 bg-gradient-to-b from-[#EDEDF0] via-[#EDEDF0]/90 to-transparent">
         <div class="bg-white border border-[#E5E5E9] rounded-2xl px-4 py-3 flex justify-between items-center shadow-sm relative">
             <a href="/dashboard" class="flex items-center space-x-2">
@@ -124,7 +119,6 @@
             </button>
         </div>
 
-        <!-- মোবাইল মেনু ড্রপডাউন -->
         <div id="top-dropdown-menu" class="hidden mt-2 border border-slate-200/80 bg-white px-5 py-4 space-y-2 text-[10px] font-bold uppercase tracking-wider text-slate-500 w-full rounded-2xl shadow-lg">
             <a href="/dashboard" class="block py-2 hover:text-emerald-500 transition"><i class="fa-solid fa-chart-line mr-2"></i> Dashboard</a>
             <a href="/store" class="block py-2 hover:text-emerald-500 transition"><i class="fa-solid fa-store mr-2"></i> Store</a>
@@ -135,7 +129,6 @@
         </div>
     </div>
 
-    <!-- ================= ৩. ফ্লোটিং টেলিগ্রাম কাস্টমার সাপোর্ট বাটন (সলিড ব্ল্যাক থিম) ================= -->
     <div class="fixed bottom-24 right-4 z-50 md:bottom-6 md:right-6">
         <a href="https://t.me/Optiworkhelp" target="_blank" class="w-11 h-11 bg-black hover:opacity-90 text-white rounded-full flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110 relative">
             <span class="absolute inset-0 rounded-full bg-black/10 animate-ping"></span>
@@ -143,9 +136,9 @@
         </a>
     </div>
 
-    <!-- ================= ৪. ফ্লোটিং মোবাইল বটম পিল-ডক (হাই-কন্ট্রাস্ট সলিড ব্ল্যাক) ================= -->
-    <div class="fixed bottom-4 left-0 right-0 z-40 px-4 max-w-sm mx-auto md:hidden">
-        <div class="bg-black py-3 rounded-full shadow-xl flex justify-around text-[10px] uppercase font-bold text-slate-500">
+    <!-- আল্ট্রা-স্লীক পিল-স্টাইল ফ্লোটিং বটম ডক (সলিড ডার্ক গ্লাস ইফেক্ট) -->
+    <div class="fixed bottom-4 left-0 right-0 z-40 px-4 max-w-xs mx-auto md:hidden">
+        <div class="bg-slate-950/95 backdrop-blur-xl border border-white/5 py-3 rounded-full shadow-[0_10px_35px_rgba(0,0,0,0.18)] flex justify-around text-[10px] uppercase font-bold text-slate-500">
             <a href="/dashboard" class="bottom-nav-link flex flex-col items-center gap-1.5 hover:text-white transition text-slate-500 relative">
                 <i class="fa-solid fa-chart-line text-sm"></i> Home
             </a>
@@ -164,7 +157,6 @@
         </div>
     </div>
 
-    <!-- মেইন কন্টেন্ট উইন্ডো -->
     <main class="max-w-5xl mx-auto p-4 mt-2 w-full flex-grow md:pl-64 lg:pl-64 shadow-none">
         {% block content %}{% endblock %}
     </main>
@@ -194,7 +186,6 @@
                     link.classList.remove('text-slate-500');
                     link.classList.add('text-white');
                     
-                    // সলিড হোয়াইট একটিভ ইন্ডিকেটর ডট
                     const dot = document.createElement('span');
                     dot.className = "w-1 h-1 bg-white rounded-full mt-0.5 absolute -bottom-1.5 shadow-[0_0_6px_#ffffff]";
                     link.appendChild(dot);
