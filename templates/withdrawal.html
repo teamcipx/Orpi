@@ -64,19 +64,19 @@
                 <label class="block text-[10px] font-black text-slate-500 uppercase mb-2">পেমেন্ট গেটওয়ে নির্বাচন করুন</label>
                 <div class="grid grid-cols-3 gap-3">
                     <!-- bKash -->
-                    <label class="cursor-pointer border border-slate-200 rounded-2xl p-3 flex flex-col items-center justify-center bg-slate-50/50 hover:bg-slate-100/50 transition relative text-center shadow-sm" id="label-bkash">
+                    <label class="cursor-pointer border border-slate-200 rounded-2xl p-3 flex flex-col items-center justify-center bg-slate-50/50 hover:bg-slate-100/50 hover:scale-[1.01] transition-all duration-300 relative text-center shadow-sm" id="label-bkash">
                         <input type="radio" name="method" value="Bkash" checked class="hidden" onclick="selectGateway('Bkash')">
                         <img src="https://images.seeklogo.com/logo-png/27/1/bkash-logo-png_seeklogo-273684.png" class="h-6 object-contain mb-1.5">
                         <span class="text-[9px] font-black text-slate-600">bKash</span>
                     </label>
                     <!-- Nagad -->
-                    <label class="cursor-pointer border border-slate-200 rounded-2xl p-3 flex flex-col items-center justify-center bg-slate-50/50 hover:bg-slate-100/50 transition relative text-center shadow-sm" id="label-nagad">
+                    <label class="cursor-pointer border border-slate-200 rounded-2xl p-3 flex flex-col items-center justify-center bg-slate-50/50 hover:bg-slate-100/50 transition-all duration-300 relative text-center shadow-sm" id="label-nagad">
                         <input type="radio" name="method" value="Nagad" class="hidden" onclick="selectGateway('Nagad')">
                         <img src="https://images.seeklogo.com/logo-png/41/1/nagad-logo-png_seeklogo-411803.png" class="h-6 object-contain mb-1.5">
                         <span class="text-[9px] font-black text-slate-600">Nagad</span>
                     </label>
                     <!-- Rocket -->
-                    <label class="cursor-pointer border border-slate-200 rounded-2xl p-3 flex flex-col items-center justify-center bg-slate-50/50 hover:bg-slate-100/50 transition relative text-center shadow-sm" id="label-rocket">
+                    <label class="cursor-pointer border border-slate-200 rounded-2xl p-3 flex flex-col items-center justify-center bg-slate-50/50 hover:bg-slate-100/50 transition-all duration-300 relative text-center shadow-sm" id="label-rocket">
                         <input type="radio" name="method" value="Rocket" class="hidden" onclick="selectGateway('Rocket')">
                         <img src="https://images.seeklogo.com/logo-png/31/1/dutch-bangla-rocket-logo-png_seeklogo-317692.png" class="h-6 object-contain mb-1.5">
                         <span class="text-[9px] font-black text-slate-600">Rocket</span>
@@ -97,7 +97,7 @@
     </div>
     {% endif %}
 
-    <!-- ৩. উইথড্রয়াল হিস্ট্রি তালিকা (লোগো সহ) -->
+    <!-- ৩. উইথড্রয়াল হিস্ট্রি তালিকা (লোগো ওভারল্যাপ বাস্ট স্ক্রিপ্ট ফিক্স সহ) -->
     <div class="premium-card p-6 rounded-3xl bg-white border border-slate-200 shadow-sm">
         <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-800 mb-4 border-b border-slate-50 pb-3 flex items-center gap-1.5">
             <i class="fa-solid fa-clock-rotate-left text-slate-500"></i> উইথড্রয়াল রেকর্ড
@@ -114,22 +114,27 @@
                 <tbody class="divide-y divide-slate-50">
                     {% for item in history %}
                     <tr class="text-slate-700">
-                        <td class="p-3 font-black text-slate-900 text-sm">৳ {{ item.amount }}</td>
-                        <td class="p-3 flex items-center gap-2.5">
-                            {% if item.payment_method == 'Bkash' %}
-                                <img src="https://images.seeklogo.com/logo-png/27/1/bkash-logo-png_seeklogo-273684.png" class="h-4.5 object-contain inline-block">
-                            {% elif item.payment_method == 'Nagad' %}
-                                <img src="https://images.seeklogo.com/logo-png/41/1/nagad-logo-png_seeklogo-411803.png" class="h-4.5 object-contain inline-block">
-                            {% elif item.payment_method == 'Rocket' %}
-                                <img src="https://images.seeklogo.com/logo-png/31/1/dutch-bangla-rocket-logo-png_seeklogo-317692.png" class="h-4.5 object-contain inline-block">
-                            {% endif %}
-                            <div class="leading-tight">
-                                <span class="font-extrabold text-slate-800">{{ item.payment_method }}</span><br>
-                                <span class="text-[9px] text-slate-400 font-mono tracking-wider font-bold block mt-0.5">{{ item.payment_number }}</span>
+                        <td class="p-3.5 font-black text-slate-900 text-sm">৳ {{ item.amount }}</td>
+                        <td class="p-3.5">
+                            <div class="flex items-center gap-3">
+                                <!-- লোগো সাইজ লক কন্টেইনার (এটি ওভারল্যাপ ফিক্স করবে) -->
+                                <div class="w-12 h-8 flex items-center justify-start shrink-0">
+                                    {% if item.payment_method == 'Bkash' %}
+                                        <img src="https://images.seeklogo.com/logo-png/27/1/bkash-logo-png_seeklogo-273684.png" class="h-6 object-contain" style="max-height: 24px;">
+                                    {% elif item.payment_method == 'Nagad' %}
+                                        <img src="https://images.seeklogo.com/logo-png/41/1/nagad-logo-png_seeklogo-411803.png" class="h-6 object-contain" style="max-height: 24px;">
+                                    {% elif item.payment_method == 'Rocket' %}
+                                        <img src="https://images.seeklogo.com/logo-png/31/1/dutch-bangla-rocket-logo-png_seeklogo-317692.png" class="h-6 object-contain" style="max-height: 24px;">
+                                    {% endif %}
+                                </div>
+                                <div class="leading-tight">
+                                    <span class="font-extrabold text-slate-800 text-xs">{{ item.payment_method }}</span><br>
+                                    <span class="text-[9px] text-slate-400 font-mono tracking-wider font-bold block mt-0.5">{{ item.payment_number }}</span>
+                                </div>
                             </div>
                         </td>
-                        <td class="p-3 text-right">
-                            <span class="px-2.5 py-1 rounded-full font-black text-[8px] uppercase tracking-wide {% if item.status == 'Pending' %}bg-amber-50 text-amber-600 border border-amber-100{% elif item.status == 'Approved' %}bg-emerald-50 text-emerald-600 border border-emerald-100{% else %}bg-red-50 text-red-600 border-red-100{% endif %}">
+                        <td class="p-3.5 text-right">
+                            <span class="inline-block px-2.5 py-1 rounded-full font-black text-[8px] uppercase tracking-wide {% if item.status == 'Pending' %}bg-amber-50 text-amber-600 border border-amber-100{% elif item.status == 'Approved' %}bg-emerald-50 text-emerald-600 border border-emerald-100{% else %}bg-red-50 text-red-600 border-red-100{% endif %}">
                                 {{ item.status }}
                             </span>
                         </td>
