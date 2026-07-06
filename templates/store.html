@@ -2,28 +2,29 @@
 {% block content %}
 
 <!-- ব্যালেন্স তথ্য ও অ্যাড মানি বাটন বার -->
-<div class="minimal-card p-4 rounded-2xl mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white border border-slate-200 shadow-sm relative overflow-hidden">
-    <div class="absolute -left-12 -top-12 w-28 h-28 bg-emerald-500/5 rounded-full blur-2xl"></div>
-    <div class="z-10">
-        <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-            <i class="fa-solid fa-store text-emerald-500"></i> প্রিমিয়াম মাইনিং স্টোর
+<div class="premium-card p-5 rounded-3xl mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border border-white/40 shadow-[0_8px_30px_rgba(37,99,235,0.04)] relative overflow-hidden">
+    <div class="absolute -left-12 -top-12 w-28 h-28 bg-blue-500/5 rounded-full blur-2xl"></div>
+    <div class="z-10 space-y-1">
+        <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+            <i class="fa-solid fa-store text-blue-600 animate-pulse"></i> প্রিমিয়াম মাইনিং স্টোর
         </h2>
-        <p class="text-[9px] text-slate-400 mt-1 font-bold uppercase tracking-wider">Choose your processing node</p>
+        <p class="text-[9px] text-slate-400 font-extrabold uppercase tracking-wider">Choose your processing node</p>
     </div>
-    <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end z-10">
-        <span class="bg-emerald-50 text-emerald-600 border border-emerald-100 px-3 py-1.5 rounded-xl text-xs font-black">
+    <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end z-10">
+        <span class="bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-100 px-4 py-2 rounded-2xl text-xs font-black">
             ব্যালেন্স: ৳ {{ balance }}
         </span>
-        <a href="/add-money" class="bg-slate-950 hover:bg-slate-800 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+        <a href="/add-money" class="glow-btn-light bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-2xl text-xs font-black transition flex items-center gap-1.5 shadow">
             <i class="fa-solid fa-plus-circle text-[11px]"></i> Add Money
         </a>
     </div>
 </div>
 
+<!-- ফ্ল্যাশ নোটিফিকেশন মেসেজ -->
 {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
         {% for category, message in messages %}
-            <div class="p-3.5 mb-4 text-xs text-center rounded-xl border font-bold {% if category == 'success' %}bg-emerald-50 text-emerald-600 border-emerald-100{% else %}bg-red-50 text-red-600 border-red-100{% endif %}">
+            <div class="p-3.5 mb-5 text-xs text-center rounded-2xl border font-bold {% if category == 'success' %}bg-emerald-50 text-emerald-600 border-emerald-100{% else %}bg-red-50 text-red-600 border-red-100{% endif %}">
                 {{ message }}
             </div>
         {% endfor %}
@@ -31,65 +32,65 @@
 {% endwith %}
 
 <!-- প্রফেশনাল গ্রিড সিস্টেমে রেসপন্সিভ প্যাকেজ কার্ডসমূহ -->
-<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
     {% for pkg in premium_packages %}
-    <div class="minimal-card p-5 rounded-3xl flex flex-col justify-between hover:shadow-md transition bg-white border border-slate-200 shadow-sm relative overflow-hidden group">
+    <div class="premium-card p-6 rounded-3xl flex flex-col justify-between hover:shadow-md transition border border-white/40 shadow-sm relative overflow-hidden group">
         <!-- ব্যাকগ্রাউন্ড গ্লো ইফেক্ট -->
-        <div class="absolute -right-8 -top-8 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl group-hover:bg-emerald-500/10 transition"></div>
+        <div class="absolute -right-8 -top-8 w-24 h-24 bg-blue-500/5 rounded-full blur-2xl group-hover:bg-blue-500/10 transition"></div>
         
-        <div class="space-y-4">
+        <div class="space-y-5">
             <!-- প্যাকেজ হেডার ও ডাবল ব্যাজ -->
             <div class="flex justify-between items-start">
-                <div class="space-y-1.5">
+                <div class="space-y-2">
                     <div class="flex flex-wrap gap-1.5">
-                        <span class="bg-purple-50 text-purple-600 border border-purple-100 px-2 py-0.5 rounded-full text-[8px] font-extrabold uppercase tracking-wider">Premium Processor</span>
+                        <span class="bg-purple-50 text-purple-600 border border-purple-100 px-2.5 py-1 rounded-full text-[8px] font-extrabold uppercase tracking-wider">Premium Processor</span>
                         <!-- এক্সপায়ারি বা মেয়াদকাল ব্যাজ -->
-                        <span class="bg-blue-50 text-blue-600 border border-blue-100 px-2 py-0.5 rounded-full text-[8px] font-extrabold uppercase tracking-wider flex items-center gap-1">
+                        <span class="bg-blue-50 text-blue-600 border border-blue-100 px-2.5 py-1 rounded-full text-[8px] font-extrabold uppercase tracking-wider flex items-center gap-1">
                             <i class="fa-regular fa-calendar-days text-[9px]"></i> মেয়াদ: ৩০ দিন
                         </span>
                     </div>
-                    <h3 class="text-xs font-black text-slate-800 mt-1">{{ pkg.name }}</h3>
+                    <h3 class="text-xs font-black text-slate-900 mt-1">{{ pkg.name }}</h3>
                 </div>
                 <!-- কাস্টম হ্যাশরেট স্পিড প্রদর্শন -->
-                <span class="text-[9px] bg-slate-100 text-slate-500 font-bold px-2 py-0.5 rounded font-mono">
+                <span class="text-[9px] bg-slate-100 text-slate-500 font-extrabold px-2.5 py-1 rounded-lg font-mono border border-slate-200/50">
                     {% if pkg.cost <= 500 %}25 GH/s{% elif pkg.cost <= 1000 %}60 GH/s{% elif pkg.cost <= 2000 %}130 GH/s{% elif pkg.cost <= 3500 %}250 GH/s{% elif pkg.cost <= 5000 %}420 GH/s{% else %}950 GH/s{% endif %}
                 </span>
             </div>
             
             <!-- মূল্য এবং ক্লেইম তথ্য -->
-            <div class="border-b border-slate-100 pb-3.5">
+            <div class="border-b border-slate-100 pb-4">
                 <span class="text-[8px] text-slate-400 uppercase font-bold tracking-wider block">নির্ধারিত রেন্টাল প্রাইস</span>
-                <p class="text-2xl font-black text-slate-900 mt-0.5">৳ {{ pkg.cost }}</p>
-                <p class="text-[10px] text-emerald-600 font-bold mt-1.5 flex items-center gap-1">
+                <p class="text-2xl font-black text-[#0F172A] mt-0.5">৳ {{ pkg.cost }}</p>
+                <p class="text-[10px] text-emerald-600 font-black mt-2 flex items-center gap-1">
                     <i class="fa-solid fa-chart-line text-[9px]"></i> ক্লেইম প্রতি আয়: ৳ {{ pkg.yield_amount }} (প্রতি {{ pkg.duration_hours }}h)
                 </p>
             </div>
 
             <!-- প্যাকেজ সুযোগ-সুবিধা বা প্রিমিয়াম ফ্যাসিলিটিস -->
-            <div class="space-y-2 py-1 text-[10px] text-slate-500 font-medium">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-circle-check text-emerald-500 text-xs"></i>
+            <div class="space-y-3 py-1 text-[10px] text-slate-600 font-bold">
+                <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-circle-check text-emerald-500 text-sm"></i>
                     <span>রেফার ছাড়াই আনলিমিটেড উইথড্রয়াল সক্রিয়</span>
                 </div>
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-circle-check text-emerald-500 text-xs"></i>
-                    <span>৮ ঘণ্টায় ৳ {{ pkg.yield_amount }} নিশ্চিত ক্লেইম প্রফিট</span>
+                <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-circle-check text-emerald-500 text-sm"></i>
+                    <span>{{ pkg.duration_hours }} ঘণ্টায় ৳ {{ pkg.yield_amount }} নিশ্চিত ক্লেইম প্রফিট</span>
                 </div>
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-circle-check text-emerald-500 text-xs"></i>
+                <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-circle-check text-emerald-500 text-sm"></i>
                     <span>টোটাল মেয়াদকাল: ৩০ দিন (নিশ্চিত মাইনিং)</span>
                 </div>
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-circle-check text-emerald-500 text-xs"></i>
+                <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-circle-check text-emerald-500 text-sm"></i>
                     <span>VIP প্রায়োরিটি উইথড্রয়াল সাপোর্ট</span>
                 </div>
             </div>
         </div>
         
         <!-- বাই বাটন -->
-        <form action="/buy-package" method="POST" class="mt-4 pt-3.5 border-t border-slate-100">
+        <form action="/buy-package" method="POST" class="mt-5 pt-4 border-t border-slate-100">
             <input type="hidden" name="package_id" value="{{ pkg.id }}">
-            <button type="submit" class="w-full bg-slate-950 hover:bg-slate-800 text-white py-2.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
+            <button type="submit" class="w-full glow-btn-light bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-2xl font-black text-xs transition flex items-center justify-center gap-1.5 shadow">
                 <i class="fa-solid fa-cart-shopping mr-1 text-[10px]"></i> ক্রয় করুন
             </button>
         </form>
@@ -98,32 +99,32 @@
 </div>
 
 <!-- নিচের দিকে হিস্ট্রি প্যানেলসমূহ -->
-<div class="space-y-4 mt-6">
+<div class="space-y-6 mt-6">
     
     <!-- ১. প্যাকেজ ক্রয়ের রেকর্ড -->
-    <div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-3 border-b border-slate-100 pb-2 flex items-center gap-1.5">
-            <i class="fa-solid fa-file-invoice-dollar text-purple-500"></i> প্যাকেজ ক্রয়ের রেকর্ড
+    <div class="premium-card p-6 rounded-3xl bg-white border border-slate-200 shadow-sm">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-800 mb-4 border-b border-slate-50 pb-3 flex items-center gap-1.5">
+            <i class="fa-solid fa-file-invoice-dollar text-purple-600"></i> প্যাকেজ ক্রয়ের রেকর্ড
         </h3>
-        <div class="overflow-x-auto text-[10px]">
+        <div class="overflow-x-auto text-[11px] font-bold">
             <table class="w-full text-left">
                 <thead>
-                    <tr class="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold uppercase">
-                        <th class="p-2.5">প্যাকেজ নাম</th>
-                        <th class="p-2.5">মূল্য</th>
-                        <th class="p-2.5 text-right">ক্রয়কাল</th>
+                    <tr class="bg-slate-50 border-b border-slate-100 text-slate-400 font-extrabold uppercase">
+                        <th class="p-3">প্যাকেজ নাম</th>
+                        <th class="p-3">মূল্য</th>
+                        <th class="p-3 text-right">ক্রয়কাল</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-slate-50">
                     {% for item in purchase_history %}
-                    <tr class="border-b border-slate-50 text-slate-600">
-                        <td class="p-2.5 font-bold">{{ item.packages.name }}</td>
-                        <td class="p-2.5">৳ {{ item.packages.cost }}</td>
-                        <td class="p-2.5 text-right text-slate-400">{{ item.bought_at[:10] }}</td>
+                    <tr class="text-slate-700">
+                        <td class="p-3 font-black text-[#0F172A]">{{ item.packages.name }}</td>
+                        <td class="p-3">৳ {{ item.packages.cost }}</td>
+                        <td class="p-3 text-right text-slate-400 font-medium">{{ item.bought_at[:10] }}</td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="3" class="p-4 text-center text-slate-400">আপনি এখনো কোনো প্যাকেজ কেনেননি।</td>
+                        <td colspan="3" class="p-5 text-center text-slate-400 font-medium">আপনি এখনো কোনো প্যাকেজ কেনেননি।</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -132,36 +133,36 @@
     </div>
 
     <!-- ২. অ্যাড মানি হিস্ট্রি -->
-    <div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-3 border-b border-slate-100 pb-2 flex items-center gap-1.5">
-            <i class="fa-solid fa-plus-circle text-emerald-500"></i> অ্যাড মানি হিস্ট্রি
+    <div class="premium-card p-6 rounded-3xl bg-white border border-slate-200 shadow-sm">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-800 mb-4 border-b border-slate-50 pb-3 flex items-center gap-1.5">
+            <i class="fa-solid fa-plus-circle text-emerald-600"></i> অ্যাড মানি হিস্ট্রি
         </h3>
-        <div class="overflow-x-auto text-[10px]">
+        <div class="overflow-x-auto text-[11px] font-bold">
             <table class="w-full text-left">
                 <thead>
-                    <tr class="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold uppercase">
-                        <th class="p-2.5">পরিমাণ</th>
-                        <th class="p-2.5">মেথড / TxID</th>
-                        <th class="p-2.5 text-right">স্ট্যাটাস</th>
+                    <tr class="bg-slate-50 border-b border-slate-100 text-slate-400 font-extrabold uppercase">
+                        <th class="p-3">পরিমাণ</th>
+                        <th class="p-3">মেথড / TxID</th>
+                        <th class="p-3 text-right">স্ট্যাটাস</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-slate-50">
                     {% for item in deposit_history %}
-                    <tr class="border-b border-slate-50 text-slate-600">
-                        <td class="p-2.5 font-bold text-emerald-600">৳ {{ item.amount }}</td>
-                        <td class="p-2.5">
-                            <span>{{ item.payment_method }}</span><br>
-                            <span class="text-[9px] text-slate-400 font-mono">{{ item.transaction_id }}</span>
+                    <tr class="text-slate-700">
+                        <td class="p-3 font-black text-emerald-600 text-sm">৳ {{ item.amount }}</td>
+                        <td class="p-3">
+                            <span class="text-slate-800 font-extrabold">{{ item.payment_method }}</span><br>
+                            <span class="text-[9px] text-slate-400 font-mono tracking-wider font-bold block mt-0.5">{{ item.transaction_id }}</span>
                         </td>
-                        <td class="p-2.5 text-right">
-                            <span class="px-2 py-0.5 rounded-full font-bold text-[8px] uppercase {% if item.status == 'Pending' %}bg-yellow-50 text-yellow-600 border border-yellow-100{% elif item.status == 'Approved' %}bg-emerald-50 text-emerald-600 border-emerald-100{% else %}bg-red-50 text-red-600 border-red-100{% endif %}">
+                        <td class="p-3 text-right">
+                            <span class="inline-block px-2.5 py-1 rounded-full font-black text-[8px] uppercase tracking-wide {% if item.status == 'Pending' %}bg-amber-50 text-amber-600 border border-amber-100{% elif item.status == 'Approved' %}bg-emerald-50 text-emerald-600 border border-emerald-100{% else %}bg-red-50 text-red-600 border-red-100{% endif %}">
                                 {{ item.status }}
                             </span>
                         </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="3" class="p-4 text-center text-slate-400">কোনো ডিপোজিট রেকর্ড পাওয়া যায়নি।</td>
+                        <td colspan="3" class="p-5 text-center text-slate-400 font-medium">কোনো ডিপোজিট রেকর্ড পাওয়া যায়নি।</td>
                     </tr>
                     {% endfor %}
                 </tbody>
