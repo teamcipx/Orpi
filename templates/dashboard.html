@@ -1,167 +1,219 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<!-- ১. স্ক্রলিং নোটিশ -->
-<div class="blockio-card p-3 px-4 mb-4 flex items-center gap-2 border-l-2 border-[#fba82f]">
-    <i class="fa-solid fa-bullhorn text-xs text-[#fba82f] animate-pulse"></i>
-    <marquee class="font-semibold text-xs tracking-wide" scrollamount="3">{{ notice }}</marquee>
+<!-- ১. স্ক্রলিং নোটিশ (Premium Minimalist Style) -->
+<div class="premium-card p-3 px-5 mb-8 rounded-2xl flex items-center gap-3 border-l-4 border-brand-orange bg-white/50 overflow-hidden">
+    <div class="flex-shrink-0 w-8 h-8 bg-orange-50 rounded-full flex items-center justify-center">
+        <i class="fa-solid fa-bullhorn text-xs text-brand-orange animate-bounce"></i>
+    </div>
+    <marquee class="font-bold text-xs tracking-wide text-gray-700" scrollamount="4">{{ notice }}</marquee>
 </div>
 
-<!-- ২. ২-কলাম প্রিমিয়াম হিরো সেকশন (আপডেটেড ও কাস্টমাইজড প্রোফাইল কার্ড) -->
-<div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
     
-    <!-- বাম পাশ (৩-কলাম): নতুন লাক্সারি হোয়াইট প্রোফাইল কার্ড (Accent #fba82f) -->
-    <div class="blockio-card p-5 sm:p-6 md:col-span-3 flex flex-col justify-between relative overflow-hidden h-[240px] border border-slate-200">
-        <!-- ব্যাকগ্রাউন্ড গ্লো আভা -->
-        <div class="absolute -right-10 -top-10 w-32 h-32 bg-[#fba82f]/5 rounded-full blur-3xl animate-pulse"></div>
+    <!-- বাম পাশের ২-কলাম (কার্ড ও মাইনিং টার্মিনাল) -->
+    <div class="md:col-span-2 space-y-6">
         
-        <div class="flex justify-between items-start z-10">
-            <span class="bg-[#fba82f]/10 text-[#fba82f] border border-[#fba82f]/20 text-[8px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-widest leading-none">Verified Partner</span>
-            <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">UID: {{ user.uid }}</span>
-        </div>
-
-        <div class="flex items-center gap-4 z-10">
-            <img src="{{ user.avatar_url }}" alt="Profile" class="w-14 h-14 rounded-full object-cover border-2 border-[#fba82f]/20 shadow-md">
-            <div>
-                <h2 class="text-base font-extrabold text-slate-800 leading-none">{{ user.username }}</h2>
-                <p class="text-[10px] text-slate-400 mt-1.5 flex items-center gap-1"><i class="fa-solid fa-circle text-[#fba82f] text-[6px]"></i> Cloud Miner Active</p>
+        <!-- প্রিমিয়াম ইউজার কার্ড (Reference blockio style) -->
+        <div class="premium-card p-8 rounded-[32px] relative overflow-hidden flex items-center justify-between group">
+            <!-- Background Decoration -->
+            <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-orange-50 rounded-full blur-3xl group-hover:bg-orange-100 transition-all duration-700"></div>
+            
+            <div class="flex items-center gap-5 z-10">
+                <div class="relative">
+                    <img src="{{ user.avatar_url }}" alt="Profile" class="w-16 h-16 rounded-full object-cover border-4 border-white shadow-xl shadow-gray-200/50">
+                    <div class="absolute bottom-1 right-1 w-4 h-4 bg-orange-500 border-2 border-white rounded-full"></div>
+                </div>
+                <div class="space-y-1.5">
+                    <h2 class="text-lg font-extrabold text-black flex items-center gap-2 leading-none">
+                        {{ user.username }}
+                    </h2>
+                    <span class="text-[10px] bg-black text-white font-black uppercase tracking-widest px-3 py-1 rounded-full inline-block">UID: {{ user.uid }}</span>
+                </div>
+            </div>
+            
+            <div class="text-right z-10">
+                <span class="text-[10px] text-gray-400 uppercase tracking-[0.2em] font-black block mb-1">Balance</span>
+                <p class="text-3xl font-black text-black leading-none">
+                    <span class="text-brand-orange">৳</span>{{ user.balance }}
+                </p>
             </div>
         </div>
 
-        <!-- ব্যালেন্স সেকশন -->
-        <div class="flex justify-between items-end border-t border-slate-100 pt-3.5 z-10">
-            <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider leading-none">মোট উপলব্ধ ব্যালেন্স</span>
-            <p class="text-2xl font-black text-[#fba82f] leading-none">৳ {{ user.balance }}</p>
+        <!-- ডেইলি চেক-ইন উইজেট (Clean Orange Theme) -->
+        {% if is_daily_eligible %}
+        <div class="premium-card p-6 rounded-[24px] flex items-center justify-between bg-white border border-gray-100">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center text-brand-orange text-xl shadow-inner">
+                    <i class="fa-solid fa-gift"></i>
+                </div>
+                <div>
+                    <h4 class="text-sm font-extrabold text-black">Daily Check-in</h4>
+                    <p class="text-[10px] text-gray-400 font-bold mt-0.5">Claim your ৳ ৫.০০ daily reward</p>
+                </div>
+            </div>
+            <button id="daily-btn" onclick="runDailyCheckin()" class="bg-black hover:bg-brand-orange text-white text-[11px] font-black tracking-widest uppercase px-6 py-3 rounded-xl transition-all duration-300 shadow-lg shadow-gray-200">
+                CLAIM ৳৫
+            </button>
+        </div>
+        {% endif %}
+
+        <!-- মাইনিং টার্মিনাল (Clean Tech Layout) -->
+        <div class="premium-card p-8 rounded-[32px] space-y-6">
+            <div class="flex items-center justify-between border-b border-gray-50 pb-5">
+                <div class="flex items-center gap-3">
+                    <div class="w-2 h-2 bg-brand-orange rounded-full animate-ping"></div>
+                    <h3 class="text-xs font-black uppercase tracking-[0.2em] text-black">Active Mining Nodes</h3>
+                </div>
+                <span class="text-[10px] font-bold text-gray-300">{{ owned_packages|length }} Nodes Online</span>
+            </div>
+
+            <div id="claim-api-message" class="hidden p-4 text-xs rounded-2xl text-center font-bold border transition-all duration-500"></div>
+
+            <div class="space-y-4">
+                {% for item in owned_packages %}
+                <div class="bg-gray-50/50 hover:bg-white border border-gray-100 p-5 rounded-3xl flex flex-col md:flex-row justify-between items-start md:items-center gap-5 transition-all duration-300 group">
+                    
+                    <div class="flex items-center gap-4 z-10">
+                        <div class="w-12 h-12 rounded-2xl bg-white border border-gray-100 flex items-center justify-center text-black group-hover:text-brand-orange shadow-sm transition-colors">
+                            <i class="fa-solid fa-microchip text-xl"></i>
+                        </div>
+                        <div class="space-y-1.5">
+                            <h4 class="font-extrabold text-black text-sm leading-none group-hover:translate-x-1 transition-transform">{{ item.packages.name }}</h4>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[10px] text-gray-400 font-black uppercase tracking-tighter">
+                                    Yield: ৳{{ item.packages.yield_amount }}
+                                </span>
+                                <span class="w-1 h-1 bg-gray-200 rounded-full"></span>
+                                <span class="text-[10px] text-gray-400 font-black uppercase tracking-tighter">
+                                    Expiry: {% if item.expires_at %}{{ item.expires_at[:10] }}{% else %}30 Days{% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- টাইমার এবং বাটন গ্রুপ -->
+                    <div class="flex items-center justify-between w-full md:w-auto gap-4 pt-4 md:pt-0 border-t md:border-t-0 border-gray-100 z-10">
+                        <div class="flex items-center gap-2 bg-white border border-gray-100 px-4 py-2 rounded-2xl shadow-sm">
+                            <i id="clock-{{ item.id }}" class="fa-regular fa-clock text-gray-300 text-xs"></i>
+                            <span class="countdown-timer text-black font-black text-xs font-mono tracking-tighter" 
+                                  id="timer-{{ item.id }}"
+                                  data-last-claimed="{{ item.last_claimed_at }}" 
+                                  data-duration="{{ item.packages.duration_hours }}"
+                                  data-id="{{ item.id }}">
+                                00:00:00
+                            </span>
+                        </div>
+
+                        <button id="claim-btn-{{ item.id }}" onclick="runClaim('{{ item.id }}')" disabled 
+                                class="bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed font-black text-[10px] px-6 py-2.5 rounded-2xl transition-all shadow-none uppercase tracking-widest">
+                            <i class="fa-solid fa-lock text-[9px] mr-1"></i> Claim
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
         </div>
     </div>
 
-    <!-- ডান পাশ (২-কলাম): ওভাল ক্লেইম উইজেট (Active Mining Terminal) -->
-    <div class="blockio-card p-5 md:col-span-2 flex flex-col justify-between h-[240px]">
-        <div class="flex justify-between items-center border-b border-slate-100 pb-2.5">
-            <span class="text-xs font-black uppercase text-slate-800 flex items-center gap-1.5">
-                <i class="fa-solid fa-server animate-pulse text-[#fba82f]"></i> Active Mining Nodes
-            </span>
-        </div>
-
-        <div id="claim-api-message" class="hidden p-2 text-[10px] rounded-xl text-center font-bold border"></div>
-
-        <!-- রানিং মাইনিং প্রসেসরসমূহ -->
-        <div class="space-y-2.5 flex-grow overflow-y-auto py-2">
-            {% for item in owned_packages %}
-            <div class="flex justify-between items-center bg-slate-50/70 border border-slate-100 p-3 rounded-2xl">
-                <div>
-                    <h4 class="font-bold text-slate-800 text-[11px] leading-tight">{{ item.packages.name }}</h4>
-                    <p class="text-[8px] text-slate-400 font-extrabold uppercase mt-0.5">৳ {{ item.packages.yield_amount }}</p>
-                </div>
-                
-                <div class="flex items-center gap-2">
-                    <span class="countdown-timer text-[10px] font-black font-mono bg-white border px-2 py-1 rounded-lg" 
-                          id="timer-{{ item.id }}"
-                          data-last-claimed="{{ item.last_claimed_at }}" 
-                          data-duration="{{ item.packages.duration_hours }}"
-                          data-id="{{ item.id }}">
-                        00:00:00
-                    </span>
-
-                    <button id="claim-btn-{{ item.id }}" onclick="runClaim('{{ item.id }}')" disabled 
-                            class="bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed font-extrabold text-[9px] px-3.5 py-1.5 rounded-full transition">
-                        CLAIM
-                    </button>
-                </div>
-            </div>
+    <!-- ডান পাশের ১-কলাম (শর্টকাট ও সাপোর্টস) -->
+    <div class="space-y-6">
+        
+        <!-- ৩ডি শর্টকাট গ্রিড -->
+        <div class="grid grid-cols-3 gap-3">
+            {% set shortcuts = [
+                {'url': '/history', 'icon': 'fa-clock-rotate-left', 'label': 'History'},
+                {'url': 'https://t.me/ortiwokr', 'icon': 'fa-brands fa-telegram', 'label': 'Group'},
+                {'url': '/tasks', 'icon': 'fa-list-check', 'label': 'Tasks'},
+                {'url': '/referrals', 'icon': 'fa-gift', 'label': 'Refer'},
+                {'url': '/profile', 'icon': 'fa-circle-user', 'label': 'Account'},
+                {'url': '/withdraw', 'icon': 'fa-money-bill-transfer', 'label': 'Cash'}
+            ] %}
+            
+            {% for link in shortcuts %}
+            <a href="{{ link.url }}" class="premium-card p-4 rounded-2xl flex flex-col items-center justify-center text-center hover:bg-black group transition-all duration-300">
+                <i class="{{ link.icon }} text-gray-400 group-hover:text-brand-orange text-lg mb-2 transition-colors"></i>
+                <span class="text-[9px] font-black text-gray-600 group-hover:text-white uppercase tracking-tighter transition-colors">{{ link.label }}</span>
+            </a>
             {% endfor %}
         </div>
+
+        <!-- সাপোর্ট কার্ডস (Clean List Style) -->
+        <div class="space-y-3">
+            <!-- Business Model Link -->
+            <a href="/about" class="premium-card p-4 rounded-2xl flex items-center justify-between hover:border-brand-orange/30 transition-all">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-brand-orange text-sm">
+                        <i class="fa-solid fa-briefcase"></i>
+                    </div>
+                    <div class="text-left">
+                        <p class="font-black text-black text-xs uppercase tracking-tighter">Business Model</p>
+                        <p class="text-[9px] text-gray-400 font-bold">How we generate revenue</p>
+                    </div>
+                </div>
+                <i class="fa-solid fa-chevron-right text-gray-200 text-xs"></i>
+            </a>
+
+            <!-- Video Tutorial -->
+            <a href="https://www.youtube.com/watch?v=YOUR_VIDEO_ID" target="_blank" class="premium-card p-4 rounded-2xl flex items-center justify-between border-2 border-red-50 hover:bg-red-50/20 transition-all">
+                <div class="flex items-center gap-4">
+                    <div class="text-red-500 text-2xl">
+                        <i class="fa-solid fa-circle-play"></i>
+                    </div>
+                    <div class="text-left">
+                        <p class="font-black text-black text-xs uppercase tracking-tighter">Tutorial Video</p>
+                        <p class="text-[9px] text-gray-400 font-bold">Learn how to mine</p>
+                    </div>
+                </div>
+                <span class="text-[8px] bg-red-500 text-white px-2 py-0.5 rounded-md font-black uppercase">Live</span>
+            </a>
+
+            <!-- Payment Proof -->
+            <a href="https://t.me/ortipay" target="_blank" class="premium-card p-4 rounded-2xl flex items-center justify-between border border-emerald-100 hover:bg-emerald-50/20 transition-all">
+                <div class="flex items-center gap-4">
+                    <div class="text-emerald-500 text-xl">
+                        <i class="fa-solid fa-shield-check"></i>
+                    </div>
+                    <div class="text-left">
+                        <p class="font-black text-black text-xs uppercase tracking-tighter">Payment Proofs</p>
+                        <p class="text-[9px] text-gray-400 font-bold">Check live payout history</p>
+                    </div>
+                </div>
+                <i class="fa-solid fa-external-link text-emerald-200 text-xs"></i>
+            </a>
+
+            <!-- Reviews -->
+            <a href="/reviews" class="premium-card p-4 rounded-2xl flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="text-brand-orange text-base">
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                    <div class="text-left">
+                        <p class="font-black text-black text-xs uppercase tracking-tighter">User Reviews</p>
+                        <p class="text-[9px] text-gray-400 font-bold">What others are saying</p>
+                    </div>
+                </div>
+                <div class="flex gap-0.5 text-brand-orange text-[9px]">
+                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                </div>
+            </a>
+
+            <!-- Upgrade Banner -->
+            <a href="/store" class="premium-card p-5 rounded-2xl bg-black flex items-center justify-between group overflow-hidden relative">
+                <div class="absolute inset-0 bg-gradient-to-r from-brand-orange/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div class="flex items-center gap-4 z-10">
+                    <div class="text-white text-xl">
+                        <i class="fa-solid fa-bolt-lightning animate-pulse text-brand-orange"></i>
+                    </div>
+                    <div class="text-left">
+                        <p class="font-black text-white text-xs uppercase tracking-widest">Upgrade Node</p>
+                        <p class="text-[9px] text-gray-400 font-bold">Increase mining speed</p>
+                    </div>
+                </div>
+                <i class="fa-solid fa-arrow-right text-white z-10 group-hover:translate-x-1 transition-transform"></i>
+            </a>
+        </div>
     </div>
-</div>
-
-<!-- ৪. মাইনিং টার্মিনালের নিচে নতুন কাজের কন্টেইনার ও CTA বাটন (টাস্ক করুন!) -->
-<a href="/tasks" class="blockio-card p-4 flex items-center justify-between hover:border-[#fba82f] transition bg-[#fba82f]/10 border border-[#fba82f]/20 mb-4">
-    <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-2xl bg-white border border-[#fba82f]/20 flex items-center justify-center text-[#fba82f] text-sm shadow-sm animate-pulse">
-            <i class="fa-solid fa-list-check"></i>
-        </div>
-        <div class="text-left">
-            <p class="font-extrabold text-slate-800 text-xs">আজকের দৈনিক কাজ সম্পূর্ণ করুন</p>
-            <p class="text-[9px] text-slate-400 mt-0.5">টাস্ক কমপ্লিট করে ফ্রিতে অতিরিক্ত পুরস্কার ক্লেইম করুন</p>
-        </div>
-    </div>
-    <span class="bg-black hover:opacity-90 text-white text-[10px] font-black px-4 py-2 rounded-full uppercase transition flex items-center gap-1.5 shadow">
-        টাস্ক করুন! <i class="fa-solid fa-arrow-right text-[8px]"></i>
-    </span>
-</a>
-
-<!-- ৪. ডেইলি ক্লেইম কার্ড (ক্লেইম করা থাকলে সম্পূর্ণ হাইড থাকবে, কোনো খালি জায়গা থাকবে না) -->
-{% if is_daily_eligible %}
-<div class="blockio-card p-4 rounded-3xl flex items-center justify-between mb-4 border border-slate-200 shadow-sm">
-    <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-500 text-sm shadow-sm animate-pulse">
-            <i class="fa-solid fa-gift"></i>
-        </div>
-        <div>
-            <h4 class="text-xs font-bold text-slate-700">ডেইলি চেক-ইন বোনাস</h4>
-            <p class="text-[9px] text-slate-400 mt-0.5">প্রতিদিন লগইন করে ৳ ৫.০০ বোনাস নিন</p>
-        </div>
-    </div>
-    <button id="daily-btn" onclick="runDailyCheckin()" class="glow-btn-light bg-black hover:opacity-90 text-white text-[11px] font-extrabold px-4 py-2 rounded-xl transition shadow">
-        CLAIM ৳৫
-    </button>
-</div>
-{% endif %}
-
-<!-- ৫. মডার্ন নেভিগেশন ডক গ্রিড (কুইক অ্যাক্সেস) -->
-<div class="blockio-card p-5 mb-4">
-    <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-700 mb-4 border-b border-slate-100 pb-2.5">
-        <i class="fa-solid fa-compass text-slate-400"></i> কুইক অ্যাক্সেস ডক (Shortcuts)
-    </h3>
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-bold">
-        <a href="/history" class="p-3 bg-slate-50 border border-slate-200/60 rounded-2xl hover:border-black transition flex flex-col items-center justify-center text-center gap-1">
-            <i class="fa-solid fa-clock-rotate-left text-slate-500 text-sm"></i>
-            <span class="text-[9px] font-black text-slate-600 uppercase tracking-wide">History</span>
-        </a>
-        <a href="/tasks" class="p-3 bg-slate-50 border border-slate-200/60 rounded-2xl hover:border-black transition flex flex-col items-center justify-center text-center gap-1">
-            <i class="fa-solid fa-list-check text-slate-500 text-sm"></i>
-            <span class="text-[9px] font-black text-slate-600 uppercase tracking-wide">Tasks</span>
-        </a>
-        <a href="/referrals" class="p-3 bg-slate-50 border border-slate-200/60 rounded-2xl hover:border-black transition flex flex-col items-center justify-center text-center gap-1">
-            <i class="fa-solid fa-gift text-slate-500 text-sm"></i>
-            <span class="text-[9px] font-black text-slate-600 uppercase tracking-wide">Referrals</span>
-        </a>
-        <a href="/withdraw" class="p-3 bg-slate-50 border border-slate-200/60 rounded-2xl hover:border-black transition flex flex-col items-center justify-center text-center gap-1">
-            <i class="fa-solid fa-money-bill-transfer text-slate-500 text-sm"></i>
-            <span class="text-[9px] font-black text-slate-600 uppercase tracking-wide">Withdraw</span>
-        </a>
-    </div>
-</div>
-
-<!-- ৬. পেমেন্ট প্রুফ চ্যানেল ও সোশ্যাল মিডিয়া কন্টেন্ট CTA -->
-<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-    <!-- পেমেন্ট প্রুফ চ্যানেল -->
-    <a href="https://t.me/ortipay" target="_blank" class="blockio-card p-5 flex items-center justify-between hover:border-black transition">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-500 text-base">
-                <i class="fa-solid fa-receipt"></i>
-            </div>
-            <div class="text-left leading-normal">
-                <p class="font-extrabold text-slate-800 text-xs">অফিসিয়াল পেমেন্ট প্রুফ চ্যানেল</p>
-                <p class="text-[9px] text-slate-400 mt-1">সব স্বয়ংক্রিয় পেমেন্ট প্রুফ লাইভ ট্র্যাক করুন</p>
-            </div>
-        </div>
-        <span class="text-[9px] bg-emerald-50 text-emerald-600 border border-emerald-100 px-3 py-1 rounded-full font-bold">JOIN PROOF</span>
-    </a>
-
-    <!-- ইউটিউব ভিডিও টিউটোরিয়াল -->
-    <a href="https://www.youtube.com/watch?v=YOUR_VIDEO_ID" target="_blank" class="blockio-card p-5 flex items-center justify-between hover:border-black transition">
-        <div class="flex items-center gap-3">
-            <div class="text-red-500 text-lg">
-                <i class="fa-solid fa-circle-play animate-pulse"></i>
-            </div>
-            <div class="text-left leading-normal">
-                <p class="font-extrabold text-slate-800 text-xs">কীভাবে কাজ করবেন? ভিডিও দেখুন!</p>
-                <p class="text-[9px] text-slate-400 mt-1">সহজ উপায়ে কাজ শিখে ইনকাম শুরু করুন</p>
-            </div>
-        </div>
-        <span class="text-[9px] bg-red-50 text-red-600 border border-red-100 px-2.5 py-1 rounded-full font-bold">WATCH VIDEO</span>
-    </a>
 </div>
 
 <script>
@@ -169,7 +221,7 @@
 async function runDailyCheckin() {
     const btn = document.getElementById('daily-btn');
     btn.setAttribute('disabled', 'true');
-    btn.innerText = "Claiming...";
+    btn.innerText = "Processing...";
 
     try {
         const res = await fetch('/claim-daily', { method: 'POST' });
@@ -180,17 +232,17 @@ async function runDailyCheckin() {
             location.reload();
         } else {
             alert(data.message);
-            btn.className = "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed text-[9px] font-bold px-3 py-1.5 rounded-full shadow-none";
-            btn.innerText = "Claimed Today";
+            btn.className = "bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed text-[11px] font-black px-6 py-3 rounded-xl shadow-none";
+            btn.innerText = "Claimed";
         }
     } catch (e) {
-        alert("কানেকশন ত্রুটি!");
+        alert("Connection Error!");
         btn.removeAttribute('disabled');
         btn.innerText = "CLAIM ৳৫";
     }
 }
 
-// ২. একাধিক রানিং প্যাকেজের জন্য ডাইনামিক মাল্টি-টাইমার এবং আলাদা বাটন আনলক স্ক্রিপ্ট
+// ২. ডাইনামিক টাইমার (UI Updated to Orange Theme)
 function updateDashboardTimers() {
     const timers = document.querySelectorAll('.countdown-timer');
     const now = new Date();
@@ -210,13 +262,12 @@ function updateDashboardTimers() {
 
         if (diffMs <= 0) {
             timer.innerText = "READY";
-            timer.className = "countdown-timer text-[#fba82f] animate-pulse";
-            clockIcon.className = "text-[#fba82f] animate-spin text-[10px]";
+            timer.className = "countdown-timer text-brand-orange font-black animate-pulse";
+            clockIcon.className = "fa-solid fa-bolt-lightning text-brand-orange animate-pulse text-[10px]";
 
             claimBtn.removeAttribute('disabled');
-            // সলিড ব্ল্যাক ওভাল ক্লেইম বাটন এক্টিভেশন (অ্যাম্বার গ্লো সহ)
-            claimBtn.className = "blockio-btn text-[9px] px-4 py-1.5 shadow-[0_4px_14px_rgba(251,168,47,0.2)] border border-black cursor-pointer";
-            claimBtn.innerHTML = 'CLAIM';
+            claimBtn.className = "bg-brand-orange hover:bg-black text-white font-black text-[10px] px-6 py-2.5 rounded-2xl transition-all shadow-lg shadow-orange-100 cursor-pointer uppercase tracking-widest";
+            claimBtn.innerHTML = 'Claim';
         } else {
             const hours = Math.floor(diffMs / (1000 * 60 * 60));
             const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
@@ -224,12 +275,12 @@ function updateDashboardTimers() {
 
             const pad = (num) => String(num).padStart(2, '0');
             timer.innerText = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
-            timer.className = "countdown-timer text-slate-800";
+            timer.className = "countdown-timer text-black font-black";
 
-            clockIcon.className = "text-slate-400";
+            clockIcon.className = "fa-regular fa-clock text-gray-300";
             claimBtn.setAttribute('disabled', 'true');
-            claimBtn.className = "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed font-extrabold text-[9px] px-3.5 py-1.5 rounded-full transition shadow-none";
-            claimBtn.innerHTML = 'CLAIM';
+            claimBtn.className = "bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed font-black text-[10px] px-6 py-2.5 rounded-2xl transition-all shadow-none uppercase tracking-widest";
+            claimBtn.innerHTML = '<i class="fa-solid fa-lock text-[9px] mr-1"></i> Claim';
         }
     });
 }
@@ -237,7 +288,7 @@ function updateDashboardTimers() {
 setInterval(updateDashboardTimers, 1000);
 updateDashboardTimers();
 
-// ৩. কাস্টম ইন্ডিভিজুয়াল প্যাকেজ ক্লেইম করার স্ক্রিপ্ট (AJAX)
+// ৩. প্যাকেজ ক্লেইম স্ক্রিপ্ট
 async function runClaim(userPackageId) {
     const alertBox = document.getElementById('claim-api-message');
     alertBox.classList.add('hidden');
@@ -250,11 +301,11 @@ async function runClaim(userPackageId) {
         });
         const data = await res.json();
         
-        alertBox.classList.remove('hidden', 'bg-red-50', 'text-red-600', 'border-red-100', 'bg-emerald-50', 'text-emerald-600', 'border-emerald-100');
+        alertBox.classList.remove('hidden', 'bg-red-50', 'text-red-600', 'border-red-100', 'bg-orange-50', 'text-brand-orange', 'border-orange-100');
         alertBox.classList.add('border');
         
         if (data.status === 'success') {
-            alertBox.classList.add('bg-emerald-50', 'text-emerald-600', 'border-emerald-100');
+            alertBox.classList.add('bg-orange-50', 'text-brand-orange', 'border-orange-100');
             alertBox.innerText = data.message;
             setTimeout(() => { location.reload(); }, 1500);
         } else {
@@ -262,7 +313,7 @@ async function runClaim(userPackageId) {
             alertBox.innerText = data.message;
         }
     } catch (e) {
-        alert("কানেকশন ত্রুটি!");
+        alert("Connection Error!");
     }
 }
 </script>
