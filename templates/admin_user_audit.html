@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - User Audit & Search</title>
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #F8FAFC; }
+        .minimal-card {
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+        }
+    </style>
+</head>
+<body class="text-[#0F172A] min-h-screen pb-10">
+
+    <!-- গ্লোবাল এডমিন নেভিগেশন বার -->
+    <nav class="bg-white border-b border-slate-100 py-3.5 px-4 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <span class="text-sm font-extrabold tracking-wider text-slate-800">
+                <i class="fa-solid fa-magnifying-glass-chart text-emerald-500 mr-1.5"></i> OPTIWORK USER AUDIT
+            </span>
+            <div class="flex space-x-4">
+                <a href="/admin" class="text-xs font-bold text-slate-500 hover:text-slate-900"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+                <a href="/admin/deposits" class="text-xs font-bold text-slate-500 hover:text-slate-900"><i class="fa-solid fa-plus-circle"></i> Deposits</a>
+                <a href="/admin/withdrawals" class="text-xs font-bold text-slate-500 hover:text-slate-900"><i class="fa-solid fa-money-bill-transfer"></i> Withdraws</a>
+                <a href="/dashboard" class="text-xs font-bold text-slate-500 hover:text-slate-900"><i class="fa-solid fa-home"></i> App</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto p-4 space-y-5">
+
+        <!-- ১. ইউজার সার্চ উইজেট -->
+        <div class="minimal-card p-5 rounded-2xl bg-white space-y-3">
+            <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider">মেম্বার সার্চ ইঞ্জিন</label>
+            <form action="/admin/user-search" method="GET" class="flex gap-2">
+                <input type="text" name="query" value="{{ query }}" required placeholder="সার্চ করার জন্য UID অথবা ইমেইল দিন..." class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-slate-350 font-sans">
+                <button type="submit" class="bg-slate-950 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl text-xs font-bold">Search</button>
+            </form>
+        </div>
+
+        {% if query and not target_user %}
+        <p class="text-xs text-red-500 text-center py-4 bg-red-50 rounded-xl border border-red-100">উক্ত UID বা ইমেইল আইডি সম্পন্ন কোনো ব্যবহারকারী খুঁজে পাওয়া যায়নি।</p>
+        {% endif %}
+
+        {% if target_user %}
+        <!-- ২. ইউজারের মূল প্রোফাইল এবং ব্যালেন্স কার্ড -->
+        <div class="minimal-card p-5 rounded-3xl bg-white border border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative overflow-hidden">
+            <div class="absolute -right-10 -top-10 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl"></div>
+            
+            <div class="flex items-center gap-3.5 z-10">
+                <img src="{{ target_user.avatar_url }}" class="w-12 h-12 rounded-full object-cover border border-slate-200 shadow-sm">
+                <div>
+                    <h2 class="text-sm font-extrabold text-slate-800 flex items-center gap-1">
+                        {{ target_user.username }}
+                        {% if target_user.is_banned %}
+                            <span class="bg-red-100 text-red-700 text-[8px] font-bold px-2 py-0.5 rounded-full">Banned</span>
+                        {% endif %}
+                    </h2>
+                    <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block mt-1">UID: {{ target_user.uid }} | {{ target_user.email }}</span>
+                    <span class="text-[9px] text-slate-400 font-semibold block mt-1">মোবাইল: {{ target_user.phone_number or 'N/A' }} | জেলা: {{ target_user.district or 'N/A' }} | বয়স: {{ target_user.age or 'N/A' }}</span>
+                </div>
+            </div>
+            
+            <div class="text-right z-10 space-y-1.5 w-full sm:w-auto border-t sm:border-t-0 border-slate-100 pt-3 sm:pt-0">
+                <span class="text-[9px] text-slate-400 uppercase tracking-wider font-bold block">মেম্বার ব্যালেন্স ক্যাটাগরি</span>
+                <p class="text-sm font-bold text-slate-700">Main: <span class="text-emerald-600">৳ {{ target_user.balance }}</span></p>
+                <p class="text-sm font-bold text-slate-700">Agent: <span class="text-blue-500">৳ {{ target_user.agent_balance }}</span></p>
+            </div>
+        </div>
+
+        <!-- ৩. কাস্টম ট্যাব বার (Tabs) -->
+        <div class="flex border-b border-slate-200 bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
+            <button id="task-btn" onclick="showTab('task')" class="tab-btn w-full py-2.5 text-center text-xs font-bold border-b-2 border-emerald-500 text-emerald-600 transition flex items-center justify-center gap-1.5 focus:outline-none">
+                <i class="fa-solid fa-list-check"></i> Task History ({{ task_history|length }})
+            </button>
+            <button id="withdraw-btn" onclick="showTab('withdraw')" class="tab-btn w-full py-2.5 text-center text-xs font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-700 transition flex items-center justify-center gap-1.5 focus:outline-none">
+                <i class="fa-solid fa-money-bill-transfer"></i> Withdrawals ({{ withdraw_history|length }})
+            </button>
+            <button id="referral-btn" onclick="showTab('referral')" class="tab-btn w-full py-2.5 text-center text-xs font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-700 transition flex items-center justify-center gap-1.5 focus:outline-none">
+                <i class="fa-solid fa-users"></i> Referrals ({{ referrals_history|length }})
+            </button>
+        </div>
+
+        <!-- ৪. ট্যাব প্যানেলসমূহ -->
+        <div class="space-y-4">
+            
+            <!-- ক. টাস্ক হিস্ট্রি প্যানেল -->
+            <div id="task-pane" class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm transition-all duration-300">
+                <div class="overflow-x-auto text-[10px] font-semibold">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold uppercase">
+                                <th class="p-2.5">কাজের বিবরণ</th>
+                                <th class="p-2.5">প্রমাণ স্ক্রিনশট লিংক</th>
+                                <th class="p-2.5 text-right">স্ট্যাটাস</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in task_history %}
+                            <tr class="border-b border-slate-50 text-slate-600">
+                                <td class="p-2.5">
+                                    <span class="font-bold text-slate-800 text-xs">{{ item.tasks.title }}</span><br>
+                                    <span class="text-[9px] text-emerald-600 font-bold">৳ {{ item.tasks.reward }}</span>
+                                </td>
+                                <td class="p-2.5">
+                                    <a href="{{ item.proof_image_url }}" target="_blank" class="text-blue-500 hover:underline font-bold">Click to View Proof <i class="fa-solid fa-external-link text-[8px] ml-0.5"></i></a>
+                                </td>
+                                <td class="p-2.5 text-right">
+                                    <span class="px-2.5 py-1 rounded-full font-bold text-[8px] uppercase {% if item.status == 'Pending' %}bg-yellow-50 text-yellow-600 border border-yellow-100{% elif item.status == 'Approved' %}bg-emerald-50 text-emerald-600 border-emerald-100{% else %}bg-red-50 text-red-600 border-red-100{% endif %}">
+                                        {{ item.status }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="3" class="p-4 text-center text-slate-400">ইউজার কোনো নরমাল কাজ সম্পন্ন করেননি।</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- খ. উইথড্রয়াল হিস্ট্রি প্যানেল (হিডেন) -->
+            <div id="withdraw-pane" class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm transition-all duration-300 hidden">
+                <div class="overflow-x-auto text-[10px] font-semibold">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold uppercase">
+                                <th class="p-2.5">পরিমাণ</th>
+                                <th class="p-2.5">গেটওয়ে / নম্বর</th>
+                                <th class="p-2.5 text-right">স্ট্যাটাস</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in withdraw_history %}
+                            <tr class="border-b border-slate-50 text-slate-600">
+                                <td class="p-2.5 font-bold text-slate-800">৳ {{ item.amount }}</td>
+                                <td class="p-2.5">
+                                    <span class="font-bold">{{ item.payment_method }}</span>
+                                    {% if item.is_agent_withdrawal %}
+                                        <span class="bg-blue-100 text-blue-700 text-[8px] font-bold px-1.5 py-0.5 rounded ml-1">Agent</span>
+                                    {% endif %}
+                                    <br>
+                                    <span class="text-[9px] text-slate-400 font-mono">{{ item.payment_number }}</span>
+                                </td>
+                                <td class="p-2.5 text-right">
+                                    <span class="px-2.5 py-1 rounded-full font-bold text-[8px] uppercase {% if item.status == 'Pending' %}bg-yellow-50 text-yellow-600 border border-yellow-100{% elif item.status == 'Approved' %}bg-emerald-50 text-emerald-600 border-emerald-100{% else %}bg-red-50 text-red-600 border-red-100{% endif %}">
+                                        {{ item.status }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="3" class="p-4 text-center text-slate-400">কোনো উইথড্রয়াল রেকর্ড পাওয়া যায়নি।</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- গ. রেফারেল হিস্ট্রি এবং ডাউনলাইন ব্যালেন্স প্যানেল (হিডেন) -->
+            <div id="referral-pane" class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm transition-all duration-300 hidden">
+                <div class="overflow-x-auto text-[10px] font-semibold">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold uppercase">
+                                <th class="p-2.5">রেফারকৃত সদস্য (UID)</th>
+                                <th class="p-2.5">লাইভ ব্যালেন্স (৳)</th>
+                                <th class="p-2.5 text-right">স্ট্যাটাস</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in referrals_history %}
+                            <tr class="border-b border-slate-50 text-slate-600">
+                                <td class="p-2.5">
+                                    <span class="font-bold text-slate-800">{{ item.users.username }}</span> (UID: {{ item.users.uid }})<br>
+                                    <span class="text-[9px] text-slate-400">{{ item.users.email }}</span>
+                                </td>
+                                <td class="p-2.5 font-bold text-slate-700">৳ {{ item.users.balance }}</td>
+                                <td class="p-2.5 text-right">
+                                    <span class="px-2.5 py-1 rounded-full font-bold text-[8px] uppercase {% if item.status == 'Success' %}bg-emerald-50 text-emerald-600 border border-emerald-100{% elif item.status == 'Processing' %}bg-yellow-50 text-yellow-600 border border-yellow-100{% else %}bg-red-50 text-red-600 border-red-100{% endif %}">
+                                        {{ item.status }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="3" class="p-4 text-center text-slate-400">এই ইউজারের অধীনে কোনো রেফারেল রেকর্ড নেই।</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+        {% endif %}
+
+    </main>
+
+    <script>
+    // ডাইনামিক ট্যাব সিস্টেম
+    function showTab(tabId) {
+        document.getElementById('task-pane').classList.add('hidden');
+        document.getElementById('withdraw-pane').classList.add('hidden');
+        document.getElementById('referral-pane').classList.add('hidden');
+        
+        const buttons = document.querySelectorAll('.tab-btn');
+        buttons.forEach(btn => {
+            btn.classList.remove('border-emerald-500', 'text-emerald-600', 'font-black');
+            btn.classList.add('border-transparent', 'text-slate-400');
+        });
+        
+        document.getElementById(`${tabId}-pane`).classList.remove('hidden');
+        const activeBtn = document.getElementById(`${tabId}-btn`);
+        activeBtn.classList.remove('border-transparent', 'text-slate-400');
+        activeBtn.classList.add('border-emerald-500', 'text-emerald-600', 'font-black');
+    }
+    </script>
+
+</body>
+                              </html>
