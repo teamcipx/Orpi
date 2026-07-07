@@ -849,6 +849,55 @@ def admin_user_action():
     return redirect(url_for('admin_dashboard'))
 
 
+# (অন্যান্য এডমিন রাউটের সাথে নিচের নতুন রাউটটি যুক্ত করুন)
+
+@app.route('/admin/user-search')
+def admin_user_search():
+    if not check_admin_auth():
+        return "Unauthorized Access", 403
+        
+    query = request.args.get('query', '').strip()
+    target_user = None
+    task_history = []
+    withdraw_history = []
+    referrals_history = []
+    
+    if query:
+        try:
+            # ১. ইউআইডি (UID) অথবা ইমেইল দিয়ে সার্চ করা হচ্ছে
+            if query.isdigit():
+                u_query = supabase.table("users").select("*").eq("uid", int(query)).execute().data
+            else:
+                u_query = supabase.table("users").select("*").ilike("email", f"%{query}%").execute().data
+                
+            if u_query:
+                target_user = u_query[0]
+                target_id = target_user['id']
+                
+                # ক. এই ইউজারের টাস্ক সাবমিশন হিস্ট্রি (কাজের নাম ও রিওয়ার্ড সহ)
+                task_history = supabase.table("task_submissions") \
+                    .select("id, status, proof_image_url, created_at, tasks(title, reward)") \
+                    .eq("user_id", target_id).order("created_at", desc=True).execute().data or []
+                    
+                # খ. এই ইউজারের উইথড্রয়াল হিস্ট্রি (সাধারণ ও এজেন্ট উভয় ক্যাটাগরি)
+                withdraw_history = supabase.table("withdrawals") \
+                    .select("*") \
+                    .eq("user_id", target_id).order("created_at", desc=True).execute().data or []
+                    
+                # গ. এই ইউজারের রেফারেল হিস্ট্রি এবং রেফার করা মেম্বারদের লাইভ ডাটাবেজ ব্যালেন্স
+                referrals_history = supabase.table("referrals") \
+                    .select("status, created_at, users:referred_id(username, email, uid, balance)") \
+                    .eq("referrer_id", target_id).order("created_at", desc=True).execute().data or []
+        except Exception as e:
+            print("Admin User Audit Error:", e)
+            
+    return render_template('admin_user_audit.html',
+                           target_user=target_user,
+                           task_history=task_history,
+                           withdraw_history=withdraw_history,
+                           referrals_history=referrals_history,
+                           query=query)
+    
 @app.route('/tasks/claim-one-time', methods=['POST'])
 def claim_one_time():
     user_id = session.get('user_id')
