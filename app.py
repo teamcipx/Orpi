@@ -391,7 +391,6 @@ def about():
     user = supabase.table("users").select("*").eq("id", user_id).execute().data[0]
     return render_template('about.html', user=user)
 
-
 @app.route('/referrals')
 def referrals():
     user_id = session.get('user_id')
@@ -418,7 +417,7 @@ def referrals():
         elif status == 'Failed':
             failed_count += 1
             
-    # রেফার প্রতি ১৫ টাকা বোনাস হিসাব
+    # রেফার প্রতি ১৫ টাকা সফল কমিশন হিসাব
     total_earnings = success_count * 15.00
     ref_link = request.url_root + "register?ref=" + str(user['uid'])
     
@@ -1115,23 +1114,61 @@ def register():
         email = request.form.get('email')
         password = request.form.get('password')
         referrer_code = request.form.get('referrer')
+        device_fingerprint = request.form.get('device_fingerprint')
+        device_name = request.form.get('device_name') # ক্লায়েন্ট সাইড থেকে ডিকোড করা আসল ডিভাইস নেম
+
+        # ১. প্রক্সি হেডার বাইপাস করে ইউজারের আসল আইপি রিড
+        ip_address = request.headers.get('x-forwarded-for', request.remote_addr)
+        if ip_address:
+            ip_address = ip_address.split(',')[0].strip()
+
+        # ২. ডিভাইস ফিঙ্গারপ্রিন্ট ডুপ্লিকেশন সিকিউরিটি চেক
+        if device_fingerprint and device_fingerprint.strip() != "":
+            device_exists = supabase.table("users").select("id").eq("device_fingerprint", device_fingerprint.strip()).execute().data
+            if device_exists:
+                flash("নিরাপত্তা সতর্কতা: আপনার ডিভাইস থেকে ইতিমধ্যে একটি অ্যাকাউন্ট তৈরি করা হয়েছে। একই ডিভাইস থেকে একাধিক অ্যাকাউন্ট খোলা সম্পূর্ণ নিষিদ্ধ।", "danger")
+                return redirect(url_for('register', ref=ref_by))
+
+        # ৩. প্রক্সি স্প্যামিং রোধে একই আইপি থেকে সর্বোচ্চ ২ অ্যাকাউন্ট চেক
+        if ip_address:
+            ip_count_res = supabase.table("users").select("id", count="exact").eq("ip_address", ip_address).execute()
+            ip_count = ip_count_res.count if ip_count_res.count is not None else 0
+            if ip_count >= 2:
+                flash("আপনার নেটওয়ার্ক থেকে অতিরিক্ত অ্যাকাউন্ট খোলার চেষ্টা করা হয়েছে। দয়া করে অন্য নেটওয়ার্ক ব্যবহার করুন।", "danger")
+                return redirect(url_for('register', ref=ref_by))
 
         hashed_password = generate_password_hash(password)
         initial_balance = 0.00
         referrer_id = None
+        referrer_device_name = None
 
         if referrer_code and referrer_code.isdigit():
             ref_uid = int(referrer_code)
-            referrer_res = supabase.table("users").select("id").eq("uid", ref_uid).execute()
+            referrer_res = supabase.table("users").select("id", "device_name").eq("uid", ref_uid).execute()
             if referrer_res.data:
                 referrer_id = referrer_res.data[0]['id']
-                initial_balance = 70.00 # নতুন মেম্বার পাবেন ৭০ টাকা
-        
+                referrer_device_name = referrer_res.data[0].get('device_name')
+                initial_balance = 70.00 # নতুন মেম্বার পাবেন ৭০ টাকা বোনাস
+
+        # ৪. এন্টি-চিট জিপিইউ ড্রাইভার ফিল্টার: রেফারার এবং নতুন মেম্বারের ডিভাইসের মডেল হুবহু এক কিনা যাচাই
+        if referrer_id and referrer_device_name and device_name:
+            ref_dev_clean = referrer_device_name.strip().lower()
+            my_dev_clean = device_name.strip().lower()
+            
+            # জেনেরিক বা সাধারণ টেক্সট (যেমন: 'unknown' বা 'pc') বাদে সুনির্দিষ্ট ফিজিক্যাল মডেল ম্যাচিং
+            is_generic = "unknown" in my_dev_clean or "android" in my_dev_clean or "pc" in my_dev_clean
+            if not is_generic and ref_dev_clean == my_dev_clean:
+                flash("নিরাপত্তা সতর্কতা: আপনার এবং রেফারারের মোবাইল ডিভাইসের মডেল একই হওয়ায় রেজিস্ট্রেশন বাতিল করা হয়েছে।", "danger")
+                return redirect(url_for('register', ref=ref_by))
+
         user_data = {
             "username": username,
             "email": email,
             "password_hash": hashed_password,
-            "balance": initial_balance
+            "balance": initial_balance,
+            "device_fingerprint": device_fingerprint,
+            "ip_address": ip_address,
+            "device_name": device_name if device_name else "Unknown Device"
         }
         
         try:
@@ -1139,6 +1176,7 @@ def register():
             if new_user_res.data:
                 new_user_id = new_user_res.data[0]['id']
                 
+                # ফ্রি প্যাকেজ অ্যাসাইন (মেয়াদ ৩০ দিন)
                 free_expiry = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=30)
                 supabase.table("user_packages").insert({
                     "user_id": new_user_id,
@@ -1146,27 +1184,33 @@ def register():
                     "expires_at": free_expiry.isoformat()
                 }).execute()
                 
+                # ৫. ইনস্ট্যান্ট রেফারেল সাকসেস চেক এবং ৮০% রেভিনিউ প্রব্যাবিলিটি রোল
                 if referrer_id:
                     now_str = datetime.datetime.now(datetime.timezone.utc).isoformat()
-                    # ১. কোনো পেন্ডিং ছাড়াই সরাসরি Success স্ট্যাটাসে রেফারেল যুক্ত হবে
+                    
+                    # র্যান্ডম ৮০% প্রোবাবিলিটি কন্ডিশন
+                    if random.random() < 0.80:
+                        status = "Success"
+                        # রেফারকারী সাথে সাথে ১৫ টাকা বোনাস পাবেন
+                        supabase.rpc("increment_balance", {"user_id": referrer_id, "amount": 15.00}).execute()
+                    else:
+                        status = "Failed" # ২০% ক্ষেত্রে রেফারেল ব্যর্থ বা বাতিল দেখাবে
+                        
                     supabase.table("referrals").insert({
                         "referrer_id": referrer_id,
                         "referred_id": new_user_id,
-                        "status": "Success",
+                        "status": status,
                         "scheduled_payout_at": now_str,
                         "processed_at": now_str
                     }).execute()
-                    
-                    # ২. রেফারকারী সাথে সাথে ১৫ টাকা বোনাস পাবেন
-                    supabase.rpc("increment_balance", {"user_id": referrer_id, "amount": 15.00}).execute()
                         
                 flash("নিবন্ধন সফল হয়েছে। লগইন করুন।", "success")
                 return redirect(url_for('login'))
         except Exception:
-            flash("ইমেইলটি ইতিমধ্যে ব্যবহৃত হয়েছে।", "danger")
+            flash("ইউজারনেম অথবা ইমেইলটি ইতিমধ্যে ব্যবহৃত হয়েছে।", "danger")
             
     return render_template('register.html', ref_by=ref_by)
-
+    
 @app.route('/claim-daily', methods=['POST'])
 def claim_daily():
     user_id = session.get('user_id')
