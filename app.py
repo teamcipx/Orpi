@@ -878,18 +878,6 @@ def claim_one_time():
         
     elif task_name == 'watch_tutorial':
         reward = 5.00
-        
-    elif task_name == 'refer_3':
-        if success_ref_count >= 3:
-            reward = 50.00
-        else:
-            return jsonify({"status": "error", "message": "আপনার এখনো ৩টি সফল রেফারেল সম্পন্ন হয়নি।"})
-            
-    elif task_name == 'refer_10':
-        if success_ref_count >= 10:
-            reward = 150.00
-        else:
-            return jsonify({"status": "error", "message": "আপনার এখনো ১০টি সফল রেফারেল সম্পন্ন হয়নি।"})
     else:
         return jsonify({"status": "error", "message": "অবৈধ টাস্ক রিকোয়েস্ট। "})
         
