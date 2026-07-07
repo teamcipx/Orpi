@@ -1136,7 +1136,7 @@ def register():
             if referrer_res.data:
                 referrer_id = referrer_res.data[0]['id']
                 referrer_device_name = referrer_res.data[0].get('device_name')
-                initial_balance = 70.00 # নতুন মেম্বার পাবেন ৭০ টাকা বোনাস
+                initial_balance = 50.00 # নতুন মেম্বার পাবেন ৭০ টাকা বোনাস
 
         # ৪. এন্টি-চিট জিপিইউ ড্রাইভার ফিল্টার: রেফারার এবং নতুন মেম্বারের ডিভাইসের মডেল হুবহু এক কিনা যাচাই
         if referrer_id and referrer_device_name and device_name:
