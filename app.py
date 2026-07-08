@@ -1417,8 +1417,6 @@ def buy_package():
         flash(f"ব্যালেন্স অপর্যাপ্ত! {pkg_name} প্যাকেজটি কিনতে আপনার আরও ৳ {shortage:.2f} লাগবে। দয়া করে এড মানি করুন।", "danger")
         
     return redirect(url_for('store'))
-
-
 @app.route('/claim-mining', methods=['POST'])
 def claim_mining():
     user_id = session.get('user_id')
@@ -1430,7 +1428,7 @@ def claim_mining():
         return jsonify({"status": "error", "message": "অবৈধ মাইনিং রিকোয়েস্ট।"}), 400
         
     pkg_query = supabase.table("user_packages") \
-        .select("id, last_claimed_at, expires_at, packages(yield_amount, duration_hours)") \
+        .select("id, last_claimed_at, expires_at, packages(name, yield_amount, duration_hours)") \
         .eq("id", user_package_id).eq("user_id", user_id).execute().data
         
     if not pkg_query:
@@ -1443,7 +1441,7 @@ def claim_mining():
         expires_at = datetime.datetime.fromisoformat(record['expires_at'].replace('Z', '+00:00'))
         if now > expires_at:
             supabase.table("user_packages").delete().eq("id", user_package_id).execute()
-            return jsonify({"status": "error", "message": "এই মাইনিং প্যাকেজটির মেয়াদ শেষ হয়ে গেছে।"}), 400
+            return jsonify({"status": "error", "message": "এই মাইনিং packagesটির মেয়াদ শেষ হয়ে গেছে।"}), 400
             
     last_claim = datetime.datetime.fromisoformat(record['last_claimed_at'].replace('Z', '+00:00'))
     cooldown = datetime.timedelta(hours=record['packages']['duration_hours'])
@@ -1451,14 +1449,19 @@ def claim_mining():
     if now >= last_claim + cooldown:
         supabase.table("user_packages").update({"last_claimed_at": now.isoformat()}).eq("id", user_package_id).execute()
         yield_amount = float(record['packages']['yield_amount'])
+        
         supabase.rpc("increment_balance", {"user_id": user_id, "amount": yield_amount}).execute()
+        
+        supabase.table("transactions").insert({
+            "user_id": user_id,
+            "title": f"Mining Yield Claimed: {record['packages']['name']}",
+            "amount": yield_amount
+        }).execute()
         
         return jsonify({"status": "success", "message": f"৳ {yield_amount} সফলভাবে ক্লেইমড!"})
     else:
         return jsonify({"status": "error", "message": "এই নোডের মাইনিং প্রসেস এখনও সম্পন্ন হয়নি।"})
 
-
-# (অন্যান্য কোড অপরিবর্তিত থাকবে, /referrals এবং /profile রাউট দুটি প্রতিস্থাপন করুন)
 
 # ৮. লগআউট
 @app.route('/logout')
