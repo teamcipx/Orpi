@@ -304,6 +304,22 @@ def admin_payout_generator():
                            total_rejected_count=total_rejected_count,
                            generation_time=generation_time)
 
+# (অন্যান্য রাউটের সাথে নিচের নতুন রাউটটি যুক্ত করুন)
+
+@app.route('/fasset')
+def fasset_landing():
+    user_id = session.get('user_id')
+    user = None
+    if user_id:
+        try:
+            user_data = supabase.table("users").select("username", "uid", "avatar_url").eq("id", user_id).execute().data
+            if user_data:
+                user = user_data[0]
+        except Exception:
+            pass
+    return render_template('fasset.html', user=user)
+
+
 @app.route('/reviews', methods=['GET', 'POST'])
 def reviews_page():
     user_id = session.get('user_id')
