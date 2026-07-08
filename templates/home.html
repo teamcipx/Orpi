@@ -22,33 +22,55 @@
         }
     </script>
     <style>
+        /* প্রিমিয়াম লাইট ডট গ্রিড ব্যাকগ্রাউন্ড */
         body {
-            background-color: #F8FAFC;
+            background-color: #f8fafc;
+            background-image: radial-gradient(#cbd5e1 1.2px, transparent 1.2px), radial-gradient(#cbd5e1 1.2px, #f8fafc 1.2px);
+            background-size: 24px 24px;
+            background-position: 0 0, 12px 12px;
+            background-attachment: fixed;
         }
-        .minimal-card {
-            background: #FFFFFF;
-            border: 1px solid #E2E8F0;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+        .premium-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.05), 0 8px 16px -6px rgba(15, 23, 42, 0.03);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .premium-card:hover {
+            border-color: rgba(37, 99, 235, 0.25);
+            box-shadow: 0 20px 35px -8px rgba(37, 99, 235, 0.12), 0 12px 20px -10px rgba(99, 102, 241, 0.08);
+            transform: translateY(-2px);
+        }
+        .glow-btn-light {
+            background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+            transition: all 0.3s ease;
+        }
+        .glow-btn-light:hover {
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+            transform: translateY(-1px);
         }
     </style>
 </head>
-<body class="text-[#0F172A] min-h-screen flex flex-col justify-between">
+<body class="text-[#0F172A] min-h-screen flex flex-col justify-between antialiased">
 
     <!-- হেডার বা নেভিগেশন বার -->
-    <header class="bg-white border-b border-slate-100 py-4 px-4 sticky top-0 z-50">
+    <header class="bg-white/80 border-b border-slate-200/50 py-4 px-5 sticky top-0 z-50 backdrop-blur-md">
         <div class="max-w-4xl mx-auto flex justify-between items-center">
-            <span class="text-base font-extrabold tracking-tight">
-                OPTI<span class="text-emerald-500">WORK</span> <span class="text-[9px] font-bold text-slate-400 border border-slate-200 px-2 py-0.5 rounded-full ml-1 uppercase">Cloud</span>
+            <span class="text-base font-extrabold tracking-wider">
+                OPTI<span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">WORK</span> <span class="text-[9px] font-black text-blue-600 bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-full ml-1 uppercase">Cloud</span>
             </span>
             
-            <div class="flex items-center space-x-3">
+            <div class="flex items-center space-x-3.5">
                 {% if user %}
-                    <a href="/dashboard" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold px-4 py-2 rounded-xl transition shadow-sm">
-                        <i class="fa-solid fa-chart-line mr-1"></i> Dashboard
+                    <a href="/dashboard" class="glow-btn-light text-white text-xs font-black px-4.5 py-2 rounded-xl transition shadow">
+                        <i class="fa-solid fa-chart-line mr-1.5"></i> Dashboard
                     </a>
                 {% else %}
-                    <a href="/login" class="text-xs font-bold text-slate-500 hover:text-slate-900 transition">Login</a>
-                    <a href="/register" class="bg-slate-950 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2 rounded-xl transition shadow-sm">Register</a>
+                    <a href="/login" class="text-xs font-extrabold text-slate-500 hover:text-blue-600 transition">Login</a>
+                    <a href="/register" class="bg-slate-950 hover:bg-slate-800 text-white text-xs font-black px-4.5 py-2.5 rounded-xl transition shadow-sm">Register</a>
                 {% endif %}
             </div>
         </div>
@@ -58,29 +80,29 @@
     <main class="max-w-4xl mx-auto p-4 w-full flex-grow space-y-6 mt-4">
         
         <!-- ১. হিরো সেকশন -->
-        <div class="minimal-card p-6 sm:p-8 rounded-3xl bg-white border border-slate-200 shadow-sm text-center relative overflow-hidden">
-            <div class="absolute -right-12 -top-12 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl"></div>
+        <div class="premium-card p-6 sm:p-10 rounded-3xl border border-white/40 text-center relative overflow-hidden">
+            <div class="absolute -right-12 -top-12 w-36 h-36 bg-blue-500/5 rounded-full blur-3xl animate-pulse"></div>
             
-            <span class="bg-emerald-50 text-emerald-700 text-[10px] font-extrabold px-3.5 py-1 rounded-full border border-emerald-100/60 uppercase tracking-widest inline-block mb-3">
+            <span class="bg-blue-50 text-blue-700 text-[10px] font-black px-4 py-1.5 rounded-full border border-blue-100 uppercase tracking-widest inline-block mb-4 shadow-sm">
                 Next-Gen Mining Solution
             </span>
-            <h1 class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight leading-tight max-w-lg mx-auto">
-                সহজ ক্লাউড মাইনিং প্রযুক্তির মাধ্যমে ঘরে বসেই নিশ্চিত আয়
+            <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-tight max-w-lg mx-auto">
+                सहज क्लाउड माइनिंग प्रविधिको মাধ্যমে ঘরে বসেই নিশ্চিত আয়
             </h1>
-            <p class="text-xs text-slate-400 mt-2.5 max-w-sm mx-auto leading-relaxed">
+            <p class="text-xs text-slate-500 mt-3 max-w-sm mx-auto leading-relaxed font-bold">
                 কোনো প্রকার হার্ডওয়্যার সেটাআপ এবং প্রযুক্তিগত অভিজ্ঞতা ছাড়াই আমাদের বিশ্বস্ত প্রসেসর রেন্টাল নোডের মাধ্যমে রিয়েল ব্লকচেন মাইনিং শুরু করুন।
             </p>
 
-            <div class="mt-6 flex justify-center gap-3">
+            <div class="mt-7 flex justify-center gap-3">
                 {% if user %}
-                    <a href="/dashboard" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold px-6 py-3 rounded-xl transition shadow">
-                        <i class="fa-solid fa-chart-line mr-1"></i> ড্যাশবোর্ডে প্রবেশ করুন
+                    <a href="/dashboard" class="glow-btn-light text-white text-xs font-black px-6 py-3 rounded-2xl transition shadow">
+                        <i class="fa-solid fa-chart-line mr-1.5"></i> ড্যাশবোর্ডে প্রবেশ করুন
                     </a>
                 {% else %}
-                    <a href="/register" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold px-6 py-3 rounded-xl transition shadow">
-                        শুরু করুন (৳১০০ বোনাস সহ)
+                    <a href="/register" class="glow-btn-light text-white text-xs font-black px-6 py-3 rounded-2xl transition shadow">
+                        শুরু করুন (৳৭০ বোনাস সহ)
                     </a>
-                    <a href="/login" class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold px-6 py-3 rounded-xl transition">
+                    <a href="/login" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-black px-6 py-3 rounded-2xl transition">
                         লগইন অ্যাকাউন্ট
                     </a>
                 {% endif %}
@@ -88,66 +110,66 @@
         </div>
 
         <!-- ২. ফ্রিতে কাজের বিশেষ হাইলাইট ব্যানার (Free Mining Spotlight) -->
-        <div class="bg-emerald-50 border border-emerald-100 p-5 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative overflow-hidden">
-            <div class="absolute -right-8 -bottom-8 w-24 h-24 bg-emerald-500/10 rounded-full blur-3xl"></div>
-            <div class="z-10">
-                <span class="bg-emerald-100 text-emerald-800 text-[8px] font-extrabold px-2.5 py-0.5 rounded-full border border-emerald-200 uppercase tracking-wide inline-block mb-1.5">
-                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full inline-block mr-1"></span> 100% Free Mining
+        <div class="premium-card bg-gradient-to-r from-blue-50/50 to-indigo-50/50 border border-blue-100 p-5 rounded-3xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative overflow-hidden shadow-sm">
+            <div class="absolute -right-8 -bottom-8 w-24 h-24 bg-blue-500/10 rounded-full blur-3xl"></div>
+            <div class="z-10 space-y-1">
+                <span class="bg-blue-100 text-blue-800 text-[8px] font-black px-2.5 py-1 rounded-full border border-blue-200 uppercase tracking-wider inline-block mb-1">
+                    <span class="w-1.5 h-1.5 bg-blue-600 rounded-full inline-block mr-1 animate-ping"></span> 100% Free Mining
                 </span>
                 <h3 class="text-sm font-black text-slate-800">কোনো বিনিয়োগ ছাড়াই ফ্রিতে কাজ করুন!</h3>
-                <p class="text-[10px] text-slate-500 mt-1 max-w-sm">আমাদের ফ্রি ট্রায়াল প্রসেসর নোডটি অ্যাক্টিভ করুন এবং প্রতি ৮ ঘণ্টায় ৳ ৭.০০ (দৈনিক ৳ ২১.০০) সম্পূর্ণ ফ্রিতে কোনো ডিপোজিট ছাড়াই ইনকাম শুরু করুন।</p>
+                <p class="text-[10px] text-slate-500 leading-relaxed max-w-sm font-bold">আমাদের ফ্রি ট্রায়াল প্রসেসর নোডটি অ্যাক্টিভ করুন এবং প্রতি ৮ ঘণ্টায় ৳ ৭.০০ (দৈনিক ৳ ২১.০০) সম্পূর্ণ ফ্রিতে কোনো ডিপোজিট ছাড়াই ইনকাম শুরু করুন।</p>
             </div>
-            <a href="/register" class="bg-slate-950 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition shadow z-10 w-full sm:w-auto text-center">
+            <a href="/register" class="bg-slate-950 hover:bg-slate-850 text-white text-xs font-black px-5 py-3 rounded-2xl transition shadow-md z-10 w-full sm:w-auto text-center shrink-0">
                 ফ্রি ইনকাম শুরু করুন
             </a>
         </div>
 
         <!-- ৩. ইন্টারেক্টিভ ইনকাম ক্যালকুলেটর (Interactive Profit Estimator) -->
-        <div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-4">
-            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 border-b border-slate-50 pb-2 flex items-center gap-1.5">
-                <i class="fa-solid fa-calculator text-emerald-500"></i> আপনার মাইনিং আয় হিসাব করুন (Profit Estimator)
+        <div class="premium-card p-6 rounded-3xl border border-white/40 shadow-sm space-y-5">
+            <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-800 border-b border-slate-50 pb-3 flex items-center gap-1.5">
+                <i class="fa-solid fa-calculator text-blue-600 animate-pulse"></i> আপনার মাইনিং আয় হিসাব করুন (Profit Estimator)
             </h3>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <!-- সিলেক্টর বাটন গ্রুপ -->
                 <div class="space-y-2">
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">প্যাকেজ নির্বাচন করুন</label>
-                    <div class="space-y-1.5">
-                        <button onclick="calculateProfit(0, 21, 'Free Node', '৳ ০.০০')" class="w-full text-left p-3 border border-slate-200 rounded-xl hover:border-slate-400 transition bg-slate-50 flex justify-between items-center text-xs font-bold">
-                            <span>Free Package</span> <span class="text-slate-400 font-normal">মূল্য: ৳ ০.০০</span>
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider">প্যাকেজ নির্বাচন করুন</label>
+                    <div class="space-y-2">
+                        <button onclick="calculateProfit(0, 21, 'Free Node', '৳ ০.০০')" class="w-full text-left p-3.5 border border-slate-200 rounded-2xl hover:border-blue-500 transition-all bg-slate-50/50 flex justify-between items-center text-xs font-extrabold">
+                            <span>Free Package</span> <span class="text-slate-500 font-bold">মূল্য: ৳ ০.০০</span>
                         </button>
-                        <button onclick="calculateProfit(500, 135, 'Starter GPU', '৳ ৫০০.০০')" class="w-full text-left p-3 border border-slate-200 rounded-xl hover:border-slate-400 transition bg-slate-50 flex justify-between items-center text-xs font-bold">
-                            <span>Starter GPU Rig</span> <span class="text-emerald-600 font-bold">মূল্য: ৳ ৫০০.০০</span>
+                        <button onclick="calculateProfit(500, 135, 'Starter GPU', '৳ ৫০০.০০')" class="w-full text-left p-3.5 border border-slate-200 rounded-2xl hover:border-blue-500 transition-all bg-slate-50/50 flex justify-between items-center text-xs font-extrabold">
+                            <span>Starter GPU Rig</span> <span class="text-blue-600 font-black">মূল্য: ৳ ৫০০.০০</span>
                         </button>
-                        <button onclick="calculateProfit(1000, 300, 'Basic ASIC', '৳ ১,০০০.০০')" class="w-full text-left p-3 border border-slate-200 rounded-xl hover:border-slate-400 transition bg-slate-50 flex justify-between items-center text-xs font-bold">
-                            <span>Basic ASIC Miner</span> <span class="text-emerald-600 font-bold">মূল্য: ৳ ১,০০০.০০</span>
+                        <button onclick="calculateProfit(1000, 300, 'Basic ASIC', '৳ ১,০০০.০০')" class="w-full text-left p-3.5 border border-slate-200 rounded-2xl hover:border-blue-500 transition-all bg-slate-50/50 flex justify-between items-center text-xs font-extrabold">
+                            <span>Basic ASIC Miner</span> <span class="text-blue-600 font-black">মূল্য: ৳ ১,০০০.০০</span>
                         </button>
-                        <button onclick="calculateProfit(5000, 1800, 'Industrial Node', '৳ ৫,০০০.০০')" class="w-full text-left p-3 border border-slate-200 rounded-xl hover:border-slate-400 transition bg-slate-50 flex justify-between items-center text-xs font-bold">
-                            <span>Industrial Node</span> <span class="text-emerald-600 font-bold">মূল্য: ৳ ৫,০০০.০০</span>
+                        <button onclick="calculateProfit(5000, 1800, 'Industrial Node', '৳ ৫,০০০.০০')" class="w-full text-left p-3.5 border border-slate-200 rounded-2xl hover:border-blue-500 transition-all bg-slate-50/50 flex justify-between items-center text-xs font-extrabold">
+                            <span>Industrial Node</span> <span class="text-blue-600 font-black">মূল্য: ৳ ৫,০০০.০০</span>
                         </button>
                     </div>
                 </div>
 
                 <!-- লাভ প্রদর্শন কার্ড -->
-                <div class="bg-slate-50 border border-slate-100 p-4 rounded-xl flex flex-col justify-between">
-                    <div>
-                        <span class="text-[8px] bg-slate-200 text-slate-600 px-2 py-0.5 rounded font-bold uppercase" id="calc-node-tag">Free Node</span>
-                        <h4 class="text-xs font-bold text-slate-800 mt-2">আনুমানিক আয়ের প্রজেকশন</h4>
-                        <p class="text-[10px] text-slate-400 mt-0.5">রেন্টাল প্রাইস: <span class="font-bold text-slate-600" id="calc-price-label">৳ ০.০০</span></p>
+                <div class="bg-slate-50/60 border border-slate-200 p-5 rounded-2xl flex flex-col justify-between shadow-inner">
+                    <div class="space-y-1.5">
+                        <span class="text-[9px] bg-blue-50 text-blue-600 border border-blue-100 px-3 py-1 rounded-full font-black uppercase inline-block shadow-sm" id="calc-node-tag">Free Node</span>
+                        <h4 class="text-xs font-extrabold text-slate-800 pt-1">আনুমানিক আয়ের প্রজেকশন</h4>
+                        <p class="text-[10px] text-slate-500 font-bold">রেন্টাল প্রাইস: <span class="font-extrabold text-blue-600" id="calc-price-label">৳ ০.০০</span></p>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-2 my-3">
-                        <div class="bg-white p-2.5 rounded-lg border border-slate-100">
-                            <span class="text-[8px] text-slate-400 font-bold uppercase block">দৈনিক আয় (Daily)</span>
-                            <span class="text-sm font-black text-emerald-600" id="calc-daily">৳ ২১.০০</span>
+                    <div class="grid grid-cols-2 gap-3 my-4">
+                        <div class="bg-white p-3 rounded-xl border border-slate-200/80 shadow-sm">
+                            <span class="text-[8px] text-slate-400 font-black uppercase block leading-none mb-1">দৈনিক আয় (Daily)</span>
+                            <span class="text-sm font-black text-blue-600" id="calc-daily">৳ ২১.০০</span>
                         </div>
-                        <div class="bg-white p-2.5 rounded-lg border border-slate-100">
-                            <span class="text-[8px] text-slate-400 font-bold uppercase block">মাসিক আয় (Monthly)</span>
-                            <span class="text-sm font-black text-emerald-600" id="calc-monthly">৳ ৬৩০.০০</span>
+                        <div class="bg-white p-3 rounded-xl border border-slate-200/80 shadow-sm">
+                            <span class="text-[8px] text-slate-400 font-black uppercase block leading-none mb-1">মাসিক আয় (Monthly)</span>
+                            <span class="text-sm font-black text-blue-600" id="calc-monthly">৳ ৬৩০.০০</span>
                         </div>
                     </div>
 
-                    <p class="text-[8px] text-slate-400 font-medium">
+                    <p class="text-[9px] text-slate-400 font-bold leading-normal">
                         * এটি একটি আনুমানিক হিসাব। ক্লাউড মাইনিংয়ের গ্লোবাল ডিফিকাল্টি এবং নেটওয়ার্ক স্ট্যাটাসের ওপর ভিত্তি করে আয় সামান্য পরিবর্তিত হতে পারে।
                     </p>
                 </div>
@@ -155,71 +177,71 @@
         </div>
 
         <!-- ৪. যেভাবে কাজ করে (How it Works) -->
-        <div class="space-y-3">
-            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 text-center mb-1">সহজ ৩টি ধাপে মাইনিং শুরু করুন</h2>
+        <div class="space-y-4">
+            <h2 class="text-xs font-black uppercase tracking-wider text-slate-400 text-center">সহজ ৩টি ধাপে মাইনিং শুরু করুন</h2>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm text-center space-y-2">
-                    <div class="w-9 h-9 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center mx-auto text-slate-700">
+                <div class="premium-card p-5 rounded-3xl border border-slate-200 shadow-sm text-center space-y-2.5">
+                    <div class="w-10 h-10 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center mx-auto text-blue-600">
                         <i class="fa-solid fa-user-plus text-sm"></i>
                     </div>
-                    <h3 class="text-xs font-bold text-slate-800">১. অ্যাকাউন্ট নিবন্ধন</h3>
-                    <p class="text-[10px] text-slate-400 leading-relaxed">১ মিনিটে বিনামূল্যে আপনার অ্যাকাউন্ট তৈরি করুন। রেফারেল কোডে যোগ দিলে পাবেন ১০০ টাকা ওয়েলকাম বোনাস।</p>
+                    <h3 class="text-xs font-extrabold text-slate-800">১. অ্যাকাউন্ট নিবন্ধন</h3>
+                    <p class="text-[10px] text-slate-500 leading-relaxed font-bold">১ মিনিটে বিনামূল্যে আপনার অ্যাকাউন্ট তৈরি করুন। রেফারেল কোডে যোগ দিলে পাবেন ৭০ টাকা ওয়েলকাম বোনাস।</p>
                 </div>
 
-                <div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm text-center space-y-2">
-                    <div class="w-9 h-9 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center mx-auto text-slate-700">
+                <div class="premium-card p-5 rounded-3xl border border-slate-200 shadow-sm text-center space-y-2.5">
+                    <div class="w-10 h-10 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center mx-auto text-blue-600">
                         <i class="fa-solid fa-server text-sm"></i>
                     </div>
-                    <h3 class="text-xs font-bold text-slate-800">২. হার্ডওয়্যার ভাড়া নিন</h3>
-                    <p class="text-[10px] text-slate-400 leading-relaxed">আমাদের ডাটা সেন্টার থেকে আপনার পছন্দের প্রসেসর নোড ভাড়া নিন। প্রিমিয়াম মেম্বারদের জন্য রেফারেল ছাড়াই উইথড্র সুবিধা রয়েছে।</p>
+                    <h3 class="text-xs font-extrabold text-slate-800">২. হার্ডওয়্যার ভাড়া নিন</h3>
+                    <p class="text-[10px] text-slate-500 leading-relaxed font-bold">আমাদের ডাটা সেন্টার থেকে আপনার পছন্দের প্রсеসর নোড ভাড়া নিন। প্রিমিয়াম মেম্বারদের জন্য রেফারেল ছাড়াই উইথড্র সুবিধা রয়েছে।</p>
                 </div>
 
-                <div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm text-center space-y-2">
-                    <div class="w-9 h-9 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center mx-auto text-slate-700">
+                <div class="premium-card p-5 rounded-3xl border border-slate-200 shadow-sm text-center space-y-2.5">
+                    <div class="w-10 h-10 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center mx-auto text-blue-600">
                         <i class="fa-solid fa-wallet text-sm"></i>
                     </div>
-                    <h3 class="text-xs font-bold text-slate-800">৩. ক্লেইম ও উইথড্র</h3>
-                    <p class="text-[10px] text-slate-400 leading-relaxed">প্রতি ৮ ঘণ্টা পর পর ড্যাশবোর্ডে গিয়ে রিওয়ার্ড ক্লেইম করুন। ব্যালেন্স ৩০০ টাকা হলেই সরাসরি বিকাশ বা রকেট ওয়ালেটে তুলে নিন।</p>
+                    <h3 class="text-xs font-extrabold text-slate-800">৩. ক্লেইম ও উইথড্র</h3>
+                    <p class="text-[10px] text-slate-500 leading-relaxed font-bold">প্রতি ৮ ঘণ্টা পর পর ড্যাশবোর্ডে গিয়ে রিওয়ার্ড ক্লেইম করুন। ব্যালেন্স ৪০০ টাকা হলেই সরাসরি বিকাশ বা রকেট ওয়ালেটে তুলে নিন।</p>
                 </div>
             </div>
         </div>
 
         <!-- ৫. প্ল্যাটফর্ম পরিসংখ্যান (Real-time Stats) -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="minimal-card p-4 rounded-2xl bg-white text-center">
-                <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider">Active Nodes</span>
-                <p class="text-lg font-black text-slate-800 mt-0.5">14,250+</p>
+            <div class="premium-card p-4 rounded-2xl text-center">
+                <span class="text-[9px] text-slate-400 uppercase font-black tracking-wider">Active Nodes</span>
+                <p class="text-lg font-black text-slate-800 mt-1">14,250+</p>
             </div>
-            <div class="minimal-card p-4 rounded-2xl bg-white text-center">
-                <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider">Total Withdraws</span>
-                <p class="text-lg font-black text-emerald-600 mt-0.5">৳ 48.5L+</p>
+            <div class="premium-card p-4 rounded-2xl text-center">
+                <span class="text-[9px] text-slate-400 uppercase font-black tracking-wider">Total Withdraws</span>
+                <p class="text-lg font-black text-blue-600 mt-1">৳ 48.5L+</p>
             </div>
-            <div class="minimal-card p-4 rounded-2xl bg-white text-center">
-                <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider">Global Hashrate</span>
-                <p class="text-lg font-black text-slate-800 mt-0.5">8.45 TH/s</p>
+            <div class="premium-card p-4 rounded-2xl text-center">
+                <span class="text-[9px] text-slate-400 uppercase font-black tracking-wider">Global Hashrate</span>
+                <p class="text-lg font-black text-slate-800 mt-1">8.45 TH/s</p>
             </div>
-            <div class="minimal-card p-4 rounded-2xl bg-white text-center">
-                <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider">Payout Success</span>
-                <p class="text-lg font-black text-emerald-600 mt-0.5">99.8%</p>
+            <div class="premium-card p-4 rounded-2xl text-center">
+                <span class="text-[9px] text-slate-400 uppercase font-black tracking-wider">Payout Success</span>
+                <p class="text-lg font-black text-blue-600 mt-1">99.8%</p>
             </div>
         </div>
 
         <!-- ৬. মিনিমালিস্ট এফএকিউ (FAQ Accordion) -->
-        <div class="minimal-card p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-3">
-            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 border-b border-slate-50 pb-2">
-                <i class="fa-solid fa-question-circle text-slate-400"></i> সাধারণ জিজ্ঞাসা ও উত্তর (FAQ)
+        <div class="premium-card p-6 rounded-3xl border border-white/40 shadow-sm space-y-4">
+            <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-800 border-b border-slate-50 pb-2 flex items-center gap-1.5">
+                <i class="fa-solid fa-question-circle text-blue-600"></i> সাধারণ জিজ্ঞাসা ও উত্তর (FAQ)
             </h3>
             
-            <div class="space-y-3 text-xs">
+            <div class="space-y-3.5 text-xs font-bold text-slate-700 leading-relaxed">
                 <!-- প্রশ্ন ১ -->
-                <div class="p-3 bg-slate-50 border border-slate-100 rounded-xl">
-                    <p class="font-bold text-slate-800 mb-1">প্রশ্ন: আমি কি সম্পূর্ণ ফ্রিতে উইথড্র করতে পারব?</p>
-                    <p class="text-[10px] text-slate-500 leading-relaxed">উত্তর: হ্যাঁ, সম্পূর্ণ ফ্রিতে উইথড্র করা সম্ভব। তবে ফ্রি নোড ব্যবহারের ক্ষেত্রে সিকিউরিটি ভেরিফিকেশনের জন্য ন্যূনতম ৩টি সফল রেফারেল এবং ৩০০ টাকা ব্যালেন্স প্রয়োজন হবে। প্রিমিয়াম নোড ভাড়া নিলে কোনো প্রকার রেফারেল ছাড়াই সরাসরি উইথড্র করা যাবে।</p>
+                <div class="p-4 bg-slate-50 border border-slate-200/60 rounded-2xl">
+                    <p class="text-slate-800 mb-1.5 flex items-center gap-2"><i class="fa-solid fa-circle-question text-blue-600"></i> প্রশ্ন: আমি কি সম্পূর্ণ ফ্রিতে উইথড্র করতে পারব?</p>
+                    <p class="text-[10px] text-slate-500 font-medium pl-6 leading-relaxed">উত্তর: হ্যাঁ, সম্পূর্ণ ফ্রিতে উইথড্র করা সম্ভব। তবে ফ্রি নোড ব্যবহারের ক্ষেত্রে সিকিউরিটি ভেরিফিকেশনের জন্য ন্যূনতম ৩টি সফল রেফারেল এবং ৪০০ টাকা ব্যালেন্স প্রয়োজন হবে। প্রিমিয়াম নোড ভাড়া নিলে কোনো প্রকার রেফারেল ছাড়াই সরাসরি উইথড্র করা যাবে।</p>
                 </div>
                 <!-- প্রশ্ন ২ -->
-                <div class="p-3 bg-slate-50 border border-slate-100 rounded-xl">
-                    <p class="font-bold text-slate-800 mb-1">প্রশ্ন: উইথড্র রিকোয়েস্ট করতে কত সময় লাগে?</p>
-                    <p class="text-[10px] text-slate-500 leading-relaxed">উত্তর: আপনার অ্যাকাউন্টে ৩০০ টাকা ব্যালেন্স হলেই আপনি যেকোনো সময় উইথড্র রিকোয়েস্ট করতে পারবেন। আমাদের ফিন্যান্স টিম সাধারণত ১২-২৪ ঘণ্টার মধ্যে পেমেন্ট প্রসেস সম্পন্ন করে থাকে।</p>
+                <div class="p-4 bg-slate-50 border border-slate-200/60 rounded-2xl">
+                    <p class="text-slate-800 mb-1.5 flex items-center gap-2"><i class="fa-solid fa-circle-question text-blue-600"></i> প্রশ্ন: উইথড্র রিকোয়েস্ট করতে কত সময় লাগে?</p>
+                    <p class="text-[10px] text-slate-500 font-medium pl-6 leading-relaxed">উত্তর: আপনার অ্যাকাউন্টে ৪০০ টাকা ব্যালেন্স হলেই আপনি যেকোনো সময় উইথড্র রিকোয়েস্ট করতে পারবেন। আমাদের ফিন্যান্স টিম সাধারণত ১২-২৪ ঘণ্টার মধ্যে পেমেন্ট প্রসেস সম্পন্ন করে থাকে।</p>
                 </div>
             </div>
         </div>
@@ -227,12 +249,12 @@
     </main>
 
     <!-- ফুটার সেকশন -->
-    <footer class="bg-white border-t border-slate-100 py-4 px-4 text-center">
-        <div class="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-center text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+    <footer class="bg-white border-t border-slate-200/60 py-5 px-5 text-center">
+        <div class="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-center text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">
             <span>© 2024 Opti Work Inc. All rights reserved.</span>
-            <div class="flex space-x-4 mt-2 sm:mt-0">
-                <a href="https://t.me/optiworkofficial" target="_blank" class="hover:text-emerald-500">Telegram Channel</a>
-                <a href="https://t.me/optiwork_help" target="_blank" class="hover:text-emerald-500">Help Desk</a>
+            <div class="flex space-x-4 mt-2.5 sm:mt-0">
+                <a href="https://t.me/optiworkofficial" target="_blank" class="hover:text-blue-600">Telegram Channel</a>
+                <a href="https://t.me/optiwork_help" target="_blank" class="hover:text-blue-600">Help Desk</a>
             </div>
         </div>
     </footer>
