@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fasset - Premium Card Campaign</title>
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Fasset অফিশিয়াল ডার্ক ফরেস্ট গ্রিন ম্যাট ব্যাকগ্রাউন্ড */
+        body {
+            background: radial-gradient(circle at 50% 10%, #03150D 0%, #010603 100%);
+            color: #FFFFFF;
+        }
+        .fasset-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 28px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .fasset-card:hover {
+            border-color: #00E575; /* এফেক্টিভ মিন্ট গ্রিন বর্ডার গ্লো */
+            box-shadow: 0 12px 40px rgba(0, 229, 117, 0.05);
+            transform: translateY(-2px);
+        }
+        /* ভার্চুয়াল মেটালিক ভিসা কার্ড থিম */
+        .visa-edge-card {
+            background: linear-gradient(135deg, #101c15 0%, #040906 100%);
+            border: 1px solid rgba(0, 229, 117, 0.15);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        .visa-edge-card::before {
+            content: '';
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(0, 229, 117, 0.08) 0%, transparent 70%);
+            top: -20px;
+            right: -20px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between antialiased">
+
+    <!-- কো-ব্র্যান্ডেড প্রিমিয়াম হেডার বার (বাম পাশে Fasset, ডান পাশে OptiWork) -->
+    <header class="bg-[#010603]/85 border-b border-white/5 py-4 px-5 sticky top-0 z-50 backdrop-blur-md">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <!-- বাম পাশে Fasset লোগো -->
+            <div class="flex items-center space-x-2">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="2" width="8" height="8" rx="2.5" fill="#00E575"/>
+                    <rect x="2" y="14" width="8" height="8" rx="2.5" fill="#00E575"/>
+                    <rect x="14" y="14" width="8" height="8" rx="2.5" fill="#00E575"/>
+                    <path d="M14 2H18C20.2091 2 22 3.79086 22 6V10C22 12.2091 20.2091 14 18 14H14V2Z" fill="#00E575"/>
+                </svg>
+                <span class="text-sm font-black tracking-widest text-white uppercase">
+                    FASSET®
+                </span>
+            </div>
+
+            <!-- ডান পাশে OptiWork লোগো -->
+            <div class="flex items-center space-x-2">
+                <span class="text-xs font-black tracking-tight text-white/95">
+                    OPTI<span class="text-[#00E575]">WORK</span>
+                </span>
+                <span class="text-[8px] bg-white/5 text-white/60 border border-white/10 px-2 py-0.5 rounded-full uppercase tracking-wider font-extrabold">Host</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- ================= লাইভ কাস্টমার সাপোর্ট উইজেট (মিন্ট গ্রিন থিম) ================= -->
+    <div class="fixed bottom-6 right-4 z-50">
+        <a href="https://t.me/Optiworkhelp" target="_blank" class="w-12 h-12 bg-[#00E575] hover:bg-[#00c562] text-black rounded-full flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110 relative">
+            <span class="absolute inset-0 rounded-full bg-[#00E575]/30 animate-ping"></span>
+            <i class="fa-brands fa-telegram text-xl relative z-10"></i>
+        </a>
+    </div>
+
+    <main class="max-w-4xl mx-auto p-4 w-full flex-grow space-y-6 mt-4">
+        
+        <!-- ১. হিরো অফার ব্যানার -->
+        <div class="text-center space-y-4 py-4">
+            <span class="bg-[#00E575]/10 text-[#00E575] border border-[#00E575]/20 text-[9px] font-black px-3.5 py-1 rounded-full uppercase tracking-widest inline-block animate-pulse">
+                Fasset Raises US$51M to Scale Financial Infrastructure
+            </span>
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight max-w-2xl mx-auto">
+                The right card <br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#00E575] to-emerald-400">changes everything</span>
+            </h1>
+            <p class="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">
+                সহজ কথায়, Fasset হলো একটি আন্তর্জাতিক ক্রিপ্টো ব্যাংকিং অ্যাপ। আমরা এই অ্যাপের ফিজিক্যাল ভিসা কার্ড অ্যাক্টিভেশন রেফার কিনছি। আপনি অ্যাকাউন্ট খুলে KYC সম্পন্ন করলেই পাবেন নিশ্চিত পুরস্কার।
+            </p>
+        </div>
+
+        <!-- ২. ভার্চুয়াল Fasset Visa Edge Card রেপ্লিকা উইজেট -->
+        <div class="visa-edge-card w-[290px] h-[180px] rounded-2xl p-5 mx-auto flex flex-col justify-between relative transition hover:scale-105 duration-300">
+            <div class="flex justify-between items-start">
+                <span class="text-[10px] font-black text-white/80 tracking-widest"><i class="fa-solid fa-cube text-[#00E575] text-[8px] mr-1"></i> FASSET®</span>
+                <span class="text-[8px] bg-white/5 border border-white/10 text-white/60 px-2 py-0.5 rounded-full">Visa Edge</span>
+            </div>
+            
+            <!-- গোল্ডেন চিপ -->
+            <div class="w-10 h-7 rounded bg-gradient-to-br from-amber-300 to-yellow-500 border border-amber-200/50 shadow flex items-center justify-center relative overflow-hidden">
+                <div class="absolute inset-0 bg-[linear-gradient(90deg,transparent_45%,rgba(0,0,0,0.25)_50%,transparent_55%)]"></div>
+            </div>
+
+            <div class="flex justify-between items-end">
+                <div class="leading-none">
+                    <span class="text-[7px] text-white/30 uppercase tracking-widest block mb-1">Campaign Card</span>
+                    <span class="text-[11px] font-mono font-bold text-white/80 tracking-wider">#{{ user.uid if user else '6892' }}</span>
+                </div>
+                <span class="text-xs font-black tracking-tighter text-white italic">VISA</span>
+            </div>
+        </div>
+
+        <!-- ৩. কাজের সহজ গাইড -->
+        <div class="fasset-card p-5 border border-white/5 space-y-3.5">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 border-b border-white/5 pb-2 flex items-center gap-1.5">
+                <i class="fa-solid fa-circle-question text-[#00E575]"></i> সহজ ভাষায় কাজ বুঝুন
+            </h3>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs leading-relaxed text-slate-400">
+                <div class="p-3 bg-white/[0.02] border border-white/5 rounded-xl">
+                    <span class="font-extrabold text-white block mb-1"><i class="fa-solid fa-circle-check text-[#00E575] mr-1"></i> ১. আপনার কাজ কী?</span>
+                    আমাদের দেওয়া নির্দিষ্ট রেফারেল লিংক থেকে Fasset অ্যাপটি ফোনে ডাউনলোড করে আপনার NID (ভোটার আইডি) কার্ড দিয়ে সম্পূর্ণ ফ্রিতে ২ মিনিটে আইডি ভেরিফিকেশন (KYC) সম্পন্ন করবেন।
+                </div>
+                <div class="p-3 bg-white/[0.02] border border-white/5 rounded-xl">
+                    <span class="font-extrabold text-white block mb-1"><i class="fa-solid fa-circle-check text-[#00E575] mr-1"></i> ২. প্রতি রেফারে কত পাবেন?</span>
+                    প্রতিটি সফল কাজের জন্য পাবেন সরাসরি **৳ ১২০**। আর আপনি যদি আমাদের মাধ্যমে ৫ বা তার বেশি মেম্বার ভেরিফাই করিয়ে দিতে পারেন, তবে প্রতি জনের রেট বেড়ে হয়ে যাবে **৳ ১৩৫ করে**!
+                </div>
+                <div class="p-3 bg-white/[0.02] border border-white/5 rounded-xl">
+                    <span class="font-extrabold text-white block mb-1"><i class="fa-solid fa-circle-check text-[#00E575] mr-1"></i> ৩. পেমেন্ট শর্ত ও সীমা</span>
+                    আমাদের কাজের কোনো লিমিট নেই, আপনি **আনলিমিটেড** রেফার করতে পারবেন। একটি কাজ শেষ করে স্ক্রিনশট দেওয়ার সাথে সাথে চেক করে বিকাশ বা নগদে ওয়ান-বাই-ওয়ান পেমেন্ট করা হবে।
+                </div>
+                <div class="p-3 bg-white/[0.02] border border-white/5 rounded-xl">
+                    <span class="font-extrabold text-white block mb-1"><i class="fa-solid fa-circle-check text-[#00E575] mr-1"></i> ৪. কীভাবে জমা দেবেন?</span>
+                    টেলিগ্রাম সাপোর্টে এসএমএস দিয়ে আপনার কাজের প্রমাণ বা স্ক্রিনশট জমা দেওয়ার সাথে সাথে আমাদের এজেন্ট আপনার পেমেন্টটি প্রসেс করে বিকাশ/নগদে টাকা পাঠিয়ে দিবে।
+                </div>
+            </div>
+        </div>
+
+        <!-- ৪. লাইভ ক্যালকুলেটর -->
+        <div class="fasset-card p-5 border border-white/5 space-y-4">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 border-b border-white/5 pb-2 flex items-center gap-1.5">
+                <i class="fa-solid fa-calculator text-[#00E575]"></i> fAsset কাস্টম আয়ের ক্যালকুলেটর
+            </h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">রেফারেল সংখ্যা নির্ধারণ করুন: <span class="text-xs font-black text-black font-mono shadow-sm px-2 py-0.5 border rounded-lg bg-white" id="referral-count-label">১</span></label>
+                    <input type="range" id="referral-range" min="1" max="100" value="1" oninput="updateCalculation(this.value)" class="w-full accent-[#00E575] h-1 bg-white/5 rounded-lg appearance-none cursor-pointer">
+                    <div class="flex justify-between text-[8px] text-slate-500 font-bold uppercase mt-1.5">
+                        <span>১ রেফার</span>
+                        <span>১০০ রেফার</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                    <div class="bg-white/[0.01] p-3 rounded-2xl border border-white/5 text-center">
+                        <span class="text-[8px] text-slate-500 font-bold uppercase block">রেফার রেট ক্যাটাগরি</span>
+                        <span id="rate-badge" class="text-xs font-black text-white bg-white/5 border border-white/10 px-3 py-1 rounded-full inline-block mt-1.5">Base Rate (৳১২০)</span>
+                    </div>
+                    <div class="bg-white/[0.01] p-3 rounded-2xl border border-white/5 text-center">
+                        <span class="text-[8px] text-slate-500 font-bold uppercase block">পেমেন্ট মেথড বিবরণ</span>
+                        <span class="text-xs font-black text-[#00E575] bg-[#00E575]/5 border border-[#00E575]/10 px-3 py-1 rounded-full inline-block mt-1.5">One-by-One Payout</span>
+                    </div>
+                    <div class="bg-white p-3.5 rounded-2xl text-center shadow-lg relative overflow-hidden">
+                        <span class="text-[8px] text-slate-400 font-bold uppercase block">আপনার মোট অর্জিত আয়</span>
+                        <span id="total-projected-earning" class="text-base font-black text-black block mt-1">৳ ১২০.০০</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ৫. কন্টাক্ট CTA -->
+        <div class="fasset-card p-6 border border-white/5 text-center space-y-4 relative overflow-hidden bg-gradient-to-br from-white/[0.01] to-[#04120A]/50">
+            <div class="absolute -left-12 -top-12 w-32 h-32 bg-[#00E575]/5 rounded-full blur-3xl animate-pulse"></div>
+            
+            <h3 class="text-sm font-bold text-white z-10 relative">কাজটি শুরু করতে এবং স্ক্রিনশট প্রুফ সাবমিট করতে সরাসরি টেলিগ্রাম সাপোর্টে এসএমএস দিন</h3>
+            <p class="text-[10px] text-slate-500 max-w-sm mx-auto leading-relaxed z-10 relative">
+                আমাদের ফিন্যান্স টিম ২৪ ঘণ্টা লাইভ পেমেন্ট প্রসেসিংয়ে নিয়োজিত রয়েছে।
+            </p>
+            
+            <div class="pt-2 z-10 relative">
+                <a href="https://t.me/Optiworkhelp" target="_blank" class="bg-[#00E575] hover:bg-[#00c562] text-black px-8 py-3 text-xs tracking-wider font-black uppercase rounded-full shadow-lg inline-flex items-center gap-2 transition duration-300">
+                    <i class="fa-brands fa-telegram text-base animate-bounce"></i> Send Message on Telegram
+                </a>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ফুটার সেকশন -->
+    <footer class="bg-[#010603] border-t border-white/5 py-5 px-4 text-center">
+        <div class="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-center text-[10px] text-slate-500 font-bold uppercase tracking-wider gap-2">
+            <span>© 2026 Fasset Campaign. Hosted by Opti Work Platform. All rights reserved.</span>
+            <div class="flex space-x-4 font-sans">
+                <a href="https://t.me/ortiwokr" target="_blank" class="hover:text-[#00E575] transition">Telegram Channel</a>
+                <a href="https://t.me/Optiworkhelp" target="_blank" class="hover:text-[#00E575] transition">Help Desk</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ক্যালকুলেটর স্ক্রিপ্ট -->
+    <script>
+        function updateCalculation(val) {
+            const count = parseInt(val);
+            document.getElementById('referral-count-label').innerText = count;
+
+            let rate = 120;
+            let badgeText = "Base Rate (৳১২ೊ)";
+            const badgeElement = document.getElementById('rate-badge');
+
+            if (count >= 5) {
+                rate = 135;
+                badgeText = "Bulk Booster (৳১৩৫) 🔥";
+                badgeElement.className = "text-xs font-black text-[#00E575] bg-[#00E575]/10 border border-[#00E575]/20 px-3 py-1 rounded-full inline-block mt-1.5";
+            } else {
+                badgeElement.className = "text-xs font-black text-white bg-white/5 border border-white/10 px-3 py-1 rounded-full inline-block mt-1.5";
+            }
+
+            badgeElement.innerHTML = badgeText;
+
+            const total = count * rate;
+            document.getElementById('total-projected-earning').innerText = "৳ " + total.toLocaleString('en-US', {minimumFractionDigits: 2});
+        }
+    </script>
+
+</body>
+</html>
