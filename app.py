@@ -1288,8 +1288,6 @@ def claim_daily():
             cooldown = datetime.timedelta(hours=24)
             
             if now < last_checkin + cooldown:
-                time_left = (last_checkin + cooldown) - now
-                seconds_left = int(time_left.total_seconds())
                 return jsonify({
                     "status": "error", 
                     "message": "আপনি ইতিমধ্যে আজকের ডেইলি বোনাস ক্লেইম করেছেন।"
@@ -1298,13 +1296,19 @@ def claim_daily():
         supabase.table("users").update({"last_daily_checkin": now.isoformat()}).eq("id", user_id).execute()
         supabase.rpc("increment_balance", {"user_id": user_id, "amount": reward_amount}).execute()
         
+        supabase.table("transactions").insert({
+            "user_id": user_id,
+            "title": "Daily Check-in Bonus claimed",
+            "amount": reward_amount
+        }).execute()
+        
         return jsonify({
             "status": "success", 
             "message": f"ডেইলি চেক-ইন সফল! আপনার ব্যালেন্সে ৳ {reward_amount} যোগ করা হয়েছে।"
         })
     except Exception as e:
         return jsonify({"status": "error", "message": f"ডাটাবেজ ত্রুটি: {str(e)}"}), 500
-
+        
 # (অন্যান্য কোড অপরিবর্তিত থাকবে, কেবল /dashboard রাউটটি নিচের কোড দ্বারা প্রতিস্থাপন করুন)
 # app.py ফাইলের ড্যাশবোর্ড রাউটটি নিচের কোড দ্বারা সম্পূর্ণ আপডেট করে নিন:
 @app.route('/dashboard')
