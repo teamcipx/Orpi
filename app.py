@@ -927,11 +927,29 @@ def claim_one_time():
         
     elif task_name == 'watch_tutorial':
         reward = 5.00
+        
+    elif task_name == 'refer_3':
+        if success_ref_count >= 3:
+            reward = 50.00
+        else:
+            return jsonify({"status": "error", "message": "আপনার এখনো ৩টি সফল রেফারেল সম্পন্ন হয়নি।"})
+            
+    elif task_name == 'refer_10':
+        if success_ref_count >= 10:
+            reward = 150.00
+        else:
+            return jsonify({"status": "error", "message": "আপনার এখনো ১০টি সফল রেফারেল সম্পন্ন হয়নি।"})
     else:
-        return jsonify({"status": "error", "message": "অবৈধ টাস্ক রিকোয়েস্ট। "})
+        return jsonify({"status": "error", "message": "অবৈধ টাস্ক রিকোয়েস্ট।"})
         
     supabase.rpc("increment_balance", {"user_id": user_id, "amount": reward}).execute()
     supabase.table("user_one_time_tasks").insert({"user_id": user_id, "task_name": task_name}).execute()
+    
+    supabase.table("transactions").insert({
+        "user_id": user_id,
+        "title": f"One-Time Task Completed: {task_name.replace('_', ' ').title()}",
+        "amount": reward
+    }).execute()
     
     return jsonify({"status": "success", "message": f"সফলভাবে ক্লেইমড! আপনার ব্যালেন্সে ৳ {reward} যোগ করা হয়েছে। "})
 
