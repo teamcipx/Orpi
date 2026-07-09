@@ -306,6 +306,116 @@ def admin_payout_generator():
 
 # (অন্যান্য রাউটের সাথে নিচের নতুন রাউটটি যুক্ত করুন)
 
+# (অন্যান্য কোডের সাথে জিমেইল মডারেটর এবং ইউজার রাউটগুলো নিচে যুক্ত করুন)
+
+# ১. ইউজার জিমেইল সাবমিশন পেজ রাউট (/gmails)
+@app.route('/gmails', methods=['GET', 'POST'])
+def gmail_tasks():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+        
+    user = supabase.table("users").select("*").eq("id", user_id).execute().data[0]
+    
+    # ডাটাবেজ সেটিংস থেকে লাইভ জিমেইল রেট রিট্রিভ করা হচ্ছে
+    price_res = supabase.table("settings").select("value").eq("key", "gmail_price").execute().data
+    gmail_price = float(price_res[0]['value']) if price_res else 15.00
+    
+    if request.method == 'POST':
+        email_input = request.form.get('gmail_address')
+        pass_input = request.form.get('gmail_password')
+        
+        if not email_input or not pass_input:
+            flash("দয়া করে জিমেইল এবং পাসওয়ার্ড দুটিই ইনপুট দিন।", "danger")
+            return redirect(url_for('gmail_tasks'))
+            
+        try:
+            supabase.table("gmail_submissions").insert({
+                "user_id": user_id,
+                "email": email_input.strip(),
+                "password": pass_input.strip(),
+                "price": gmail_price, # সাবমিট করার সময়ের নির্ধারিত মূল্য ডাটাবেজে লক থাকবে
+                "status": "Pending"
+            }).execute()
+            flash("জিমেইল অ্যাকাউন্টটি সফলভাবে জমা দেওয়া হয়েছে। এডমিন ভেরিফাই করবে।", "success")
+            return redirect(url_for('gmail_tasks'))
+        except Exception:
+            flash("ত্রুটি ঘটেছে। আবার চেষ্টা করুন।", "danger")
+            
+    # এই ইউজারের পূর্ববর্তী জিমেইল সাবমিশন হিস্ট্রি রিট্রিভ করা
+    submissions = supabase.table("gmail_submissions") \
+        .select("*") \
+        .eq("user_id", user_id) \
+        .order("created_at", desc=True).execute().data or []
+        
+    return render_template('gmails.html', user=user, gmail_price=gmail_price, submissions=submissions)
+
+
+# ২. এডমিন জিমেইল রিভিউ ও রেট পরিবর্তনের পেজ রাউট (/admin/gmails)
+@app.route('/admin/gmails', methods=['GET', 'POST'])
+def admin_gmails():
+    if not check_admin_auth():
+        return "Unauthorized Access", 403
+        
+    # রেট আপডেট ফরম হ্যান্ডলিং
+    if request.method == 'POST':
+        new_price = request.form.get('new_price')
+        if new_price:
+            supabase.table("settings").upsert({"key": "gmail_price", "value": str(new_price)}).execute()
+            flash("জিমেইলের অফিশিয়াল ক্রয়মূল্য সফলভাবে আপডেট করা হয়েছে।", "success")
+            return redirect(url_for('admin_gmails'))
+            
+    # লাইভ জিমেইল প্রাইস এবং পেন্ডিং জিমেইলসমূহ রিট্রিভ করা
+    price_res = supabase.table("settings").select("value").eq("key", "gmail_price").execute().data
+    gmail_price = float(price_res[0]['value']) if price_res else 15.00
+    
+    pending_list = supabase.table("gmail_submissions") \
+        .select("*, users:user_id(username, email, uid)") \
+        .eq("status", "Pending") \
+        .order("created_at", desc=True).execute().data or []
+        
+    return render_template('admin_gmails.html', pending_gmails=pending_list, gmail_price=gmail_price)
+
+
+# ৩. এডমিন জিমেইল এপ্রুভ/রিজেক্ট অ্যাকশন রাউট (/admin/gmail-action)
+@app.route('/admin/gmail-action', methods=['POST'])
+def admin_gmail_action():
+    if not check_admin_auth():
+        return "Unauthorized Action", 403
+        
+    submission_id = request.form.get('submission_id')
+    action = request.form.get('action') # 'approve' or 'reject'
+    
+    sub_query = supabase.table("gmail_submissions").select("*").eq("id", submission_id).execute().data
+    if not sub_query:
+        flash("রেকর্ড খুঁজে পাওয়া যায়নি।", "danger")
+        return redirect(url_for('admin_gmails'))
+        
+    sub = sub_query[0]
+    target_user_id = sub['user_id']
+    price = float(sub['price'])
+    sub_email = sub['email']
+    
+    if action == 'approve':
+        # স্ট্যাটাস Approved করা
+        supabase.table("gmail_submissions").update({"status": "Approved"}).eq("id", submission_id).execute()
+        # ইউজারের মূল ব্যালেন্সে টাকা যোগ করা
+        supabase.rpc("increment_balance", {"user_id": target_user_id, "amount": price}).execute()
+        
+        # লেনদেন হিস্ট্রি বা লগ সেভ করা
+        supabase.table("transactions").insert({
+            "user_id": target_user_id,
+            "title": f"Gmail Account Sold: {sub_email}",
+            "amount": price
+        }).execute()
+        
+        flash("জিমেইল অ্যাকাউন্টটি সফলভাবে এপ্রুভ এবং রিওয়ার্ড যোগ করা হয়েছে।", "success")
+    elif action == 'reject':
+        supabase.table("gmail_submissions").update({"status": "Rejected"}).eq("id", submission_id).execute()
+        flash("জিমেইল অ্যাকাউন্টটি রিজেক্ট করা হয়েছে।", "success")
+        
+    return redirect(url_for('admin_gmails'))
+    
 @app.route('/fasset')
 def fasset_landing():
     user_id = session.get('user_id')
