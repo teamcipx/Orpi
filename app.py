@@ -975,7 +975,7 @@ def task_detail(task_id):
     return render_template('task_detail.html', task=task, status=status, proof_url=proof_url)
 
 
-# ৩. নরমাল টাস্ক সাবমিট এপিআই (ডিটেইলস পেজ থেকে ট্রিগার হবে)
+# app.py ফাইলের /tasks/submit-normal রাউটটি এটি দিয়ে পরিবর্তন করুন
 @app.route('/tasks/submit-normal', methods=['POST'])
 def submit_normal():
     user_id = session.get('user_id')
@@ -985,14 +985,17 @@ def submit_normal():
     task_id = request.form.get('task_id')
     proof_url = request.form.get('proof_image_url')
     
+    # কাজের প্রুফ না থাকলে হোম পেজের বদলে সরাসরি সেই টাস্কের ডিটেইলস পেজেই রিডাইরেক্ট করবে
     if not proof_url:
         flash("দয়া করে কাজের প্রুফ (স্ক্রিনশট) আপলোড করুন।", "danger")
         return redirect(url_for('task_detail', task_id=task_id))
         
     try:
+        # Rejected থাকা পূর্ববর্তী ডাটা ডিলিট করে দেওয়া হচ্ছে
         supabase.table("task_submissions").delete() \
             .eq("user_id", user_id).eq("task_id", task_id).eq("status", "Rejected").execute()
         
+        # নতুন পেন্ডিং রিকোয়েস্ট ইনসার্ট
         supabase.table("task_submissions").insert({
             "user_id": user_id,
             "task_id": task_id,
@@ -1004,7 +1007,7 @@ def submit_normal():
         flash("এই কাজটি ইতিমধ্যে প্রক্রিয়াধীন (Pending) অথবা অনুমোদিত (Approved) আছে।", "danger")
         
     return redirect(url_for('tasks'))
-
+    
 
 @app.route('/history')
 def history():
