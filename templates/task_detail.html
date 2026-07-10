@@ -3,24 +3,24 @@
 
 <div class="space-y-6 max-w-3xl mx-auto">
     
-    <!-- ১. টাস্ক হেডার কার্ড (স্মুথ রাউন্ডেড কোণ ও গ্রেডিয়েন্ট শ্যাডো) -->
-    <div class="premium-card p-5 flex justify-between items-center rounded-3xl border border-white/40 shadow-[0_8px_30px_rgba(37,99,235,0.04)]">
+    <!-- ১. টাস্ক হেডার কার্ড (স্লিক অ্যাম্বার থিম) -->
+    <div class="premium-card p-5 flex justify-between items-center rounded-3xl border border-white/40 shadow-sm bg-white">
         <div class="space-y-1.5">
-            <span class="text-[9px] bg-blue-50 text-blue-700 border border-blue-100 font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full">Task Panel</span>
+            <span class="text-[9px] bg-[#fba82f]/10 text-[#fba82f] border border-[#fba82f]/20 font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full">Task Panel</span>
             <h2 class="text-base font-black text-[#0F172A] leading-tight pt-1">
                 {{ task.title }}
             </h2>
         </div>
         <div class="text-right shrink-0">
             <span class="text-[9px] text-slate-400 uppercase tracking-widest font-extrabold block mb-1">পুরস্কার</span>
-            <span class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md px-4 py-2 rounded-2xl text-xs font-black">
+            <span class="bg-[#fba82f] text-white shadow px-4 py-2 rounded-2xl text-xs font-black">
                 ৳ {{ task.reward }}
             </span>
         </div>
     </div>
 
     <!-- ২. ইউনিফাইড লাইভ ট্র্যাকার এবং সাবমিশন প্যানেল -->
-    <div class="premium-card p-6 md:p-8 rounded-3xl border border-white/40 shadow-[0_12px_40px_rgba(0,0,0,0.02)]">
+    <div class="premium-card p-6 md:p-8 rounded-3xl border border-white/40 shadow-sm bg-white">
         
         <!-- সাবমিশন হয়ে থাকলে স্ট্যাটাস দেখাবে -->
         {% if status %}
@@ -28,7 +28,7 @@
                 <i class="fa-solid fa-circle-check text-emerald-500 mb-3 text-3xl block animate-bounce"></i>
                 <p class="text-xs font-extrabold text-slate-800">কাজটি সফলভাবে জমা দেওয়া হয়েছে!</p>
                 <div class="mt-4">
-                    <span class="text-[10px] uppercase font-black tracking-wider px-4 py-2 rounded-full border {% if status == 'Pending' %}bg-amber-50 text-amber-600 border-amber-100 shadow-[0_0_10px_rgba(245,158,11,0.05)]{% elif status == 'Approved' %}bg-emerald-50 text-emerald-600 border-emerald-100 shadow-[0_0_10px_rgba(16,185,129,0.05)]{% else %}bg-red-50 text-red-600 border-red-100 shadow-[0_0_10px_rgba(239,68,68,0.05)]{% endif %}">
+                    <span class="text-[10px] uppercase font-black tracking-wider px-4 py-2 rounded-full border {% if status == 'Pending' %}bg-yellow-50 text-yellow-600 border-yellow-100 shadow-[0_0_10px_rgba(245,158,11,0.05)]{% elif status == 'Approved' %}bg-emerald-50 text-emerald-600 border-emerald-100 shadow-[0_0_10px_rgba(16,185,129,0.05)]{% else %}bg-red-50 text-red-600 border-red-100 shadow-[0_0_10px_rgba(239,68,68,0.05)]{% endif %}">
                         ভেরিফিকেশন স্ট্যাটাস: {{ status }}
                     </span>
                 </div>
@@ -39,47 +39,42 @@
                 <input type="hidden" name="task_id" value="{{ task.id }}">
                 <input type="hidden" name="proof_image_url" id="proof-image-url-input">
 
-                <!-- ================= ১ম ধাপ: বিস্তারিত বিবরণ ও নিয়মাবলী (In Progress) ================= -->
+                <!-- ================= ১ম ধাপ: বিস্তারিত বিবরণ ও নিয়মাবলী ================= -->
                 <div class="relative z-10 space-y-3.5">
-                    <!-- কানেক্টিং লাইন ১ থেকে ২ -->
                     <div class="absolute -left-7 top-7 bottom-0 w-1 bg-slate-200 z-0">
-                        <div id="line-progress-1" class="w-full bg-[#0F172A] transition-all duration-500" style="height: 0%;"></div>
+                        <div id="line-progress-1" class="w-full bg-[#fba82f] transition-all duration-500" style="height: 0%;"></div>
                     </div>
 
                     <!-- স্টেপ সার্কেল ও টাইটেল -->
-                    <div class="absolute -left-[38px] w-6 h-6 rounded-full border-2 border-[#0F172A] bg-white flex items-center justify-center text-[10px] font-bold text-slate-800 transition-all duration-300 shadow-sm z-10" id="step-circle-1">
+                    <div class="absolute -left-[38px] w-6 h-6 rounded-full border-2 border-[#fba82f] bg-white flex items-center justify-center text-[10px] font-bold text-slate-850 transition-all duration-300 shadow-sm z-10" id="step-circle-1">
                         1
                     </div>
                     
                     <div class="flex items-center gap-2">
                         <span class="text-xs font-black text-[#0F172A]">১ম ধাপ: বিস্তারিত পড়ুন (কাজের নিয়মাবলী)</span>
-                        <span id="step-pill-1" class="text-[8px] px-2 py-0.5 rounded-full font-black bg-blue-50 text-blue-600 border border-blue-100 uppercase">In Progress</span>
+                        <span id="step-pill-1" class="text-[8px] px-2 py-0.5 rounded-full font-black bg-[#fba82f]/10 text-[#fba82f] border border-[#fba82f]/20 uppercase">In Progress</span>
                     </div>
 
-                    <!-- অ্যাকশন কন্টেন্ট (ডেসক্রিপশন বক্স) -->
                     <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-4.5 text-xs text-slate-700 leading-relaxed font-semibold">
-                        <div class="flex items-center gap-1 mb-2.5 text-[10px] text-blue-600 font-black uppercase tracking-wider">
+                        <div class="flex items-center gap-1 mb-2.5 text-[10px] text-[#fba82f] font-black uppercase tracking-wider">
                             <i class="fa-solid fa-book-open"></i> কাজের নিয়মাবলী
                         </div>
                         <p class="text-slate-600 whitespace-pre-line">{{ task.description }}</p>
                     </div>
 
-                    <!-- ১ম ধাপ নিশ্চিতকরণ বোতাম -->
                     <div class="pt-1">
-                        <button type="button" id="confirm-step-1" onclick="completeStepOne()" class="glow-btn-light bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[10px] font-extrabold px-5 py-2.5 rounded-2xl inline-flex items-center gap-1.5 shadow">
+                        <button type="button" id="confirm-step-1" onclick="completeStepOne()" class="glow-btn-light bg-[#fba82f] hover:opacity-95 text-white text-[10px] font-extrabold px-5 py-2.5 rounded-2xl inline-flex items-center gap-1.5 shadow">
                             নিয়মাবলী পড়েছি, পরবর্তী ধাপে যান <i class="fa-solid fa-arrow-right text-[8px]"></i>
                         </button>
                     </div>
                 </div>
 
-                <!-- ================= ২য় ধাপ: কাজের লিংক ভিজিট (Locked) ================= -->
+                <!-- ================= ২য় ধাপ: কাজের লিংক ভিজিট ================= -->
                 <div id="step-two-container" class="opacity-40 transition-all duration-500 relative z-10 space-y-3.5">
-                    <!-- কানেক্টিং লাইন ২ থেকে ৩ -->
                     <div class="absolute -left-7 top-7 bottom-0 w-1 bg-slate-200 z-0">
-                        <div id="line-progress-2" class="w-full bg-[#0F172A] transition-all duration-500" style="height: 0%;"></div>
+                        <div id="line-progress-2" class="w-full bg-[#fba82f] transition-all duration-500" style="height: 0%;"></div>
                     </div>
 
-                    <!-- স্টেপ সার্কেল ও টাইটেল -->
                     <div class="absolute -left-[38px] w-6 h-6 rounded-full border-2 border-slate-200 bg-slate-50 flex items-center justify-center text-[10px] font-bold text-slate-400 transition-all duration-300 shadow-sm z-10" id="step-circle-2">
                         <span class="w-1 h-1 rounded-full bg-slate-400"></span>
                     </div>
@@ -89,7 +84,6 @@
                         <span id="step-pill-2" class="text-[8px] px-2 py-0.5 rounded-full font-black bg-slate-100 text-slate-500 border border-slate-200 uppercase">Pending</span>
                     </div>
 
-                    <!-- কাজের লিংক খোলার বাটন -->
                     <div class="pt-1">
                         <a href="{{ task.link }}" id="visit-link-btn" target="_blank" onclick="completeStepTwo()" class="cursor-not-allowed bg-slate-100 text-slate-400 border border-slate-200 text-[10px] font-extrabold px-5 py-3 rounded-2xl inline-flex items-center gap-1.5 pointer-events-none transition-all duration-300">
                             কাজের লিংক খুলুন <i class="fa-solid fa-external-link text-[8px]"></i>
@@ -97,9 +91,8 @@
                     </div>
                 </div>
 
-                <!-- ================= ৩য় ধাপ: স্ক্রিনশট আপলোড ও সাবমিশন (Locked) ================= -->
+                <!-- ================= ৩য় ধাপ: স্ক্রিনশট আপলোড ও সাবমিশন ================= -->
                 <div id="step-three-container" class="opacity-40 transition-all duration-500 relative z-10 space-y-4">
-                    <!-- স্টেপ সার্কেল ও টাইটেল -->
                     <div class="absolute -left-[38px] w-6 h-6 rounded-full border-2 border-slate-200 bg-slate-50 flex items-center justify-center text-[10px] font-bold text-slate-400 transition-all duration-300 shadow-sm z-10" id="step-circle-3">
                         <span class="w-1 h-1 rounded-full bg-slate-400"></span>
                     </div>
@@ -109,7 +102,6 @@
                         <span id="step-pill-3" class="text-[8px] px-2 py-0.5 rounded-full font-black bg-slate-100 text-slate-500 border border-slate-200 uppercase">Pending</span>
                     </div>
 
-                    <!-- অ্যাকশন কন্টেন্ট -->
                     <div class="space-y-4 pl-1">
                         <div class="flex flex-col gap-3">
                             <div class="flex items-center gap-3.5">
@@ -123,11 +115,10 @@
 
                             <!-- লাইভ প্রোগ্রেস বার -->
                             <div id="upload-progress-container" class="hidden w-full bg-slate-100 h-2 rounded-full overflow-hidden mt-1 shadow-inner">
-                                <div id="upload-progress-bar" class="bg-gradient-to-r from-blue-500 to-indigo-500 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+                                <div id="upload-progress-bar" class="bg-gradient-to-r from-[#fba82f] to-[#f59e0b] h-full rounded-full transition-all duration-300" style="width: 0%"></div>
                             </div>
                         </div>
 
-                        <!-- সাবমিট বাটন -->
                         <div class="pt-2">
                             <button type="submit" id="submit-btn" disabled class="w-full bg-slate-100 text-slate-400 border border-slate-200/80 cursor-not-allowed text-[11px] font-black py-4 rounded-2xl transition shadow-none">
                                 কাজটি সম্পূর্ণ সাবমিট করুন
@@ -142,96 +133,80 @@
 </div>
 
 <script>
-// ১ম ধাপ সম্পূর্ণ করা এবং ২য় ধাপ সচল করার স্ক্রিপ্ট
 function completeStepOne() {
-    // ১ম কানেক্টিং লাইন অ্যানিমেশন করে ফুল করা হচ্ছে
     document.getElementById('line-progress-1').style.height = "100%";
 
-    // Step 1: Completed স্টেট পরিবর্তন (টিক মার্ক ও গ্রিন পিল)
     const circle1 = document.getElementById('step-circle-1');
     const pill1 = document.getElementById('step-pill-1');
     const confirmBtn = document.getElementById('confirm-step-1');
 
     circle1.innerHTML = '<i class="fa-solid fa-check text-white text-[9px]"></i>';
-    circle1.className = "absolute -left-[38px] w-6 h-6 rounded-full bg-[#0F172A] border-2 border-[#0F172A] flex items-center justify-center font-bold text-white transition-all duration-300 shadow-sm z-10";
+    circle1.className = "absolute -left-[38px] w-6 h-6 rounded-full bg-black border-2 border-black flex items-center justify-center font-bold text-white transition-all duration-300 shadow-sm z-10";
     pill1.innerText = "Completed";
     pill1.className = "text-[8px] px-2 py-0.5 rounded-full font-black bg-emerald-50 text-emerald-600 border border-emerald-100 uppercase";
     
-    // কনফার্ম বাটনটি ডিজেবল করা হলো
     confirmBtn.setAttribute('disabled', 'true');
     confirmBtn.className = "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed text-[10px] font-extrabold px-5 py-2.5 rounded-2xl inline-flex items-center gap-1.5 pointer-events-none";
 
-    // Step 2: "In Progress" স্টেটে রূপান্তর
     const circle2 = document.getElementById('step-circle-2');
     const pill2 = document.getElementById('step-pill-2');
     const title2 = document.getElementById('step-title-2');
     const visitBtn = document.getElementById('visit-link-btn');
 
     circle2.innerHTML = '2';
-    circle2.className = "absolute -left-[38px] w-6 h-6 rounded-full bg-white border-2 border-[#0F172A] flex items-center justify-center text-[10px] font-bold text-slate-800 transition-all duration-300 shadow-sm z-10";
+    circle2.className = "absolute -left-[38px] w-6 h-6 rounded-full bg-white border-2 border-[#fba82f] flex items-center justify-center text-[10px] font-bold text-slate-800 transition-all duration-300 shadow-sm z-10";
     title2.className = "text-xs font-black text-[#0F172A]";
     pill2.innerText = "In Progress";
-    pill2.className = "text-[8px] px-2 py-0.5 rounded-full font-black bg-blue-50 text-blue-600 border border-blue-100 uppercase";
+    pill2.className = "text-[8px] px-2 py-0.5 rounded-full font-black bg-[#fba82f]/10 text-[#fba82f] border border-[#fba82f]/20 uppercase";
 
-    // ২য় ধাপের কনটেন্ট আনলক করা
     const stepTwoContainer = document.getElementById('step-two-container');
     stepTwoContainer.classList.remove('opacity-40');
     stepTwoContainer.classList.add('opacity-100');
 
-    // ২য় ধাপের কাজের লিংক বাটনটি সচল করা হচ্ছে
     visitBtn.classList.remove('cursor-not-allowed', 'bg-slate-100', 'text-slate-400', 'border-slate-200', 'pointer-events-none');
-    visitBtn.className = "glow-btn-light bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[10px] font-extrabold px-5 py-3 rounded-2xl inline-flex items-center gap-1.5 shadow cursor-pointer";
+    visitBtn.className = "glow-btn-light bg-[#fba82f] text-white text-[10px] font-extrabold px-5 py-3 rounded-2xl inline-flex items-center gap-1.5 shadow cursor-pointer";
 }
 
-// ২য় ধাপ সম্পূর্ণ করা এবং ৩য় ধাপ সচল করার স্ক্রিপ্ট
 function completeStepTwo() {
-    // ২য় কানেক্টিং লাইন অ্যানিমেশন করে ফুল করা হচ্ছে
     document.getElementById('line-progress-2').style.height = "100%";
 
-    // Step 2: Completed স্টেট পরিবর্তন (টিক মার্ক ও গ্রিন পিল)
     const circle2 = document.getElementById('step-circle-2');
     const pill2 = document.getElementById('step-pill-2');
 
     circle2.innerHTML = '<i class="fa-solid fa-check text-white text-[9px]"></i>';
-    circle2.className = "absolute -left-[38px] w-6 h-6 rounded-full bg-[#0F172A] border-2 border-[#0F172A] flex items-center justify-center font-bold text-white transition-all duration-300 shadow-sm z-10";
+    circle2.className = "absolute -left-[38px] w-6 h-6 rounded-full bg-black border-2 border-black flex items-center justify-center font-bold text-white transition-all duration-300 shadow-sm z-10";
     pill2.innerText = "Completed";
     pill2.className = "text-[8px] px-2 py-0.5 rounded-full font-black bg-emerald-50 text-emerald-600 border border-emerald-100 uppercase";
 
-    // Step 3: "In Progress" স্টেটে রূপান্তর
     const circle3 = document.getElementById('step-circle-3');
     const pill3 = document.getElementById('step-pill-3');
     const title3 = document.getElementById('step-title-3');
 
     circle3.innerHTML = '3';
-    circle3.className = "absolute -left-[38px] w-6 h-6 rounded-full bg-white border-2 border-[#0F172A] flex items-center justify-center text-[10px] font-bold text-slate-800 transition-all duration-300 shadow-sm z-10";
+    circle3.className = "absolute -left-[38px] w-6 h-6 rounded-full bg-white border-2 border-[#fba82f] flex items-center justify-center text-[10px] font-bold text-slate-800 transition-all duration-300 shadow-sm z-10";
     title3.className = "text-xs font-black text-[#0F172A]";
     pill3.innerText = "In Progress";
-    pill3.className = "text-[8px] px-2 py-0.5 rounded-full font-black bg-blue-50 text-blue-600 border border-blue-100 uppercase";
+    pill3.className = "text-[8px] px-2 py-0.5 rounded-full font-black bg-[#fba82f]/10 text-[#fba82f] border border-[#fba82f]/20 uppercase";
 
-    // ৩য় ধাপের কনটেন্ট আনলক করা
     const stepThreeContainer = document.getElementById('step-three-container');
     stepThreeContainer.classList.remove('opacity-40');
     stepThreeContainer.classList.add('opacity-100');
 
-    // স্ক্রিনশট ফাইল ইনপুট সচল করা হচ্ছে
     const fileInput = document.getElementById('proof-file');
     const uploadLabelBtn = document.getElementById('upload-label-btn');
     const statusLabel = document.getElementById('upload-status-label');
     
     if (fileInput && uploadLabelBtn) {
         fileInput.removeAttribute('disabled');
-        uploadLabelBtn.className = "cursor-pointer bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[10px] font-extrabold px-4 py-3 rounded-2xl transition-all duration-300 flex items-center gap-1.5 shadow-[0_4px_12px_rgba(37,99,235,0.25)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.4)] hover:scale-[1.01]";
+        uploadLabelBtn.className = "cursor-pointer bg-[#fba82f] text-white text-[10px] font-extrabold px-4 py-3 rounded-2xl transition-all duration-300 flex items-center gap-1.5 shadow-[0_4px_12px_rgba(251,168,47,0.25)] hover:scale-[1.01]";
         uploadLabelBtn.setAttribute('for', 'proof-file');
         statusLabel.innerText = "স্ক্রিনশট আপলোড করুন";
     }
 }
 
-// প্রোগ্রেস বার ট্র্যাকিং সহ স্ক্রিনশট আপলোড স্ক্রিপ্ট (ImgBB)
 function uploadTaskProof(input) {
     const file = input.files[0];
     if (!file) return;
-
-    const IMGBB_API_KEY = "1cb6f7d4b65dfd982d0435de86bb8aff"; 
 
     const formData = new FormData();
     formData.append("image", file);
@@ -257,35 +232,33 @@ function uploadTaskProof(input) {
         }
     }, false);
 
-    xhr.open("POST", `https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, true);
+    xhr.open("POST", "/api/upload", true); // লোকাল রোটেশন সিকিউর প্রক্সি
 
     xhr.onload = function() {
         if (xhr.status === 200) {
             const data = JSON.parse(xhr.responseText);
-            if (data.success) {
-                document.getElementById('proof-image-url-input').value = data.data.url;
+            if (data.status === "success") {
+                document.getElementById('proof-image-url-input').value = data.url;
                 statusLabel.innerText = "Screenshot Uploaded Successfully! ✓";
                 statusLabel.className = "text-[10px] text-emerald-600 font-extrabold animate-none";
                 
-                // ৩য় ধাপ সম্পূর্ণ করা হলো (টিক মার্ক)
                 const circle3 = document.getElementById('step-circle-3');
                 const pill3 = document.getElementById('step-pill-3');
 
                 circle3.innerHTML = '<i class="fa-solid fa-check text-white text-[9px]"></i>';
-                circle3.className = "absolute -left-[38px] w-6 h-6 rounded-full bg-[#0F172A] border-2 border-[#0F172A] flex items-center justify-center font-bold text-white transition-all duration-300 shadow-sm z-10";
+                circle3.className = "absolute -left-[38px] w-6 h-6 rounded-full bg-black border-2 border-black flex items-center justify-center font-bold text-white transition-all duration-300 shadow-sm z-10";
                 pill3.innerText = "Completed";
                 pill3.className = "text-[8px] px-2 py-0.5 rounded-full font-black bg-emerald-50 text-emerald-600 border border-emerald-100 uppercase";
 
-                // ধাপ ৪ সাবমিট বাটন সচল করা হচ্ছে (গ্রিন রাউন্ডেড গ্রেডিয়েন্ট গ্লো বাটন)
                 submitBtn.removeAttribute('disabled');
-                submitBtn.className = "w-full glow-btn-light bg-gradient-to-r from-emerald-500 to-teal-600 hover:shadow-[0_8px_20px_rgba(16,185,129,0.3)] text-white text-[11px] font-black py-4 rounded-2xl transition-all duration-300 cursor-pointer shadow";
+                submitBtn.className = "w-full bg-black hover:opacity-90 text-white text-[11px] font-black py-4 rounded-2xl transition cursor-pointer shadow";
             } else {
                 statusLabel.innerText = "Upload Failed. Please try again.";
                 statusLabel.className = "text-[10px] text-red-500 font-bold animate-none";
                 progressContainer.classList.add('hidden');
             }
         } else {
-            statusLabel.innerText = "Connection or API Key Error.";
+            statusLabel.innerText = "Connection Error. Re-upload again.";
             statusLabel.className = "text-[10px] text-red-500 font-bold animate-none";
             progressContainer.classList.add('hidden');
         }
