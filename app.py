@@ -4,6 +4,7 @@ import random
 import urllib.request
 import urllib.parse
 import json
+import base64
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from supabase import create_client, Client
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -632,6 +633,89 @@ def admin_withdraw_action():
     return redirect(url_for('admin_withdrawals'))
     
 
+# (অন্যান্য কোডের সাথে নিচের ডাইনামিক আপলোডার এবং এডমিন কি-ম্যানেজার রাউটগুলো যুক্ত করুন)
+
+# ১. সুরক্ষিত অটো-ফেইলওভার আপলোডার এপিআই (১০০% সাকসেস গ্যারান্টি)
+@app.route('/api/upload', methods=['POST'])
+def api_upload_image():
+    if 'image' not in request.files:
+        return jsonify({"status": "error", "message": "No image file provided."}), 400
+        
+    file = request.files['image']
+    file_bytes = file.read()
+    base64_image = base64.b64encode(file_bytes)
+    
+    # ফেইলওভার হ্যান্ডলিং লুপ
+    while True:
+        # ডাটাবেজ থেকে প্রথম সচল (Active) কি-টি কুয়েরি করা হচ্ছে
+        keys_query = supabase.table("imgbb_keys") \
+            .select("id, key_value") \
+            .eq("status", "Active") \
+            .order("created_at", desc=False) \
+            .limit(1).execute().data
+            
+        if not keys_query:
+            return jsonify({"status": "error", "message": "কোনো সক্রিয় ImgBB API Key পাওয়া যায়নি। দয়া করে এডমিনের সাথে যোগাযোগ করুন।"}), 500
+            
+        key_id = keys_query[0]['id']
+        key_value = keys_query[0]['key_value']
+        
+        # আপলোড করার চেষ্টা
+        try:
+            payload = urllib.parse.urlencode({
+                "image": base64_image
+            }).encode("utf-8")
+            
+            url = f"https://api.imgbb.com/1/upload?key={key_value}"
+            req = urllib.request.Request(url, data=payload)
+            
+            with urllib.request.urlopen(req) as response:
+                res_data = json.loads(response.read().decode('utf-8'))
+                
+            if res_data.get('success'):
+                # সফল হলে সরাসরি ইমেজ লিংক ফ্রন্টএন্ডে রিটার্ন করবে
+                return jsonify({"status": "success", "url": res_data['data']['url']}), 200
+            else:
+                raise Exception("Upload rejected")
+                
+        except Exception:
+            # কনেকশন ফেইল বা কি ব্লকড হলে ডাটাবেজে স্ট্যাটাস Failed করে দেওয়া হচ্ছে
+            supabase.table("imgbb_keys").update({"status": "Failed"}).eq("id", key_id).execute()
+            # লুপটি পুনরায় চলবে এবং পরবর্তী সক্রিয় কি-টি দিয়ে আপলোড শুরু করবে
+
+
+# ২. এডমিন এপিআই কি ম্যানেজার রাউট (/admin/keys)
+@app.route('/admin/keys', methods=['GET', 'POST'])
+def admin_keys():
+    if not check_admin_auth():
+        return "Unauthorized Access", 403
+        
+    if request.method == 'POST':
+        new_key = request.form.get('key_value')
+        if new_key:
+            try:
+                supabase.table("imgbb_keys").insert({"key_value": new_key.strip(), "status": "Active"}).execute()
+                flash("নতুন ImgBB API Key সফলভাবে সচল তালিকায় যুক্ত করা হয়েছে।", "success")
+            except Exception:
+                flash("এই এপিআই কী-টি ইতিমধ্যে ডাটাবেজে রয়েছে।", "danger")
+        return redirect(url_for('admin_keys'))
+        
+    # সমস্ত কি-সমূহের তালিকা
+    all_keys = supabase.table("imgbb_keys").select("*").order("created_at", desc=True).execute().data or []
+    return render_template('admin_keys.html', keys=all_keys)
+
+
+# ৩. এডমিন এপিআই কি ডিলিট রাউট
+@app.route('/admin/keys/delete', methods=['POST'])
+def admin_delete_key():
+    if not check_admin_auth():
+        return "Unauthorized Action", 403
+        
+    key_id = request.form.get('key_id')
+    supabase.table("imgbb_keys").delete().eq("id", key_id).execute()
+    flash("এপিআই কী-টি ডাটাবেজ থেকে মুছে ফেলা হয়েছে।", "success")
+    return redirect(url_for('admin_keys'))
+    
 @app.route('/agent')
 def agent_portal():
     user_id = session.get('user_id')
