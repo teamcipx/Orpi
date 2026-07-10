@@ -4,26 +4,26 @@
 <!-- html2canvas লাইব্রেরি সরাসরি স্ক্রিনশট জেনারেট করার জন্য -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-<div class="space-y-6 max-w-2xl mx-auto pb-10">
+<div class="space-y-4 max-w-2xl mx-auto pb-10">
     
-    <!-- ১. ফিগমা স্টাইল প্রোফাইল ও হেডার কার্ড (তিয়াল গ্রিন ও সাদা ওভারল্যাপ লেআউট) -->
+    <!-- ১. প্রিমিয়াম প্রোফাইল ও হেডার কার্ড (SaaS Overlapping Layout) -->
     <div class="relative rounded-3xl bg-white border border-slate-200/60 shadow-[0_8px_30px_rgba(0,0,0,0.02)] overflow-hidden">
-        <!-- টিয়াল গ্রিন টপ হেডার -->
-        <div class="h-32 bg-[#009688] flex items-center justify-between px-6 relative">
-            <div class="w-8 h-8 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white cursor-pointer hover:bg-white/30 transition">
+        <!-- মিডনাইট ডার্ক টপ হেডার -->
+        <div class="h-32 bg-[#090D1F] flex items-center justify-between px-6 relative">
+            <div class="w-8 h-8 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center text-white cursor-pointer hover:bg-white/20 transition">
                 <i class="fa-solid fa-chevron-left text-xs"></i>
             </div>
-            <div class="w-8 h-8 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white cursor-pointer hover:bg-white/30 transition">
+            <div class="w-8 h-8 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center text-white cursor-pointer hover:bg-white/20 transition">
                 <i class="fa-solid fa-gear text-sm"></i>
             </div>
         </div>
 
         <!-- ওভারল্যাপিং প্রোফাইল বডি -->
         <div class="px-6 pb-6 pt-0 -mt-10 relative z-10 flex flex-col items-center text-center">
-            <!-- প্রোফাইল পিকচার ক্যামেরা বাটন সহ -->
+            <!-- প্রোফাইল পিকচার কাস্টম ক্যামেরা বাটন সহ -->
             <div class="relative w-24 h-24 rounded-full border-4 border-white shadow-md bg-white overflow-visible">
                 <img id="profile-pic-preview" src="{{ user.avatar_url }}" alt="Profile" class="w-full h-full rounded-full object-cover">
-                <label for="image-upload" class="absolute bottom-0 right-0 bg-[#FF5C01] text-white rounded-full p-2 cursor-pointer hover:bg-orange-600 transition shadow-[0_4px_12px_rgba(255,92,1,0.3)]">
+                <label for="image-upload" class="absolute bottom-0 right-0 bg-black text-white rounded-full p-2 cursor-pointer hover:opacity-90 transition shadow">
                     <i class="fa-solid fa-camera text-[10px]"></i>
                 </label>
                 <input type="file" id="image-upload" class="hidden" accept="image/*" onchange="uploadToImgBB(this)">
@@ -32,18 +32,18 @@
             <h2 class="text-lg font-black text-[#0F172A] mt-3">{{ user.username }}</h2>
             <p class="text-[11px] text-slate-400 font-bold mt-1">{{ user.email }}</p>
             
-            <button onclick="generateShareCard()" class="mt-4 bg-slate-50 hover:bg-blue-50 hover:text-blue-600 text-slate-600 border border-slate-200/50 text-[10px] uppercase font-extrabold px-5 py-2.5 rounded-2xl transition flex items-center gap-2">
+            <button onclick="generateShareCard()" class="mt-4 bg-slate-50 hover:bg-[#fba82f]/10 hover:text-[#fba82f] text-slate-600 border border-slate-200/50 text-[10px] uppercase font-extrabold px-5 py-2.5 rounded-2xl transition flex items-center gap-2">
                 <i class="fa-solid fa-share-nodes text-xs"></i> Share Profile Card
             </button>
         </div>
     </div>
 
-    <!-- ২. ফিগমা ২×২ আইওএস-স্টাইল প্রিমিয়াম স্ট্যাটস উইজেট (২ কলাম গ্রিড) -->
+    <!-- ২. ২×২ আইওএস-স্টাইল প্রিমিয়াম স্ট্যাটস উইজেট (অ্যাম্বার থিম ম্যাচ) -->
     <div class="grid grid-cols-2 gap-4">
         <!-- ব্যালেন্স উইজেট -->
         <div class="bg-white border border-slate-200/60 p-5 rounded-3xl flex flex-col justify-between shadow-[0_4px_20px_rgba(0,0,0,0.01)] min-h-[110px]">
-            <div class="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500 text-sm">
-                <i class="fa-solid fa-star"></i>
+            <div class="w-8 h-8 rounded-full bg-[#fba82f]/10 flex items-center justify-center text-[#fba82f] text-sm">
+                <i class="fa-solid fa-wallet"></i>
             </div>
             <div class="mt-3.5 leading-none">
                 <p class="text-lg font-black text-[#0F172A]">৳ {{ user.balance }}</p>
@@ -53,8 +53,8 @@
 
         <!-- ইউজার আইডি উইজেট -->
         <div class="bg-white border border-slate-200/60 p-5 rounded-3xl flex flex-col justify-between shadow-[0_4px_20px_rgba(0,0,0,0.01)] min-h-[110px]">
-            <div class="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 text-sm">
-                <i class="fa-solid fa-id-badge"></i>
+            <div class="w-8 h-8 rounded-full bg-[#fba82f]/10 flex items-center justify-center text-[#fba82f] text-sm">
+                <i class="fa-solid fa-id-card"></i>
             </div>
             <div class="mt-3.5 leading-none">
                 <p class="text-xs font-black text-[#0F172A]">#{{ user.uid }}</p>
@@ -64,7 +64,7 @@
 
         <!-- জেলা উইজেট -->
         <div class="bg-white border border-slate-200/60 p-5 rounded-3xl flex flex-col justify-between shadow-[0_4px_20px_rgba(0,0,0,0.01)] min-h-[110px]">
-            <div class="w-8 h-8 rounded-full bg-teal-500/10 flex items-center justify-center text-[#009688] text-sm">
+            <div class="w-8 h-8 rounded-full bg-[#fba82f]/10 flex items-center justify-center text-[#fba82f] text-sm">
                 <i class="fa-solid fa-map-location-dot"></i>
             </div>
             <div class="mt-3.5 leading-none">
@@ -75,7 +75,7 @@
 
         <!-- বয়স উইজেট -->
         <div class="bg-white border border-slate-200/60 p-5 rounded-3xl flex flex-col justify-between shadow-[0_4px_20px_rgba(0,0,0,0.01)] min-h-[110px]">
-            <div class="w-8 h-8 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-600 text-sm">
+            <div class="w-8 h-8 rounded-full bg-[#fba82f]/10 flex items-center justify-center text-[#fba82f] text-sm">
                 <i class="fa-solid fa-ranking-star"></i>
             </div>
             <div class="mt-3.5 leading-none">
@@ -88,22 +88,21 @@
     <!-- ৩. সেটিংস লিস্ট এবং ইনফরমেশন এডিট প্যানেল -->
     <div class="bg-white border border-slate-200/60 p-6 rounded-3xl shadow-[0_10px_30px_rgba(0,0,0,0.01)]">
         
-        <!-- সাকসেস/এরর ফ্ল্যাশ নোটিশ -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="p-3 mb-4 text-[10px] font-black rounded-2xl border text-center {% if category == 'success' %}bg-emerald-50 text-emerald-600 border-emerald-100{% else %}bg-red-50 text-red-600 border-red-100{% endif %}">
+                    <div class="p-3 mb-4 text-[10px] font-black rounded-2xl border text-center {% if category == 'success' %}bg-[#fba82f]/10 text-[#fba82f] border-[#fba82f]/20{% else %}bg-red-50 text-red-600 border-red-100{% endif %}">
                         {{ message }}
                     </div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
 
-        <!-- ক. রিড-অনলি সেটিংস লিস্ট (ফিগমা সেটিংস অনুকরণে) -->
+        <!-- ক. রিড-অনলি সেটিংস লিস্ট -->
         <div id="profile-view-mode" class="space-y-1">
             <div class="flex justify-between items-center pb-3 border-b border-slate-100 mb-2">
                 <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-800">ব্যক্তিগত তথ্য বিবরণী</h3>
-                <button onclick="toggleEditMode(true)" class="text-xs text-blue-600 hover:text-blue-700 font-black flex items-center gap-1.5 focus:outline-none bg-blue-50/50 px-3 py-1.5 rounded-full border border-blue-100">
+                <button onclick="toggleEditMode(true)" class="text-xs text-[#fba82f] hover:text-[#fba82f]/90 font-black flex items-center gap-1.5 focus:outline-none bg-[#fba82f]/10 px-3 py-1.5 rounded-full border border-[#fba82f]/20">
                     <i class="fa-regular fa-pen-to-square text-xs"></i> Edit Info
                 </button>
             </div>
@@ -134,28 +133,28 @@
 
                 <div>
                     <label class="block text-[10px] font-black text-slate-500 uppercase mb-1.5">মোবাইল নম্বর</label>
-                    <input type="text" name="phone_number" value="{{ user.phone_number or '' }}" placeholder="017XXXXXXXX" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-800 font-extrabold focus:outline-none focus:border-blue-500 focus:bg-white transition-all">
+                    <input type="text" name="phone_number" value="{{ user.phone_number or '' }}" placeholder="017XXXXXXXX" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-800 font-extrabold focus:outline-none focus:border-[#fba82f] focus:bg-white transition-all">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-[10px] font-black text-slate-500 uppercase mb-1.5">বয়স</label>
-                        <input type="number" name="age" value="{{ user.age or '' }}" placeholder="22" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-800 font-extrabold focus:outline-none focus:border-blue-500 focus:bg-white transition-all">
+                        <input type="number" name="age" value="{{ user.age or '' }}" placeholder="22" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-800 font-extrabold focus:outline-none focus:border-[#fba82f] focus:bg-white transition-all">
                     </div>
                     <div>
                         <label class="block text-[10px] font-black text-slate-500 uppercase mb-1.5">জেলা</label>
-                        <input type="text" name="district" value="{{ user.district or '' }}" placeholder="Dhaka" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-800 font-extrabold focus:outline-none focus:border-blue-500 focus:bg-white transition-all">
+                        <input type="text" name="district" value="{{ user.district or '' }}" placeholder="Dhaka" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-800 font-extrabold focus:outline-none focus:border-[#fba82f] focus:bg-white transition-all">
                     </div>
                 </div>
                 <div>
                     <label class="block text-[10px] font-black text-slate-500 uppercase mb-1.5">নতুন পাসওয়ার্ড (ঐচ্ছিক)</label>
-                    <input type="password" name="password" placeholder="পাসওয়ার্ড পরিবর্তন করতে এখানে লিখুন..." class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-800 font-extrabold focus:outline-none focus:border-blue-500 focus:bg-white transition-all">
+                    <input type="password" name="password" placeholder="পাসওয়ার্ড পরিবর্তন করতে এখানে লিখুন..." class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-800 font-extrabold focus:outline-none focus:border-[#fba82f] focus:bg-white transition-all">
                 </div>
 
                 <div class="flex gap-3 pt-3">
                     <button type="button" onclick="toggleEditMode(false)" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-black text-xs py-3.5 rounded-2xl transition">
                         Cancel
                     </button>
-                    <button type="submit" class="w-1/2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-black text-xs py-3.5 rounded-2xl transition shadow">
+                    <button type="submit" class="w-1/2 bg-[#fba82f] hover:opacity-90 text-white font-black text-xs py-3.5 rounded-2xl transition shadow">
                         Save Info
                     </button>
                 </div>
@@ -163,29 +162,29 @@
         </div>
     </div>
 
-    <!-- ৪. কোরাল অরেঞ্জ রেফার-এ-ফ্রেন্ড উইজেট (ফিগমা ডিজাইনের হুবহু কালার ও স্টাইল) -->
-    <div class="bg-[#FF5C01] text-white p-6 rounded-3xl shadow-[0_8px_25px_rgba(255,92,1,0.3)] relative overflow-hidden">
+    <!-- ৪. ফ্লোটিং অরেঞ্জ রেফার-এ-ফ্রেন্ড উইজেট (সংশোধিত বোনাস রেট ৳ ৭০) -->
+    <div class="bg-black text-white p-6 rounded-3xl relative overflow-hidden">
         <!-- ব্যাকগ্রাউন্ড গ্লো ডিজাইন -->
-        <div class="absolute -right-10 -bottom-10 w-36 h-36 bg-white/10 rounded-full blur-2xl"></div>
+        <div class="absolute -right-10 -bottom-10 w-36 h-36 bg-[#fba82f]/10 rounded-full blur-2xl"></div>
         
         <div class="flex justify-between items-start z-10 relative">
             <div class="space-y-1">
-                <span class="text-[9px] bg-white/20 backdrop-blur-md text-white font-black uppercase tracking-widest px-3 py-1 rounded-full border border-white/25">Refer & Earn</span>
+                <span class="text-[9px] bg-white/10 backdrop-blur-md text-[#fba82f] border border-[#fba82f]/30 font-black uppercase tracking-widest px-3 py-1 rounded-full">Refer & Earn</span>
                 <h3 class="text-base font-black pt-2 leading-none">Refer a Friend</h3>
                 <p class="text-[10px] text-white/80 pt-1">বন্ধুদের সাথে শেয়ার করুন এবং বোনাস আয় করুন</p>
             </div>
-            <!-- ফিগমার মতো ক্যাশ স্টিকার -->
-            <div class="bg-white text-[#FF5C01] px-3.5 py-1.5 rounded-2xl text-[10px] font-black shadow-sm">
-                ৳ ১০০ /Referral
+            <!-- সংশোধিত ৭০ টাকা ক্যাশ স্টিকার -->
+            <div class="bg-[#fba82f] text-white px-3.5 py-1.5 rounded-2xl text-[10px] font-black shadow-sm">
+                ৳ ৭০ /Referral
             </div>
         </div>
 
         <div class="mt-6 flex gap-2 z-10 relative">
             <input type="text" id="referral-link" readonly value="{{ ref_link }}" 
-                   class="w-full bg-white/15 backdrop-blur-md border border-white/20 p-3 rounded-2xl text-xs text-white placeholder-white/50 font-bold tracking-wide focus:outline-none select-all shadow-inner">
+                   class="w-full bg-white/10 backdrop-blur-md border border-white/20 p-3 rounded-2xl text-xs text-white placeholder-white/50 font-bold tracking-wide focus:outline-none select-all shadow-inner font-mono">
             
             <button id="copy-btn" onclick="copyLink()" 
-                    class="bg-white hover:bg-slate-100 text-[#FF5C01] text-xs font-black px-5 py-3 rounded-2xl transition flex items-center gap-1.5 whitespace-nowrap shadow-md">
+                    class="bg-[#fba82f] hover:opacity-90 text-white text-xs font-black px-5 py-3 rounded-2xl transition flex items-center gap-1.5 whitespace-nowrap shadow-md border border-[#fba82f]/20">
                 <i id="copy-icon" class="fa-solid fa-copy"></i> <span id="copy-text">Copy Link</span>
             </button>
         </div>
@@ -198,12 +197,10 @@
         </h3>
         
         <div class="grid grid-cols-2 gap-3 text-xs font-bold">
-            <!-- রিয়েল সাপোর্ট ডেস্ক্রিপশন লিংক -->
-            <a href="https://t.me/optiwork_help" target="_blank" class="p-3.5 bg-slate-50 border border-slate-100/80 rounded-2xl hover:border-slate-300 transition flex items-center justify-between">
+            <a href="https://t.me/Optiworkhelp" target="_blank" class="p-3.5 bg-slate-50 border border-slate-100/80 rounded-2xl hover:border-slate-300 transition flex items-center justify-between">
                 <span class="flex items-center gap-2"><i class="fa-solid fa-headset text-sky-500"></i> Support Help</span>
                 <i class="fa-solid fa-chevron-right text-slate-300 text-[10px]"></i>
             </a>
-            <!-- রিয়েল অফিসিয়াল চ্যানেল লিংক -->
             <a href="https://t.me/optiworkofficial" target="_blank" class="p-3.5 bg-slate-50 border border-slate-100/80 rounded-2xl hover:border-slate-300 transition flex items-center justify-between">
                 <span class="flex items-center gap-2"><i class="fa-brands fa-telegram text-sky-500"></i> Channel News</span>
                 <i class="fa-solid fa-chevron-right text-slate-300 text-[10px]"></i>
@@ -218,24 +215,23 @@
         <div class="absolute top-4 right-4 text-[10px] font-bold text-slate-300">OPTI WORK ⚡</div>
         
         <div class="flex flex-col items-center mt-6">
-            <img id="card-avatar" src="{{ user.avatar_url }}" class="w-20 h-20 rounded-full object-cover border-2 border-teal-500/20 shadow-md">
+            <img id="card-avatar" src="{{ user.avatar_url }}" class="w-20 h-20 rounded-full object-cover border-2 border-emerald-500/20 shadow-md">
             <h3 class="text-base font-extrabold text-slate-800 mt-3">{{ user.username }}</h3>
             <p class="text-xs text-slate-400">Verified Partner Profile</p>
         </div>
 
-        <div class="w-full bg-[#FF5C01] p-4 rounded-2xl my-6 text-center text-white">
+        <div class="w-full bg-[#fba82f] p-4 rounded-2xl my-6 text-center text-white">
             <span class="text-[9px] text-white/80 uppercase font-bold tracking-widest">মোট অর্জিত আয়</span>
             <p class="text-3xl font-black mt-1">৳ {{ user.balance }}</p>
         </div>
 
         <div class="text-[9px] text-slate-400 text-center uppercase tracking-wider font-bold">
-            Join using my link to get ৳ 100 bonus instantly!
+            Join using my link to get ৳ 70 bonus instantly!
         </div>
     </div>
 </div>
 
 <script>
-// ১. এডিট মোড টগল স্ক্রিপ্ট
 function toggleEditMode(enable) {
     if (enable) {
         document.getElementById('profile-view-mode').classList.add('hidden');
@@ -246,12 +242,10 @@ function toggleEditMode(enable) {
     }
 }
 
-// ২. ImgBB সরাসরি ইমেজ আপলোডিং স্ক্রিপ্ট
+// ৪. ওয়ান-ক্লিক অটোমেটিক ফেইলওভার প্রক্সি আপলোডার (ImgBB)
 function uploadToImgBB(input) {
     const file = input.files[0];
     if (!file) return;
-
-    const IMGBB_API_KEY = "e87be15e90ee993fb9b49f58a3916243"; 
 
     const formData = new FormData();
     formData.append("image", file);
@@ -263,14 +257,14 @@ function uploadToImgBB(input) {
     preview.style.opacity = "0.5";
 
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", `https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, true);
+    xhr.open("POST", "/api/upload", true); // লোকাল অটো-রোটেশন প্রক্সি
 
     xhr.onload = function() {
         preview.style.opacity = "1";
         if (xhr.status === 200) {
             const data = JSON.parse(xhr.responseText);
-            if (data.success) {
-                const imageUrl = data.data.url;
+            if (data.status === "success") {
+                const imageUrl = data.url;
                 preview.src = imageUrl;
                 avatarInput.value = imageUrl;
                 
@@ -295,7 +289,6 @@ function uploadToImgBB(input) {
     xhr.send(formData);
 }
 
-// ৩. রেফারেল লিংক কপি স্ক্রিপ্ট
 function copyLink() {
     const linkInput = document.getElementById('referral-link');
     linkInput.select();
@@ -309,17 +302,16 @@ function copyLink() {
     text.innerText = "Copied!";
     icon.className = "fa-solid fa-check";
     btn.classList.remove('bg-white', 'text-[#FF5C01]');
-    btn.classList.add('bg-emerald-500', 'text-white');
+    btn.classList.add('bg-[#fba82f]', 'text-white');
 
     setTimeout(() => {
         text.innerText = "Copy Link";
         icon.className = "fa-solid fa-copy";
-        btn.classList.remove('bg-emerald-500', 'text-white');
-        btn.classList.add('bg-white', 'text-[#FF5C01]');
+        btn.classList.remove('bg-[#fba82f]', 'text-white');
+        btn.classList.add('bg-white', 'text-[#fba82f]');
     }, 1500);
 }
 
-// ৪. প্রোফাইল শেয়ার কার্ড জেনারেটর
 function generateShareCard() {
     const card = document.getElementById('capture-share-card');
     const cardImg = document.getElementById('card-avatar');
