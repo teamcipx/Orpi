@@ -215,6 +215,8 @@ def check_admin_auth():
     return None
 
 
+# (অন্যান্য কোড অপরিবর্তিত থাকবে, app.py ফাইলের একদম ওপরের দিকে import math যুক্ত করে নিন এবং admin_dashboard রাউটটি নিচের কোড দ্বারা পরিবর্তন করুন)
+import math
 
 @app.route('/admin', methods=['GET', 'POST'])
 def admin_dashboard():
@@ -236,26 +238,60 @@ def admin_dashboard():
     today_dep_query = supabase.table("deposits").select("amount").eq("status", "Approved").gte("created_at", today_start).execute().data
     today_deposits = sum(float(d['amount']) for d in today_dep_query)
     
+    pending_dep_res = supabase.table("deposits").select("id", count="exact").eq("status", "Pending").execute()
+    pending_deposits_count = pending_dep_res.count if pending_dep_res.count is not None else 0
+    
+    pending_with_res = supabase.table("withdrawals").select("id", count="exact").eq("status", "Pending").execute()
+    pending_withdrawals_count = pending_with_res.count if pending_with_res.count is not None else 0
+    
+    pending_tasks_res = supabase.table("task_submissions").select("id", count="exact").eq("status", "Pending").execute()
+    pending_tasks_count = pending_tasks_res.count if pending_tasks_res.count is not None else 0
+    
+    # --- পেজিনেশন ক্যালকুলেশন (২০ জন করে প্রতি পেজে) ---
+    page = int(request.args.get('page', 1))
+    limit = 20
+    start = (page - 1) * limit
+    end = start + limit - 1
+    
     search_query = request.args.get('search', '').strip()
     users_list = []
     
     if search_query:
-        u_data = supabase.table("users").select("id, username, email, balance, is_banned") \
-            .or_(f"email.ilike.%{search_query}%,username.ilike.%{search_query}%").execute().data
-        users_list = u_data
+        # সার্চ করা হলে ফিল্টার করা ইউজার তালিকা এবং পেজিনেশন রেঞ্জ লিমিট
+        query_builder = supabase.table("users").select("id, uid, username, email, balance, is_banned, device_name")
+        
+        if search_query.isdigit():
+            u_res = query_builder.eq("uid", int(search_query)).range(start, end).execute()
+        else:
+            u_res = query_builder.or_(f"email.ilike.%{search_query}%,username.ilike.%{search_query}%").range(start, end).execute()
+            
+        users_list = u_res.data or []
+        has_next = len(users_list) == limit
+        has_prev = page > 1
     else:
-        u_data = supabase.table("users").select("id, username, email, balance, is_banned") \
-            .order("created_at", desc=True).limit(10).execute().data
-        users_list = u_data
+        # ডিফল্টভাবে সমস্ত ইউজারদের মেম্বার তালিকা পেজিনেশন রেঞ্জ লিমিট সহ
+        u_res = supabase.table("users").select("id, uid, username, email, balance, is_banned, device_name") \
+            .order("created_at", desc=True).range(start, end).execute()
+            
+        users_list = u_res.data or []
+        total_pages = math.ceil(total_users / limit)
+        has_next = page < total_pages
+        has_prev = page > 1
 
     return render_template('admin.html', 
                            total_users=total_users, 
                            today_users=today_users, 
                            total_deposits=total_deposits, 
                            today_deposits=today_deposits, 
+                           pending_deposits_count=pending_deposits_count,
+                           pending_withdrawals_count=pending_withdrawals_count,
+                           pending_tasks_count=pending_tasks_count,
                            users_list=users_list,
-                           search_query=search_query)
-
+                           search_query=search_query,
+                           page=page,
+                           has_next=has_next,
+                           has_prev=has_prev)
+    
 # (অন্যান্য এডমিন রাউটের সাথে নিচের সংশোধিত রাউটটি যুক্ত করুন)
 
 @app.route('/admin/payout')
