@@ -1,254 +1,179 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Home</title>
-    <!-- Google Fonts: Plus Jakarta Sans -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        body { background-color: #F8FAFC; }
-        .blockio-card {
-            background: #FFFFFF;
-            border: 1px solid #E2E8F0;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .blockio-card:hover {
-            border-color: #fba82f;
-            transform: translateY(-1.5px);
-            box-shadow: 0 10px 25px rgba(251, 168, 47, 0.03);
-        }
-    </style>
-</head>
-<body class="text-[#0F172A] min-h-screen pb-10">
+{% extends 'admin_base.html' %}
+{% block admin_content %}
 
-    <!-- গ্লোবাল এডমিন নেভিগেশন বার -->
-    <nav class="bg-white border-b border-slate-100 py-3.5 px-4 sticky top-0 z-50 shadow-sm">
-        <div class="max-w-5xl mx-auto flex justify-between items-center">
-            <span class="text-sm font-extrabold tracking-wider text-slate-800">
-                <i class="fa-solid fa-screwdriver-wrench text-[#fba82f] mr-1.5"></i> OPTIWORK ADMIN
-            </span>
-            <div class="flex space-x-4">
-                <a href="/admin/deposits" class="text-xs font-bold text-slate-500 hover:text-slate-900"><i class="fa-solid fa-plus-circle"></i> Deposits</a>
-                <a href="/admin/withdrawals" class="text-xs font-bold text-slate-500 hover:text-slate-900"><i class="fa-solid fa-money-bill-transfer"></i> Withdraws</a>
-                <a href="/admin/add" class="text-xs font-bold text-slate-500 hover:text-slate-900"><i class="fa-solid fa-list-check"></i> Tasks</a>
-                <a href="/dashboard" class="text-xs font-bold text-slate-500 hover:text-slate-900"><i class="fa-solid fa-home"></i> App</a>
+<div class="space-y-6">
+    <!-- ১. পেন্ডিং কমান্ড সেন্টার (পেন্ডিং ট্র্যাকারস) -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <a href="/admin/deposits" class="blockio-card p-4 flex items-center justify-between border-l-4 border-yellow-500 hover:scale-[1.02] transition bg-white">
+            <div class="space-y-0.5">
+                <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider">পেন্ডিং ডিপোজিট</span>
+                <p class="text-base font-black text-slate-800">{{ pending_deposits_count }}টি আবেদন ওয়েটিং</p>
             </div>
+            <div class="w-8 h-8 rounded-full bg-yellow-50 flex items-center justify-center text-yellow-500 text-xs">
+                <i class="fa-solid fa-hourglass-half"></i>
+            </div>
+        </a>
+
+        <a href="/admin/withdrawals" class="blockio-card p-4 flex items-center justify-between border-l-4 border-red-500 hover:scale-[1.02] transition bg-white">
+            <div class="space-y-0.5">
+                <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider">পেন্ডিং উইথড্রয়াল</span>
+                <p class="text-base font-black text-slate-800">{{ pending_withdrawals_count }}টি আবেদন ওয়েটিং</p>
+            </div>
+            <div class="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center text-red-500 text-xs">
+                <i class="fa-solid fa-money-bill-transfer"></i>
+            </div>
+        </a>
+
+        <a href="/admin/add" class="blockio-card p-4 flex items-center justify-between border-l-4 border-blue-500 hover:scale-[1.02] transition bg-white">
+            <div class="space-y-0.5">
+                <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider">পেন্ডিং টাস্ক প্রুফ</span>
+                <p class="text-base font-black text-slate-800">{{ pending_tasks_count }}টি কাজ ভেরিফাই যোগ্য</p>
+            </div>
+            <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 text-xs">
+                <i class="fa-solid fa-list-check"></i>
+            </div>
+        </a>
+    </div>
+
+    <!-- ২. ফাইন্যান্সিয়াল ও মেম্বার মেট্রিক্স গ্রিড -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="blockio-card p-4 bg-white">
+            <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider">Today Register</span>
+            <p class="text-xl font-extrabold text-slate-800 mt-1">{{ today_users }}</p>
         </div>
-    </nav>
+        <div class="blockio-card p-4 bg-white">
+            <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider">Today Deposit</span>
+            <p class="text-xl font-extrabold text-[#fba82f] mt-1">৳ {{ today_deposits }}</p>
+        </div>
+        <div class="blockio-card p-4 bg-white">
+            <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider">Total User</span>
+            <p class="text-xl font-extrabold text-slate-800 mt-1">{{ total_users }}</p>
+        </div>
+        <div class="blockio-card p-4 bg-white">
+            <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider">Total Deposit</span>
+            <p class="text-xl font-extrabold text-[#fba82f] mt-1">৳ {{ total_deposits }}</p>
+        </div>
+    </div>
 
-    <main class="max-w-5xl mx-auto p-4 space-y-6">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="p-3 text-xs text-center rounded-xl border {% if category == 'success' %}bg-emerald-50 text-emerald-600 border-emerald-100{% else %}bg-red-50 text-red-600 border-red-100{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
 
-        <!-- ১. পেন্ডিং কমান্ড সেন্টার -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <!-- ডিপোজিট কিউ -->
-            <a href="/admin/deposits" class="blockio-card p-4 flex items-center justify-between border-l-4 border-yellow-500 hover:scale-[1.02] transition bg-white">
-                <div class="space-y-0.5">
-                    <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider">পেন্ডিং ডিপোজিট</span>
-                    <p class="text-base font-black text-slate-800">{{ pending_deposits_count }}টি আবেদন ওয়েটিং</p>
-                </div>
-                <div class="w-8 h-8 rounded-full bg-yellow-50 flex items-center justify-center text-yellow-500 text-xs">
-                    <i class="fa-solid fa-hourglass-half"></i>
-                </div>
-            </a>
-
-            <!-- উইথড্রয়াল কিউ -->
-            <a href="/admin/withdrawals" class="blockio-card p-4 flex items-center justify-between border-l-4 border-red-500 hover:scale-[1.02] transition bg-white">
-                <div class="space-y-0.5">
-                    <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider">পেন্ডিং উইথড্রয়াল</span>
-                    <p class="text-base font-black text-slate-800">{{ pending_withdrawals_count }}টি আবেদন ওয়েটিং</p>
-                </div>
-                <div class="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center text-red-500 text-xs">
-                    <i class="fa-solid fa-money-bill-transfer"></i>
-                </div>
-            </a>
-
-            <!-- টাস্ক ভেরিফিকেশন কিউ -->
-            <a href="/admin/add" class="blockio-card p-4 flex items-center justify-between border-l-4 border-blue-500 hover:scale-[1.02] transition bg-white">
-                <div class="space-y-0.5">
-                    <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider">পেন্ডিং টাস্ক প্রুফ</span>
-                    <p class="text-base font-black text-slate-800">{{ pending_tasks_count }}টি কাজ ভেরিফাই যোগ্য</p>
-                </div>
-                <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 text-xs">
-                    <i class="fa-solid fa-list-check"></i>
-                </div>
-            </a>
+    <!-- ৩. সার্চ ইন্টিগ্রেশন সম্পন্ন ইউজার তালিকা বোর্ড -->
+    <div class="blockio-card p-5 bg-white space-y-4">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-100 pb-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
+                <i class="fa-solid fa-users text-slate-400"></i> মেম্বার ম্যানেজমেন্ট হাব
+            </h3>
+            
+            <form action="/admin" method="GET" class="w-full sm:w-auto flex gap-2">
+                <input type="text" name="search" value="{{ search_query }}" placeholder="UID / ইউজারনেম / ইমেইল..." class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none w-full sm:w-56 font-sans">
+                <button type="submit" class="bg-black hover:opacity-90 text-white px-4 py-1.5 rounded-xl text-xs font-bold">Search</button>
+            </form>
         </div>
 
-        <!-- ২. ফাইন্যান্সিয়াল ও মেম্বার মেট্রিক্স গ্রিড -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="blockio-card p-4 bg-white">
-                <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider">Today Register</span>
-                <p class="text-xl font-extrabold text-slate-800 mt-1">{{ today_users }}</p>
-            </div>
-            <div class="blockio-card p-4 bg-white">
-                <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider">Today Deposit</span>
-                <p class="text-xl font-extrabold text-[#fba82f] mt-1">৳ {{ today_deposits }}</p>
-            </div>
-            <div class="blockio-card p-4 bg-white">
-                <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider">Total User</span>
-                <p class="text-xl font-extrabold text-slate-800 mt-1">{{ total_users }}</p>
-            </div>
-            <div class="blockio-card p-4 bg-white">
-                <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider">Total Deposit</span>
-                <p class="text-xl font-extrabold text-[#fba82f] mt-1">৳ {{ total_deposits }}</p>
-            </div>
-        </div>
+        <div class="overflow-x-auto text-[11px] font-semibold">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold uppercase">
+                        <th class="p-2.5">ইউজার তথ্য (UID)</th>
+                        <th class="p-2.5">ব্যালেন্স</th>
+                        <th class="p-2.5 text-right">মডারেটর অ্যাকশন</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in users_list %}
+                    <tr class="border-b border-slate-50 hover:bg-slate-50/50">
+                        <td class="p-2.5">
+                            <span class="font-bold text-slate-800">{{ u.username }}</span>
+                            {% if u.is_banned %}
+                                <span class="ml-1 bg-red-100 text-red-700 text-[8px] font-black px-1.5 py-0.5 rounded-full border border-red-200">Banned</span>
+                            {% endif %}
+                            <br>
+                            <span class="text-[9px] text-slate-400 font-mono">UID: {{ u.uid }} | <i class="fa-solid fa-mobile-screen-button"></i> {{ u.device_name or 'N/A' }} | {{ u.email }}</span>
+                        </td>
+                        <td class="p-2.5 font-bold text-slate-700">৳ {{ u.balance }}</td>
+                        <td class="p-2.5 text-right space-y-2 sm:space-y-0 sm:space-x-1 flex flex-col sm:flex-row justify-end items-end sm:items-center">
+                            
+                            <form action="/admin/user-action" method="POST" class="inline-flex items-center gap-1">
+                                <input type="hidden" name="user_id" value="{{ u.id }}">
+                                <input type="hidden" name="action" value="add_balance">
+                                <input type="number" name="amount" placeholder="৳" required class="w-12 px-1.5 py-1 border border-slate-200 rounded text-center text-xs bg-slate-50 focus:outline-none">
+                                <button type="submit" class="bg-emerald-500 hover:bg-emerald-600 text-white px-2 py-1.5 rounded-lg text-[10px] font-bold shadow-sm"><i class="fa-solid fa-plus"></i></button>
+                            </form>
 
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="p-3 text-xs text-center rounded-xl border {% if category == 'success' %}bg-emerald-50 text-emerald-600 border-emerald-100{% else %}bg-red-50 text-red-600 border-red-100{% endif %}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+                            <form action="/admin/user-action" method="POST" class="inline">
+                                <input type="hidden" name="user_id" value="{{ u.id }}">
+                                <input type="hidden" name="action" value="add_referral">
+                                <button type="submit" title="Add Success Referral" class="bg-blue-500 hover:bg-blue-600 text-white px-2.5 py-1.5 rounded-lg text-[10px] font-bold shadow-sm"><i class="fa-solid fa-user-plus"></i></button>
+                            </form>
 
-        <!-- ৩. সার্চ ইন্টিগ্রেশন সম্পন্ন ইউজার তালিকা বোর্ড -->
-        <div class="blockio-card p-5 bg-white space-y-4">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-100 pb-3">
-                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
-                    <i class="fa-solid fa-users text-slate-400"></i> মেম্বার ম্যানেজমেন্ট হাব
-                </h3>
-                
-                <form action="/admin" method="GET" class="w-full sm:w-auto flex gap-2">
-                    <input type="text" name="search" value="{{ search_query }}" placeholder="UID / ইউজারনেম / ইমেইল..." class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none w-full sm:w-56 font-sans">
-                    <button type="submit" class="bg-black hover:opacity-90 text-white px-4 py-1.5 rounded-xl text-xs font-bold">Search</button>
-                </form>
-            </div>
-
-            <div class="overflow-x-auto text-[11px] font-semibold">
-                <table class="w-full text-left">
-                    <thead>
-                        <tr class="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold uppercase">
-                            <th class="p-2.5">ইউজার তথ্য (UID)</th>
-                            <th class="p-2.5">ব্যালেন্স</th>
-                            <th class="p-2.5 text-right">মডারেটর অ্যাকশন</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for u in users_list %}
-                        <tr class="border-b border-slate-50 hover:bg-slate-50/50">
-                            <td class="p-2.5">
-                                <span class="font-bold text-slate-800">{{ u.username }}</span>
+                            <form action="/admin/user-action" method="POST" class="inline">
+                                <input type="hidden" name="user_id" value="{{ u.id }}">
                                 {% if u.is_banned %}
-                                    <span class="ml-1 bg-red-100 text-red-700 text-[8px] font-black px-1.5 py-0.5 rounded-full border border-red-200">Banned</span>
+                                    <input type="hidden" name="action" value="unban">
+                                    <button type="submit" class="bg-slate-500 hover:bg-slate-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold">Unban</button>
+                                {% else %}
+                                    <input type="hidden" name="action" value="ban">
+                                    <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-[#070A13] px-3 py-1.5 rounded-lg text-[10px] font-bold">Ban</button>
                                 {% endif %}
-                                <br>
-                                <span class="text-[9px] text-slate-400 font-mono">UID: {{ u.uid }} | <i class="fa-solid fa-mobile-screen-button"></i> {{ u.device_name or 'N/A' }} | {{ u.email }}</span>
-                            </td>
-                            <td class="p-2.5 font-bold text-slate-700">৳ {{ u.balance }}</td>
-                            <td class="p-2.5 text-right space-y-2 sm:space-y-0 sm:space-x-1 flex flex-col sm:flex-row justify-end items-end sm:items-center">
-                                
-                                <form action="/admin/user-action" method="POST" class="inline-flex items-center gap-1">
-                                    <input type="hidden" name="user_id" value="{{ u.id }}">
-                                    <input type="hidden" name="action" value="add_balance">
-                                    <input type="number" name="amount" placeholder="৳" required class="w-12 px-1.5 py-1 border border-slate-200 rounded text-center text-xs bg-slate-50 focus:outline-none">
-                                    <button type="submit" class="bg-emerald-500 hover:bg-emerald-600 text-white px-2 py-1.5 rounded-lg text-[10px] font-bold shadow-sm"><i class="fa-solid fa-plus"></i></button>
-                                </form>
+                            </form>
 
-                                <form action="/admin/user-action" method="POST" class="inline">
-                                    <input type="hidden" name="user_id" value="{{ u.id }}">
-                                    <input type="hidden" name="action" value="add_referral">
-                                    <button type="submit" title="Add Success Referral" class="bg-blue-500 hover:bg-blue-600 text-white px-2.5 py-1.5 rounded-lg text-[10px] font-bold shadow-sm"><i class="fa-solid fa-user-plus"></i></button>
-                                </form>
+                            <form action="/admin/user-action" method="POST" class="inline" onsubmit="return confirm('আপনি কি নিশ্চিত যে এই ইউজারটিকে মুছে ফেলতে চান?');">
+                                <input type="hidden" name="user_id" value="{{ u.id }}">
+                                <input type="hidden" name="action" value="delete">
+                                <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold">Delete</button>
+                            </form>
 
-                                <form action="/admin/user-action" method="POST" class="inline">
-                                    <input type="hidden" name="user_id" value="{{ u.id }}">
-                                    {% if u.is_banned %}
-                                        <input type="hidden" name="action" value="unban">
-                                        <button type="submit" class="bg-slate-500 hover:bg-slate-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold">Unban</button>
-                                    {% else %}
-                                        <input type="hidden" name="action" value="ban">
-                                        <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-[#070A13] px-3 py-1.5 rounded-lg text-[10px] font-bold">Ban</button>
-                                    {% endif %}
-                                </form>
-
-                                <form action="/admin/user-action" method="POST" class="inline" onsubmit="return confirm('আপনি কি নিশ্চিত যে এই ইউজারটিকে মুছে ফেলতে চান?');">
-                                    <input type="hidden" name="user_id" value="{{ u.id }}">
-                                    <input type="hidden" name="action" value="delete">
-                                    <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold">Delete</button>
-                                </form>
-
-                            </td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="3" class="p-4 text-center text-slate-400 font-normal">কোনো ইউজার রেকর্ড খুঁজে পাওয়া যায়নি।</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- ৪. স্লীক ও মডার্ন পেজিনেশন কন্ট্রোল বাটন গ্রুপ (Prev & Next) -->
-            <div class="flex justify-between items-center pt-4 border-t border-slate-100 text-xs font-bold text-slate-500">
-                <div>
-                    {% if has_prev %}
-                        <a href="/admin?search={{ search_query }}&page={{ page - 1 }}" class="bg-slate-950 hover:opacity-90 text-white px-4 py-2 rounded-full transition shadow-sm">
-                            <i class="fa-solid fa-chevron-left mr-1"></i> Prev Page
-                        </a>
+                        </td>
+                    </tr>
                     {% else %}
-                        <span class="bg-slate-100 text-slate-400 border px-4 py-2 rounded-full cursor-not-allowed">
-                            <i class="fa-solid fa-chevron-left mr-1"></i> Prev Page
-                        </span>
-                    {% endif %}
-                </div>
-
-                <div class="text-slate-800">
-                    Page <span class="font-extrabold text-black">{{ page }}</span>
-                </div>
-
-                <div>
-                    {% if has_next %}
-                        <a href="/admin?search={{ search_query }}&page={{ page + 1 }}" class="bg-slate-950 hover:opacity-90 text-white px-4 py-2 rounded-full transition shadow-sm">
-                            Next Page <i class="fa-solid fa-chevron-right ml-1"></i>
-                        </a>
-                    {% else %}
-                        <span class="bg-slate-100 text-slate-400 border px-4 py-2 rounded-full cursor-not-allowed">
-                            Next Page <i class="fa-solid fa-chevron-right ml-1"></i>
-                        </span>
-                    {% endif %}
-                </div>
-            </div>
-
+                    <tr>
+                        <td colspan="3" class="p-4 text-center text-slate-400 font-normal">কোনো ইউজার রেকর্ড খুঁজে পাওয়া যায়নি।</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
 
-    </main>
+        <!-- ৪. পেজিনেশন কন্ট্রোল বাটন গ্রুপ -->
+        <div class="flex justify-between items-center pt-4 border-t border-slate-100 text-xs font-bold text-slate-500">
+            <div>
+                {% if has_prev %}
+                    <a href="/admin?search={{ search_query }}&page={{ page - 1 }}" class="bg-slate-950 hover:opacity-90 text-white px-4 py-2 rounded-full transition shadow-sm">
+                        <i class="fa-solid fa-chevron-left mr-1"></i> Prev Page
+                    </a>
+                {% else %}
+                    <span class="bg-slate-100 text-slate-400 border px-4 py-2 rounded-full cursor-not-allowed">
+                        <i class="fa-solid fa-chevron-left mr-1"></i> Prev Page
+                    </span>
+                {% endif %}
+            </div>
 
-    <!-- মোবাইল টগল ড্রপডাউন স্ক্রিপ্ট -->
-    <script>
-        function toggleAdminMenu() {
-            const menu = document.getElementById('top-dropdown-menu');
-            const icon = document.getElementById('menu-icon');
-            if (menu.classList.contains('hidden')) {
-                menu.classList.remove('hidden');
-                icon.classList.remove('fa-bars');
-                icon.classList.add('fa-xmark');
-            } else {
-                menu.classList.add('hidden');
-                icon.classList.remove('fa-xmark');
-                icon.classList.add('fa-bars');
-            }
-        }
-    </script>
+            <div class="text-slate-800">
+                Page <span class="font-extrabold text-black">{{ page }}</span>
+            </div>
 
-</body>
-</html>
+            <div>
+                {% if has_next %}
+                    <a href="/admin?search={{ search_query }}&page={{ page + 1 }}" class="bg-slate-950 hover:opacity-90 text-white px-4 py-2 rounded-full transition shadow-sm">
+                        Next Page <i class="fa-solid fa-chevron-right ml-1"></i>
+                    </a>
+                {% else %}
+                    <span class="bg-slate-100 text-slate-400 border px-4 py-2 rounded-full cursor-not-allowed">
+                        Next Page <i class="fa-solid fa-chevron-right ml-1"></i>
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}
