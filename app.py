@@ -1583,7 +1583,7 @@ def register():
                 referrer_id = referrer_res.data[0]['id']
                 referrer_device_name = referrer_res.data[0].get('device_name')
                 referrer_fingerprint = referrer_res.data[0].get('device_fingerprint')
-                initial_balance = 50.00
+                initial_balance = 70.00
 
         # --- মিডিয়াম সিকিউরিটি: সাইলেন্ট এন্টি-চিট ভ্যালিডেশন ---
         is_cheating = False
