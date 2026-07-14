@@ -13,22 +13,21 @@
         </div>
     </div>
 
-    <!-- ২. ৩ডি নিয়ন টেলিগ্রাম ভিডিও এমবেড প্লেয়ার (পূর্বের লেআউট) -->
-    <div class="blockio-card p-5 bg-white border border-slate-200 shadow-sm space-y-4">
-        <!-- রেসপন্সিভ ভিডিও কন্টেইনার (১৬:৯ অ্যাসপেক্ট রেশিও) -->
-        <div class="w-full rounded-2xl overflow-hidden bg-black aspect-video relative border border-slate-200 shadow-inner">
-            <!-- আপনার দেওয়া টেলিগ্রাম ভিডিও পোস্ট ৩৬ এমবেড লিংক -->
-            <iframe 
-                src="https://t.me/ortiwokr/36?embed=1" 
-                class="absolute inset-0 w-full h-full rounded-2xl" 
-                frameborder="0" 
-                allow="autoplay; encrypted-media"
-                allowfullscreen>
-            </iframe>
+    <!-- ২. ৩ডি নিয়ন টেলিগ্রাম অফিশিয়াল উইজেট প্লেয়ার (মোবাইল ও পিসিতে শতভাগ সচল) -->
+    <div class="blockio-card p-5 bg-white border border-slate-200 shadow-sm space-y-4 flex flex-col items-center">
+        
+        <!-- অফিসিয়াল টেলিগ্রাম পোস্ট উইজেট কন্টেইনার -->
+        <div class="w-full flex justify-center bg-slate-50/50 p-2 rounded-2xl border border-slate-100 overflow-hidden">
+            <!-- আপনার দেওয়া স্ক্রিপ্ট অনুযায়ী এবং ortiwokr/36 আইডি সেট করা হয়েছে -->
+            <script async 
+                    src="https://telegram.org/js/telegram-widget.js?22" 
+                    data-telegram-post="ortiwokr/36" 
+                    data-width="100%">
+            </script>
         </div>
 
         <!-- কুইক লার্নিং নির্দেশিকা -->
-        <div class="bg-slate-50 border border-slate-100 p-4 rounded-2xl text-xs text-slate-600 leading-relaxed font-semibold">
+        <div class="bg-slate-50 border border-slate-100 p-4 rounded-2xl text-xs text-slate-600 leading-relaxed font-semibold w-full text-justify">
             <div class="text-[10px] font-black text-slate-800 uppercase tracking-widest mb-1.5 flex items-center gap-1">
                 <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping"></span> গুরুত্বপূর্ণ পরামর্শ
             </div>
