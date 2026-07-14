@@ -452,6 +452,17 @@ def admin_gmail_action():
         flash("জিমেইল অ্যাকাউন্টটি রিজেক্ট করা হয়েছে।", "success")
         
     return redirect(url_for('admin_gmails'))
+
+# (অন্যান্য রাউটের সাথে নিচের নতুন রাউটটি যুক্ত করুন)
+
+@app.route('/tutorial')
+def tutorial_page():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+        
+    user = supabase.table("users").select("*").eq("id", user_id).execute().data[0]
+    return render_template('tutorial.html', user=user)
     
 @app.route('/fasset')
 def fasset_landing():
