@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="space-y-4 max-w-2xl mx-auto">
+    
+    <!-- ১. হেডার কার্ড -->
+    <div class="blockio-card p-5 flex justify-between items-center bg-white border border-slate-200 shadow-sm">
+        <div class="space-y-1">
+            <h2 class="text-sm font-extrabold text-slate-800 flex items-center gap-1.5">
+                <i class="fa-solid fa-circle-play text-red-500 animate-pulse"></i> অফিসিয়াল ভিডিও টিউটোরিয়াল
+            </h2>
+            <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Opti Work - Step-by-Step Learning Guide</p>
+        </div>
+    </div>
+
+    <!-- ২. ৩ডি নিয়ন টেলিগ্রাম ভিডিও এমবেড প্লেয়ার -->
+    <div class="blockio-card p-5 bg-white border border-slate-200 shadow-sm space-y-4">
+        <!-- রেসপন্সিভ ভিডিও কন্টেইনার (১৬:৯ অ্যাসপেক্ট রেশিও) -->
+        <div class="w-full rounded-2xl overflow-hidden bg-black aspect-video relative border border-slate-200 shadow-inner">
+            <!-- আপনার দেওয়া টেলিগ্রাম ভিডিও পোস্ট ৩৬ এমবেড লিংক -->
+            <iframe 
+                src="https://t.me/ortiwokr/36?embed=1" 
+                class="absolute inset-0 w-full h-full rounded-2xl" 
+                frameborder="0" 
+                allowfullscreen>
+            </iframe>
+        </div>
+
+        <!-- কুইক লার্নিং নির্দেশিকা -->
+        <div class="bg-slate-50 border border-slate-100 p-4 rounded-2xl text-xs text-slate-600 leading-relaxed font-semibold">
+            <div class="text-[10px] font-black text-slate-800 uppercase tracking-widest mb-1.5 flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping"></span> গুরুত্বপূর্ণ পরামর্শ
+            </div>
+            ভিডিওটিতে দেখানো প্রতিটি ধাপ মনোযোগ দিয়ে দেখুন। ভুল পদ্ধতিতে ক্লেইম বা টাস্ক সম্পন্ন করলে এডমিন প্যানেল থেকে আপনার অ্যাকাউন্টটি সাময়িকভাবে স্থগিত করা হতে পারে।
+        </div>
+    </div>
+</div>
+
+{% endblock %}
