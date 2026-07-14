@@ -1554,6 +1554,10 @@ def add_money():
             
     history = supabase.table("deposits").select("*").eq("user_id", user_id).order("created_at", desc=True).execute().data
     return render_template('add_money.html', history=history)
+
+
+# app.py ফাইলের /register রাউটটি এটি দিয়ে পরিবর্তন করুন
+# (এখানে প্রতিটি ফিজিক্যাল ফিঙ্গারপ্রিন্টের জন্য সর্বোচ্চ ২টি অ্যাকাউন্ট এলাও করা হয়েছে, যা ফলস-পজিটিভ সম্পূর্ণ দূর করবে)
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     ref_by = request.args.get('ref', '')
@@ -1569,12 +1573,22 @@ def register():
         if ip_address:
             ip_address = ip_address.split(',')[0].strip()
 
+        # ১. ইন্টেলিজেন্ট ডিভাইস ফিঙ্গারপ্রিন্ট চেক (কোলিশন প্রতিরোধে প্রতি ডিভাইসে সর্বোচ্চ ২টি অ্যাকাউন্ট অনুমোদিত)
         if device_fingerprint and device_fingerprint.strip() != "":
-            device_exists = supabase.table("users").select("id").eq("device_fingerprint", device_fingerprint.strip()).execute().data
-            if device_exists:
-                flash("নিরাপত্তা সতর্কতা: আপনার ডিভাইস থেকে ইতিমধ্যে একটি অ্যাকাউন্ট তৈরি করা হয়েছে। একই ডিভাইস থেকে একাধিক অ্যাকাউন্ট খোলা সম্পূর্ণ নিষিদ্ধ।", "danger")
-                return redirect(url_for('register', ref=ref_by))
+            # ডাইনামিক র্যান্ডম ফলব্যাক হলে চেক করার প্রয়োজন নেই
+            if not device_fingerprint.startswith("secure_fallback_"):
+                fingerprint_count_res = supabase.table("users") \
+                    .select("id", count="exact") \
+                    .eq("device_fingerprint", device_fingerprint.strip()).execute()
+                
+                fingerprint_count = fingerprint_count_res.count if fingerprint_count_res.count is not None else 0
+                
+                # সর্বোচ্চ ২টি অ্যাকাউন্ট ব্যবহারের অনুমতি (যাতে সাধারণ ইউজারদের অ্যাকাউন্ট ব্লক না হয়)
+                if fingerprint_count >= 2:
+                    flash("নিরাপত্তা সতর্কতা: আপনার ডিভাইস থেকে ইতিমধ্যে অতিরিক্ত অ্যাকাউন্ট তৈরি করা হয়েছে। একই ডিভাইস থেকে একাধিক অ্যাকাউন্ট খোলা সম্পূর্ণ নিষিদ্ধ।", "danger")
+                    return redirect(url_for('register', ref=ref_by))
 
+        # ২. প্রক্সি স্প্যামিং রোধে একই আইপি থেকে সর্বোচ্চ ২ অ্যাকাউন্ট চেক
         if ip_address:
             ip_count_res = supabase.table("users").select("id", count="exact").eq("ip_address", ip_address).execute()
             ip_count = ip_count_res.count if ip_count_res.count is not None else 0
@@ -1595,9 +1609,11 @@ def register():
                 referrer_device_name = referrer_res.data[0].get('device_name')
                 initial_balance = 70.00
 
+        # ৩. এন্টি-চিট জিপিইউ ড্রাইভার ফিল্টার (রেফারার এবং নতুন মেম্বারের ফিজিক্যাল ফোন মডেল ম্যাচিং)
         if referrer_id and referrer_device_name and device_name:
             ref_dev_clean = referrer_device_name.strip().lower()
             my_dev_clean = device_name.strip().lower()
+            
             is_generic = "unknown" in my_dev_clean or "android" in my_dev_clean or "pc" in my_dev_clean
             if not is_generic and ref_dev_clean == my_dev_clean:
                 flash("নিরাপত্তা সতর্কতা: আপনার এবং রেফারারের মোবাইল ডিভাইসের মডেল একই হওয়ায় রেজিস্ট্রেশন বাতিল করা হয়েছে।", "danger")
