@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>500 - Internal Server Error</title>
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #EDEDF0; }
+        .blockio-card {
+            background: #FFFFFF;
+            border: 1px solid #E5E5E9;
+            border-radius: 28px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.015);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div class="blockio-card p-6 sm:p-8 max-w-sm w-full text-center space-y-4">
+        <!-- ৫০০ নিয়ন মেকানিক আইকন -->
+        <div class="w-14 h-14 bg-amber-500/10 border border-amber-500/20 text-[#fba82f] rounded-2xl flex items-center justify-center mx-auto text-xl shadow-[0_0_15px_rgba(251,168,47,0.05)] animate-pulse">
+            <i class="fa-solid fa-screwdriver-wrench animate-bounce"></i>
+        </div>
+
+        <div class="space-y-1.5 leading-normal">
+            <h1 class="text-base font-black text-slate-900 leading-none">500 - Server Internal Error</h1>
+            <p class="text-xs font-bold text-slate-800 leading-normal">সার্ভার সাময়িক ত্রুটি</p>
+            <p class="text-[10px] text-slate-400 font-medium leading-relaxed">সার্ভারে সাময়িক কারিগরি সংযোগ বিচ্ছিন্নতা ঘটেছে। আমাদের ইঞ্জিনিয়ার টিম এটি দ্রুত মেরামতের জন্য কাজ করছে। অনুগ্রহ করে কিছুক্ষণ পর পেজটি রিফ্রেশ করুন।</p>
+        </div>
+
+        <!-- রিফ্রেশ ও হোমে ফিরে যাওয়ার বাটন গ্রুপ -->
+        <div class="flex gap-2 pt-2">
+            <button onclick="location.reload()" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-extrabold text-xs py-2.5 rounded-xl transition">
+                রিফ্রেশ করুন
+            </button>
+            <a href="/dashboard" class="w-1/2 bg-black hover:opacity-90 text-white font-extrabold text-xs py-2.5 rounded-xl transition text-center flex items-center justify-center shadow">
+                হোম ড্যাশবোর্ড
+            </a>
+        </div>
+    </div>
+
+</body>
+</html>
