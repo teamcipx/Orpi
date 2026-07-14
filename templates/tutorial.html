@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<div class="space-y-4 max-w-2xl mx-auto">
+<div class="space-y-4 max-w-2xl mx-auto pb-10">
     
     <!-- ১. হেডার কার্ড -->
     <div class="blockio-card p-5 flex justify-between items-center bg-white border border-slate-200 shadow-sm">
@@ -13,7 +13,7 @@
         </div>
     </div>
 
-    <!-- ২. ৩ডি নিয়ন টেলিগ্রাম ভিডিও এমবেড প্লেয়ার -->
+    <!-- ২. ৩ডি নিয়ন টেলিগ্রাম ভিডিও এমবেড প্লেয়ার (পূর্বের লেআউট) -->
     <div class="blockio-card p-5 bg-white border border-slate-200 shadow-sm space-y-4">
         <!-- রেসপন্সিভ ভিডিও কন্টেইনার (১৬:৯ অ্যাসপেক্ট রেশিও) -->
         <div class="w-full rounded-2xl overflow-hidden bg-black aspect-video relative border border-slate-200 shadow-inner">
@@ -22,6 +22,7 @@
                 src="https://t.me/ortiwokr/36?embed=1" 
                 class="absolute inset-0 w-full h-full rounded-2xl" 
                 frameborder="0" 
+                allow="autoplay; encrypted-media"
                 allowfullscreen>
             </iframe>
         </div>
