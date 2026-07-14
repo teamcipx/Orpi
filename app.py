@@ -294,6 +294,17 @@ def admin_dashboard():
     
 # (অন্যান্য এডমিন রাউটের সাথে নিচের সংশোধিত রাউটটি যুক্ত করুন)
 
+# app.py ফাইলের একদম নিচে এই এরর হ্যান্ডলার রাউট দুটি যুক্ত করুন:
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    return render_template('500.html'), 500
+    
 @app.route('/admin/payout')
 def admin_payout_generator():
     if not check_admin_auth():
