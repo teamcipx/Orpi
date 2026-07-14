@@ -1139,25 +1139,24 @@ def submit_normal():
         flash("এই কাজটি ইতিমধ্যে প্রক্রিয়াধীন (Pending) অথবা অনুমোদিত (Approved) আছে।", "danger")
         
     return redirect(url_for('tasks'))
-    
 
+# app.py ফাইলের /history রাউটটি এটি দিয়ে পরিবর্তন করুন
+# (এখানে tasks সম্পর্কের বদলে সুনির্দিষ্ট "tasks:task_id" রিলেশন ম্যাপ করা হয়েছে)
 @app.route('/history')
 def history():
     user_id = session.get('user_id')
     if not user_id:
         return redirect(url_for('login'))
         
-    now = datetime.datetime.now(datetime.timezone.utc)
-    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
-    yesterday_start = today_start - datetime.timedelta(days=1)
-    yesterday_end = today_start
+    deposits = supabase.table("deposits").select("*").eq("user_id", user_id).order("created_at", desc=True).execute().data
+    withdrawals = supabase.table("withdrawals").select("*").eq("user_id", user_id).order("created_at", desc=True).execute().data
+    
+    # শতভাগ নিরাপদ ও নিখুঁত জয়েনিং কুয়েরি
+    task_history = supabase.table("task_submissions") \
+        .select("proof_image_url, status, created_at, tasks:task_id(title, reward)") \
+        .eq("user_id", user_id).order("created_at", desc=True).execute().data or []
     
     transactions = supabase.table("transactions") \
-        .select("*") \
-        .eq("user_id", user_id) \
-        .order("created_at", desc=True).execute().data or []
-        
-    withdrawals = supabase.table("withdrawals") \
         .select("*") \
         .eq("user_id", user_id) \
         .order("created_at", desc=True).execute().data or []
@@ -1172,19 +1171,39 @@ def history():
         
         if amount > 0:
             total_income += amount
+            if tx_date >= today_start if 'today_start' in locals() else now.replace(hour=0, minute=0, second=0, microsecond=0) if 'now' in locals() else datetime.datetime.now(datetime.timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0):
+                today_income += amount
+            elif (yesterday_start if 'yesterday_start' in locals() else today_start - datetime.timedelta(days=1)) <= tx_date < (yesterday_end if 'yesterday_end' in locals() else today_start):
+                yesterday_income += amount
+                
+    # টাইমস্ট্যাম্প ডেট ক্যালকুলেশন ফিক্সড সেফটি ব্লক
+    now = datetime.datetime.now(datetime.timezone.utc)
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    yesterday_start = today_start - datetime.timedelta(days=1)
+    yesterday_end = today_start
+    
+    today_income = 0.00
+    yesterday_income = 0.00
+    total_income = 0.00
+    
+    for tx in transactions:
+        amount = float(tx['amount'])
+        tx_date = datetime.datetime.fromisoformat(tx['created_at'].replace('Z', '+00:00'))
+        
+        if amount > 0:
+            total_income += amount
             if tx_date >= today_start:
                 today_income += amount
             elif yesterday_start <= tx_date < yesterday_end:
                 yesterday_income += amount
-                
+
     return render_template('history.html', 
                            transactions=transactions, 
-                           withdrawals=withdrawals,
+                           withdrawals=withdrawals, 
+                           task_history=task_history,
                            today_income=round(today_income, 2),
                            yesterday_income=round(yesterday_income, 2),
                            total_income=round(total_income, 2))
-    
-    return render_template('history.html', deposits=deposits, withdrawals=withdrawals, task_history=task_history)
     
 @app.route('/admin/user-action', methods=['POST'])
 def admin_user_action():
