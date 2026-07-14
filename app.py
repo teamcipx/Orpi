@@ -549,6 +549,7 @@ def admin_task_bulk_action():
     flash(f"বাল্ক অটো-ভেরিফিকেশন সম্পন্ন! {approved_count}টি টাস্ক Approved এবং {rejected_count}টি টাস্ক Rejected করা হয়েছে।", "success")
     return redirect(url_for('admin_add_task'))
     
+# app.py ফাইলের /reviews রাউটটি এটি দিয়ে প্রতিস্থাপন করে নিন:
 
 @app.route('/reviews', methods=['GET', 'POST'])
 def reviews_page():
@@ -583,20 +584,32 @@ def reviews_page():
             
         return redirect(url_for('reviews_page'))
         
+    # --- ১০০% নিরাপদ পাইথন-লেভেল ফিল্টারিং ও রেন্ডারিং ---
     try:
-        if is_admin:
-            reviews_data = supabase.table("reviews").select("*").execute().data or []
-        else:
-            fake_reviews = supabase.table("reviews").select("*").eq("is_admin_fake", True).execute().data or []
-            my_reviews = supabase.table("reviews").select("*").eq("user_id", user_id).eq("is_admin_fake", False).execute().data or []
-            reviews_data = fake_reviews + my_reviews
+        # প্রথমে ডাটাবেজ থেকে কোনো ফিল্টার ছাড়া সম্পূর্ণ জেনেরিক তালিকা নিয়ে আসা হচ্ছে (যা কখনোই ক্র্যাশ করবে না)
+        all_reviews = supabase.table("reviews").select("*").execute().data or []
+        
+        reviews_data = []
+        for r in all_reviews:
+            if is_admin:
+                # এডমিন হলে সব দেখতে পাবেন
+                reviews_data.append(r)
+            else:
+                # সাধারণ মেম্বার হলে:
+                # ১. এডমিনের তৈরি ফেক রিভিউগুলো দেখতে পাবেন (is_admin_fake == True)
+                # ২. অথবা নিজের তৈরি করা রিভিউটি দেখতে পাবেন (user_id ম্যাচ করলে)
+                db_user_id = str(r.get('user_id')) if r.get('user_id') else None
+                if r.get('is_admin_fake') == True or db_user_id == str(user_id):
+                    reviews_data.append(r)
             
+        # তারিখ অনুযায়ী সাজানো (Newest first)
         reviews_data.sort(key=lambda x: x.get('created_at', ''), reverse=True)
-    except Exception:
+    except Exception as e:
+        print("Reviews Filter Error:", e)
         reviews_data = []
             
     return render_template('reviews.html', reviews=reviews_data, is_admin=is_admin)
-
+    
 
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
