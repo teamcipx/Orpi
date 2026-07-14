@@ -466,6 +466,67 @@ def fasset_landing():
             pass
     return render_template('fasset.html', user=user)
 
+# (অন্যান্য এডমিন রাউটের সাথে নিচের নতুন রাউটটি যুক্ত করুন)
+
+@app.route('/admin/task-bulk-action', methods=['POST'])
+def admin_task_bulk_action():
+    if not check_admin_auth():
+        return "Unauthorized Action", 403
+        
+    # ১. প্রথম ২০টি পেন্ডিং সাবমিশন রিট্রিভ করা
+    pending_subs = supabase.table("task_submissions") \
+        .select("id, user_id, tasks(title, reward)") \
+        .eq("status", "Pending") \
+        .limit(20).execute().data or []
+        
+    if not pending_subs:
+        flash("বর্তমানে কোনো পেন্ডিং টাস্ক সাবমিশন নেই।", "danger")
+        return redirect(url_for('admin_add_task'))
+        
+    total_count = len(pending_subs)
+    
+    # ২. র্যান্ডম রিজেকশন সংখ্যা নির্ধারণ (২/৩টি রিজেক্ট করার সুনির্দিষ্ট লজিক)
+    if total_count >= 10:
+        reject_count = random.randint(2, 3) # ১০ বা তার বেশি হলে ২/৩টি রিজেক্ট হবে
+    elif total_count >= 3:
+        reject_count = 1                   # ৩টির বেশি হলে ১টি রিজেক্ট হবে
+    else:
+        reject_count = 0                   # ৩টির নিচে হলে সব এপ্রুভ হবে
+        
+    # র্যান্ডমলি কোন কোন ইনডেক্স রিজেক্ট হবে তা সিলেক্ট করা হচ্ছে
+    reject_indices = set(random.sample(range(total_count), reject_count))
+    
+    approved_count = 0
+    rejected_count = 0
+    
+    # ৩. বাল্ক লুপিং প্রসেস
+    for index, sub in enumerate(pending_subs):
+        submission_id = sub['id']
+        target_user_id = sub['user_id']
+        reward = float(sub['tasks']['reward']) if sub.get('tasks') else 0.00
+        task_title = sub['tasks']['title'] if sub.get('tasks') else "Task"
+        
+        if index in reject_indices:
+            # রিজেক্ট করা হচ্ছে
+            supabase.table("task_submissions").update({"status": "Rejected"}).eq("id", submission_id).execute()
+            rejected_count += 1
+        else:
+            # এপ্রুভ করা হচ্ছে
+            supabase.table("task_submissions").update({"status": "Approved"}).eq("id", submission_id).execute()
+            # ব্যালেন্স অ্যাড করা হচ্ছে
+            supabase.rpc("increment_balance", {"user_id": target_user_id, "amount": reward}).execute()
+            
+            # লেনদেন হিস্ট্রি লগ সেভ
+            supabase.table("transactions").insert({
+                "user_id": target_user_id,
+                "title": f"Task Approved: {task_title}",
+                "amount": reward
+            }).execute()
+            approved_count += 1
+            
+    flash(f"বাল্ক অটো-ভেরিফিকেশন সম্পন্ন! {approved_count}টি টাস্ক Approved এবং {rejected_count}টি টাস্ক Rejected করা হয়েছে।", "success")
+    return redirect(url_for('admin_add_task'))
+    
 
 @app.route('/reviews', methods=['GET', 'POST'])
 def reviews_page():
