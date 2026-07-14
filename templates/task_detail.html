@@ -22,19 +22,31 @@
     <!-- ২. ইউনিফাইড লাইভ ট্র্যাকার এবং সাবমিশন প্যানেল -->
     <div class="premium-card p-6 md:p-8 rounded-3xl border border-white/40 shadow-sm bg-white">
         
-        <!-- সাবমিশন হয়ে থাকলে স্ট্যাটাস দেখাবে -->
-        {% if status %}
+        <!-- যদি কাজটি প্রক্রিয়াধীন (Pending) অথবা অনুমোদিত (Approved) থাকে -->
+        {% if status == 'Pending' or status == 'Approved' %}
             <div class="text-center py-8 bg-slate-50/50 rounded-3xl border border-dashed border-slate-200/85 shadow-inner">
                 <i class="fa-solid fa-circle-check text-emerald-500 mb-3 text-3xl block animate-bounce"></i>
                 <p class="text-xs font-extrabold text-slate-800">কাজটি সফলভাবে জমা দেওয়া হয়েছে!</p>
                 <div class="mt-4">
-                    <span class="text-[10px] uppercase font-black tracking-wider px-4 py-2 rounded-full border {% if status == 'Pending' %}bg-yellow-50 text-yellow-600 border-yellow-100 shadow-[0_0_10px_rgba(245,158,11,0.05)]{% elif status == 'Approved' %}bg-emerald-50 text-emerald-600 border-emerald-100 shadow-[0_0_10px_rgba(16,185,129,0.05)]{% else %}bg-red-50 text-red-600 border-red-100 shadow-[0_0_10px_rgba(239,68,68,0.05)]{% endif %}">
+                    <span class="text-[10px] uppercase font-black tracking-wider px-4 py-2 rounded-full border {% if status == 'Pending' %}bg-yellow-50 text-yellow-600 border-yellow-100 shadow-[0_0_10px_rgba(245,158,11,0.05)]{% else %}bg-emerald-50 text-emerald-600 border-emerald-100 shadow-[0_0_10px_rgba(16,185,129,0.05)]{% endif %}">
                         ভেরিফিকেশন স্ট্যাটাস: {{ status }}
                     </span>
                 </div>
             </div>
         {% else %}
-            <!-- কাজের প্রধান ডাইনামিক ইন্টারফেস ফর্ম -->
+            
+            <!-- যদি কাজটি পূর্বে বাতিল (Rejected) করা হয়ে থাকে, তবে লাল সতর্কবার্তা দেখাবে -->
+            {% if status == 'Rejected' %}
+            <div class="bg-red-50 border border-red-100 text-red-700 p-4 mb-5 rounded-2xl flex items-start gap-2.5 text-xs font-bold leading-relaxed">
+                <i class="fa-solid fa-triangle-exclamation text-red-500 text-sm mt-0.5 animate-bounce"></i>
+                <div>
+                    <p class="font-extrabold text-slate-850">আপনার পূর্বের সাবমিশনটি রিজেক্ট করা হয়েছে!</p>
+                    <p class="text-[10px] text-slate-500 font-medium">অ্যাডমিন আপনার দেওয়া আগের প্রুফটি বাতিল করেছেন। দয়া করে সঠিক নিয়মে পুনরায় কাজটি সম্পন্ন করে নতুন স্ক্রিনশটটি প্রুফ হিসেবে সাবমিট করুন।</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- কাজের প্রধান ডাইনামিক ইন্টারফেস ফর্ম (রিজেক্টেডদের জন্য এটি আনলকড থাকবে) -->
             <form action="/tasks/submit-normal" method="POST" class="relative flex flex-col gap-8 pl-10">
                 <input type="hidden" name="task_id" value="{{ task.id }}">
                 <input type="hidden" name="proof_image_url" id="proof-image-url-input">
@@ -55,7 +67,7 @@
                         <span id="step-pill-1" class="text-[8px] px-2 py-0.5 rounded-full font-black bg-[#fba82f]/10 text-[#fba82f] border border-[#fba82f]/20 uppercase">In Progress</span>
                     </div>
 
-                    <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-4.5 text-xs text-slate-700 leading-relaxed font-semibold">
+                    <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-4.5 text-xs text-slate-700 leading-relaxed font-semibold font-sans">
                         <div class="flex items-center gap-1 mb-2.5 text-[10px] text-[#fba82f] font-black uppercase tracking-wider">
                             <i class="fa-solid fa-book-open"></i> কাজের নিয়মাবলী
                         </div>
@@ -232,7 +244,7 @@ function uploadTaskProof(input) {
         }
     }, false);
 
-    xhr.open("POST", "/api/upload", true); // লোকাল রোটেশন সিকিউর প্রক্সি
+    xhr.open("POST", "/api/upload", true); // সুরক্ষিত রোটেশন প্রক্সি
 
     xhr.onload = function() {
         if (xhr.status === 200) {
