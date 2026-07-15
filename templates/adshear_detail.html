@@ -1,6 +1,41 @@
 {% extends 'base.html' %}
 {% block content %}
 
+<!-- কাস্টম ৩ডি গ্লসি সাইন এবং পালস গ্লো অ্যানিমেশন স্টাইলস -->
+<style>
+    @keyframes shine {
+        100% {
+            left: 125%;
+        }
+    }
+    .shine-card {
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(135deg, #FFFFFF 0%, #F5F9FC 100%);
+        border: 1px solid rgba(226, 232, 240, 0.9);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.01);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .shine-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -75%;
+        width: 50%;
+        height: 100%;
+        background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.4) 100%);
+        transform: skewX(-25deg);
+    }
+    .shine-card:hover {
+        border-color: rgba(37, 99, 235, 0.3);
+        box-shadow: 0 10px 30px rgba(37, 99, 235, 0.04);
+        transform: translateY(-2px);
+    }
+    .shine-card:hover::after {
+        animation: shine 0.8s ease-in-out;
+    }
+</style>
+
 <div class="space-y-6 max-w-3xl mx-auto pb-10">
     
     <!-- হেডার কার্ড (স্মুথ রাউন্ডেড কোণ ও গ্রেডিয়েন্ট শ্যাডো) -->
@@ -83,8 +118,10 @@
                                 <span class="text-[9px] text-slate-400 font-bold uppercase block">শেয়ার করার ব্যানার ইমেজ</span>
                                 <a href="{{ task.image_url }}" target="_blank" class="text-[10px] text-blue-500 font-bold hover:underline">View Banner <i class="fa-solid fa-external-link text-[8px]"></i></a>
                             </div>
-                            <!-- ডাউনলোড বাটন -->
-                            <a href="{{ task.image_url }}" download="OptiWork-Campaign-Banner" class="bg-purple-600 hover:bg-purple-700 text-white text-[9px] font-bold px-3.5 py-2 rounded-xl transition flex items-center gap-1 shadow-sm"><i class="fa-solid fa-download"></i> Download Image</a>
+                            <!-- ওয়ান-ক্লিক ট্রু ডাউনলোডার বাটন (বাগ-ফ্রি) -->
+                            <button type="button" id="download-img-btn" onclick="downloadCampaignImage('{{ task.image_url }}')" class="bg-purple-600 hover:bg-purple-700 text-white text-[9px] font-bold px-3.5 py-2 rounded-xl transition flex items-center gap-1 shadow-sm">
+                                <i class="fa-solid fa-download"></i> Download Image
+                            </button>
                         </div>
                     </div>
 
@@ -112,12 +149,11 @@
                         <span id="step-pill-2" class="text-[8px] px-2 py-0.5 rounded-full font-black bg-slate-100 text-slate-500 border border-slate-200 uppercase">Pending</span>
                     </div>
 
-                    <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-4.5 text-xs text-slate-500 font-semibold leading-relaxed">
-                        <i class="fa-brands fa-facebook text-blue-600 mr-1.5"></i> আপনার কপি করা ক্যাপশন এবং ডাউনলোড করা ছবিটি ব্যবহার করে যেকোনো বড় ফেসবুক আর্নিং গ্রুপে একটি সুন্দর পোস্ট তৈরি করুন এবং সফলভাবে পাবলিশ হওয়ার পর সেটির একটি সুন্দর স্ক্রিনশট তুলে নিন।
+                    <div class="bg-slate-50 border border-slate-200/85 rounded-2xl p-4.5 text-xs text-slate-500 font-semibold leading-relaxed">
+                        <i class="fa-brands fa-facebook text-blue-600 mr-1.5"></i> আপনার কপি করা ক্যাপশন এবং ডাউনলোড করা ছবিটি ব্যবহার করে যেকোনো বড় ফেসবুক আর্নিং গ্রুপে একটি সুন্দর পোস্ট তৈরি করুন এবং সফলভাবে পোস্ট হওয়ার পর সেটির একটি সুন্দর স্ক্রিনশট তুলে নিন।
                     </div>
 
                     <div class="pt-1">
-                        <!-- বাগ ফিক্সড: এই বাটনের আইডি ব্যবহার করে স্ক্রিপ্ট আনলক হবে -->
                         <button type="button" id="confirm-step-2" disabled onclick="completeStepTwo()" class="cursor-not-allowed bg-slate-100 text-slate-400 border border-slate-200 text-[10px] font-extrabold px-5 py-2.5 rounded-2xl inline-flex items-center gap-1.5 pointer-events-none transition-all duration-300">
                             ফেসবুকে শেয়ার করেছি, ৩য় ধাপে যান <i class="fa-solid fa-arrow-right text-[8px]"></i>
                         </button>
@@ -190,7 +226,38 @@ function copyCaption() {
     }, 1500);
 }
 
-// ২. স্টেপ ১ সম্পূর্ণ করা এবং ২য় ধাপের সাবমিশন বাটন আনলক করার স্ক্রিপ্ট (বাগ ফিক্সড)
+// ২. সুরক্ষিত ওয়ান-ক্লিক ইমেজ ডাউনলোডার (Blob Downloader)
+async function downloadCampaignImage(imageUrl) {
+    const btn = document.getElementById('download-img-btn');
+    const originalHtml = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Downloading...';
+    btn.style.pointerEvents = 'none';
+
+    try {
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = 'OptiWork-Campaign-Banner.jpg';
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Downloaded';
+        setTimeout(() => {
+            btn.innerHTML = originalHtml;
+            btn.style.pointerEvents = 'auto';
+        }, 2000);
+    } catch (error) {
+        // ফেইলওভার: কোন কারণে CORS ব্লক হলে নতুন ট্যাবে ওপেন করবে
+        window.open(imageUrl, '_blank');
+        btn.innerHTML = originalHtml;
+        btn.style.pointerEvents = 'auto';
+    }
+}
+
+// ৩. স্টেপ ১ সম্পূর্ণ করা
 function completeStepOne() {
     document.getElementById('line-progress-1').style.height = "100%";
 
@@ -209,7 +276,7 @@ function completeStepOne() {
     const circle2 = document.getElementById('step-circle-2');
     const pill2 = document.getElementById('step-pill-2');
     const title2 = document.getElementById('step-title-2');
-    const visitBtn = document.getElementById('confirm-step-2'); // বাগ ফিক্সড: এইচটিএমএল বাটন আইডি সংযুক্ত করা হলো
+    const visitBtn = document.getElementById('confirm-step-2');
 
     circle2.innerHTML = '2';
     circle2.className = "absolute -left-[38px] w-6 h-6 rounded-full bg-white border-2 border-[#0F172A] flex items-center justify-center text-[10px] font-bold text-slate-800 transition-all duration-300 shadow-sm z-10";
@@ -226,13 +293,13 @@ function completeStepOne() {
     visitBtn.className = "glow-btn-light bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[10px] font-extrabold px-5 py-3 rounded-2xl inline-flex items-center gap-1.5 shadow cursor-pointer";
 }
 
-// ৩. স্টেপ ২ সম্পূর্ণ করা এবং ৩য় ধাপের আপলোডার আনলক করার স্ক্রিপ্ট (বাগ ফিক্সড)
+// ৪. স্টেপ ২ সম্পূর্ণ করা
 function completeStepTwo() {
     document.getElementById('line-progress-2').style.height = "100%";
 
     const circle2 = document.getElementById('step-circle-2');
     const pill2 = document.getElementById('step-pill-2');
-    const visitBtn = document.getElementById('confirm-step-2'); // বাগ ফিক্সড
+    const visitBtn = document.getElementById('confirm-step-2');
 
     circle2.innerHTML = '<i class="fa-solid fa-check text-white text-[9px]"></i>';
     circle2.className = "absolute -left-[38px] w-6 h-6 rounded-full bg-[#0F172A] border-2 border-[#0F172A] flex items-center justify-center font-bold text-white transition-all duration-300 shadow-sm z-10";
@@ -268,7 +335,7 @@ function completeStepTwo() {
     }
 }
 
-// ৪. সুরক্ষিত অটো-ফেইলওভার আপলোডার (ImgBB / Proxy রোটেশন স্ক্রিপ্ট)
+// ৫. সুরক্ষিত অটো-ফেইলওভার আপলোডার (ImgBB / Proxy রোটেশন স্ক্রিপ্ট)
 function uploadTaskProof(input) {
     const file = input.files[0];
     if (!file) return;
