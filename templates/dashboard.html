@@ -287,7 +287,78 @@
 
     </div>
 
+    
 </div>
+
+<!-- Welcome To OptiWork - Floating Welcome Modal (Default Hidden) -->
+<div id="opti-welcome-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+    <!-- প্রিমিয়াম গ্লাস-মরফিজম কার্ড -->
+    <div class="bg-white border border-slate-200 rounded-[28px] p-6 max-w-xs w-full text-center relative overflow-hidden shadow-2xl" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+        <!-- ডেকোরেটিভ গ্লো আভা -->
+        <div class="absolute -right-8 -top-8 w-24 h-24 bg-[#fba82f]/5 rounded-full blur-2xl"></div>
+        <div class="absolute -left-8 -bottom-8 w-24 h-24 bg-[#fba82f]/5 rounded-full blur-2xl"></div>
+
+        <div class="z-10 relative space-y-4">
+            <!-- ব্র্যান্ড হেডার -->
+            <div class="border-b border-slate-100 pb-3 text-center">
+                <span class="text-sm font-extrabold tracking-tight text-slate-900">
+                    Welcome To <span class="text-[#fba82f]">OptiWork</span> ⚡
+                </span>
+                <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-1">Cloud Mining Hub</p>
+            </div>
+
+            <!-- ৪-টি গুরুত্বপূর্ণ অ্যাকশন ডিরেক্ট বোতাম গ্রুপ -->
+            <div class="space-y-2 text-xs font-bold text-slate-700">
+                <!-- কীভাবে কাজ করবেন -->
+                <a href="/tutorial" class="flex items-center justify-between p-3 bg-slate-50 border border-slate-200/60 rounded-xl hover:border-black transition">
+                    <span><i class="fa-solid fa-circle-play text-red-500 mr-1.5"></i> কীভাবে কাজ করবেন?</span>
+                    <i class="fa-solid fa-chevron-right text-slate-300 text-[9px]"></i>
+                </a>
+                <!-- আপডেটস দেখুন -->
+                <a href="/updates" class="flex items-center justify-between p-3 bg-slate-50 border border-slate-200/60 rounded-xl hover:border-black transition">
+                    <span><i class="fa-solid fa-bullhorn text-[#fba82f] mr-1.5"></i> আপডেটস দেখুন</span>
+                    <i class="fa-solid fa-chevron-right text-slate-300 text-[9px]"></i>
+                </a>
+                <!-- মেইন চ্যানেল -->
+                <a href="https://t.me/ortiwokr" target="_blank" class="flex items-center justify-between p-3 bg-slate-50 border border-slate-200/60 rounded-xl hover:border-black transition">
+                    <span><i class="fa-brands fa-telegram text-sky-500 mr-1.5"></i> মেইন চ্যানেল</span>
+                    <i class="fa-solid fa-chevron-right text-slate-300 text-[9px]"></i>
+                </a>
+                <!-- পেমেন্ট প্রুফ -->
+                <a href="https://t.me/ortipay" target="_blank" class="flex items-center justify-between p-3 bg-slate-50 border border-slate-200/60 rounded-xl hover:border-black transition">
+                    <span><i class="fa-solid fa-receipt text-emerald-500 mr-1.5"></i> পেমেন্ট প্রুফ</span>
+                    <i class="fa-solid fa-chevron-right text-slate-300 text-[9px]"></i>
+                </a>
+            </div>
+
+            <!-- ক্লোজ এবং এন্ট্রি বোতাম (সলিড ব্ল্যাক) -->
+            <button onclick="closeWelcomeModal()" class="w-full bg-slate-950 hover:bg-slate-800 text-white font-extrabold text-xs py-2.5 rounded-xl transition shadow">
+                ড্যাশবোর্ডে প্রবেশ করুন
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- এটি আপনার dashboard.html ফাইলের স্ক্রিপ্ট সেকশনের যেকোনো জায়গায় পেস্ট করে দিন -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const lastPopup = localStorage.getItem('opti_last_popup_time');
+        const now = new Date().getTime();
+        const cooldown = 4 * 60 * 60 * 1000; // ৪ ঘণ্টা মিলিসেকেন্ডে
+
+        // যদি পূর্বে ক্লেইম না হয়ে থাকে অথবা শেষ ক্লেইমের সময় থেকে ৪ ঘণ্টা পার হয়ে যায়
+        if (!lastPopup || (now - lastPopup > cooldown)) {
+            document.getElementById('opti-welcome-modal').classList.remove('hidden');
+        }
+    });
+
+    // পপআপ বন্ধ করা এবং লোকাল স্টোরেজে ৪ ঘণ্টার কুকি সেট করার ফাংশন
+    function closeWelcomeModal() {
+        document.getElementById('opti-welcome-modal').classList.add('hidden');
+        localStorage.setItem('opti_last_popup_time', new Date().getTime());
+    }
+</script>
+
 
 <script>
 // ১. ডেইলি চেক-ইন ক্লেইম স্ক্রিপ্ট
