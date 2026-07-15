@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Edit Task</title>
-    <!-- Google Fonts: Plus Jakarta Sans -->
+    <title>Admin - Task Management Hub</title>
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -32,51 +32,180 @@
 </head>
 <body class="text-[#0F172A] min-h-screen pb-10">
 
-    <!-- হেডার বার -->
+    <!-- গ্লোবাল নেভিগেশন বার -->
     <nav class="bg-white border-b border-slate-100 py-3.5 px-4 sticky top-0 z-50 shadow-sm">
         <div class="max-w-5xl mx-auto flex justify-between items-center">
             <span class="text-sm font-extrabold tracking-wider text-slate-800">
-                <i class="fa-solid fa-pen-to-square text-[#fba82f] mr-1.5"></i> EDIT TASK PROFILE
+                <i class="fa-solid fa-list-check text-emerald-500 mr-1"></i> OPTIWORK TASK HUB
             </span>
-            <a href="/admin/task" class="text-xs font-bold text-slate-500 hover:text-slate-900"><i class="fa-solid fa-arrow-left"></i> Back to Hub</a>
+            <div class="flex space-x-4">
+                <a href="/admin" class="text-xs font-bold text-slate-500 hover:text-slate-900"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+                <a href="/admin/deposits" class="text-xs font-bold text-slate-500 hover:text-slate-900"><i class="fa-solid fa-plus-circle"></i> Deposits</a>
+                <a href="/admin/withdrawals" class="text-xs font-bold text-slate-500 hover:text-slate-900"><i class="fa-solid fa-money-bill-transfer"></i> Withdraws</a>
+                <a href="/dashboard" class="text-xs font-bold text-slate-500 hover:text-slate-900"><i class="fa-solid fa-home"></i> App</a>
+            </div>
         </div>
     </nav>
 
-    <main class="max-w-2xl mx-auto p-4 mt-4">
+    <main class="max-w-4xl mx-auto p-4 space-y-6">
         
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="p-3 text-xs text-center rounded-xl border {% if category == 'success' %}bg-emerald-50 text-emerald-600 border-emerald-100{% else %}bg-red-50 text-red-600 border-red-100{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- ১. নতুন নরমাল টাস্ক অ্যাড করার ফরম -->
         <div class="blockio-card p-6 bg-white">
-            <form action="/admin/task/edit/{{ task.id }}" method="POST" class="space-y-4">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-4 border-b border-slate-50 pb-2 flex items-center gap-1.5">
+                <i class="fa-solid fa-circle-plus text-slate-400"></i> নতুন নরমাল টাস্ক যুক্ত করুন
+            </h2>
+            <form action="/admin/task/create" method="POST" class="space-y-4">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">টাস্ক টাইটেল</label>
-                        <input type="text" name="title" value="{{ task.title }}" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-slate-350 font-bold">
+                        <input type="text" name="title" required placeholder="যেমন: টেলিগ্রাম চ্যানেলে জয়েন করুন" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-slate-350">
                     </div>
                     <div>
                         <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">রিওয়ার্ড অ্যামাউন্ট (৳)</label>
-                        <input type="number" step="0.1" name="reward" value="{{ task.reward }}" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-slate-350 font-bold">
+                        <input type="number" step="0.1" name="reward" required placeholder="5.0" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-slate-350">
                     </div>
                 </div>
                 <div>
                     <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">লিংক</label>
-                    <input type="url" name="link" value="{{ task.link }}" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-slate-350 font-mono font-bold">
+                    <input type="url" name="link" required placeholder="https://example.com" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-slate-350">
                 </div>
                 <div>
                     <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">ডেসক্রিপশন / নির্দেশাবলী</label>
-                    <textarea name="description" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-slate-350 h-24 font-bold">{{ task.description }}</textarea>
+                    <textarea name="description" required placeholder="যেমন: জয়েন করার পর কাজের প্রুফ হিসেবে স্ক্রিনশট দিন..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-slate-350 h-20"></textarea>
                 </div>
-
-                <div class="flex gap-3 pt-2">
-                    <a href="/admin/task" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs py-3 rounded-xl transition text-center flex items-center justify-center">
-                        Cancel
-                    </a>
-                    <button type="submit" class="w-1/2 bg-black hover:opacity-90 text-white font-extrabold text-xs py-3 rounded-xl transition">
-                        Update Task
-                    </button>
-                </div>
+                <button type="submit" class="w-full bg-slate-950 hover:bg-slate-800 text-white font-extrabold text-xs py-2.5 rounded-xl transition">
+                    টাস্কটি সেভ করুন
+                </button>
             </form>
         </div>
 
+        <!-- ২. প্রজেক্ট সেটিংস: নতুন চ্যানেল নোটিশ পোস্ট ফরম -->
+        <div class="blockio-card p-6 bg-white border-2 border-dashed border-emerald-200">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-emerald-700 mb-4 border-b border-emerald-100 pb-2 flex items-center gap-1.5">
+                <i class="fa-brands fa-telegram text-[#229ED9]"></i> প্রজেক্ট সেটিংস: নতুন চ্যানেল নোটিশ পোস্ট করুন
+            </h2>
+            <form action="/admin/add-update" method="POST" class="flex flex-col sm:flex-row gap-3 items-end">
+                <div class="w-full">
+                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">টেলিগ্রাম পোস্ট আইডি / পাথ</label>
+                    <input type="text" name="post_path" required placeholder="যেমন: 49 অথবা ortiwokr/49" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-slate-350">
+                </div>
+                <button type="submit" class="w-full sm:w-auto bg-slate-950 hover:bg-slate-800 text-white font-extrabold text-xs px-6 py-2.5 rounded-xl transition whitespace-nowrap">
+                    ড্যাশবোর্ডে পোস্ট করুন
+                </button>
+            </form>
+        </div>
+
+        <!-- ৩. অ্যাক্টিভ টাস্ক তালিকা ও ডিলিট/এডিট সেকশন -->
+        <div class="blockio-card p-6 bg-white">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-4 border-b border-slate-100 pb-2.5 flex items-center gap-1.5">
+                <i class="fa-solid fa-list-ul text-slate-400"></i> অ্যাক্টিভ নরমাল টাস্ক তালিকা
+            </h2>
+            <div class="overflow-x-auto text-[11px] font-semibold">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold uppercase">
+                            <th class="p-2.5">কাজের বিবরণ</th>
+                            <th class="p-2.5">পুরস্কার</th>
+                            <th class="p-2.5 text-right">মডারেট অ্যাকশন</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for t in tasks %}
+                        <tr class="border-b border-slate-50 text-slate-650">
+                            <td class="p-2.5">
+                                <span class="font-bold text-slate-800 text-xs">{{ t.title }}</span><br>
+                                <a href="{{ t.link }}" target="_blank" class="text-[9px] text-blue-500 hover:underline">Link: {{ t.link }}</a>
+                            </td>
+                            <td class="p-2.5 font-bold text-emerald-600">৳ {{ t.reward }}</td>
+                            <td class="p-2.5 text-right space-x-1.5 flex justify-end items-center">
+                                <a href="/admin/task/edit/{{ t.id }}" class="bg-blue-50 hover:bg-blue-100 border border-blue-150 text-blue-600 px-3 py-1.5 rounded-lg text-[10px] font-bold">Edit</a>
+                                
+                                <form action="/admin/task/delete" method="POST" class="inline" onsubmit="return confirm('আপনি কি নিশ্চিত যে এই কাজটি স্থায়ীভাবে মুছে ফেলতে চান?');">
+                                    <input type="hidden" name="task_id" value="{{ t.id }}">
+                                    <button type="submit" class="bg-red-50 hover:bg-red-100 border border-red-150 text-red-600 px-3 py-1.5 rounded-lg text-[10px] font-bold">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="3" class="p-4 text-center text-slate-400 font-normal">কোনো অ্যাক্টিভ টাস্ক পাওয়া যায়নি।</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ৪. পেন্ডিং টাস্ক ভেরিফিকেশন প্যানেল -->
+        <div class="blockio-card p-6 bg-white">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3 mb-4">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                    <i class="fa-solid fa-clock-rotate-left text-slate-400"></i> পেন্ডিং টাস্ক ভেরিফিকেশন প্যানেল
+                </h2>
+                <form action="/admin/task-bulk-action" method="POST" class="inline">
+                    <button type="submit" class="bg-black hover:opacity-90 text-white font-extrabold text-[10px] px-3.5 py-2 rounded-xl transition shadow-sm flex items-center gap-1.5">
+                        <i class="fa-solid fa-bolt-lightning text-[#fba82f]"></i> Bulk Auto-Verify (20 Tasks)
+                    </button>
+                </form>
+            </div>
+
+            <div class="space-y-4">
+                {% for sub in pending_submissions %}
+                <div class="border border-slate-100 p-4 rounded-xl bg-slate-50/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-xs font-semibold">
+                    <div class="space-y-1.5">
+                        <p class="font-bold text-slate-800 text-xs">{{ sub.tasks.title }}</p>
+                        <p class="text-[9px] text-slate-500">ইউজার: <span class="font-bold">{{ sub.users.username }}</span> (UID: {{ sub.users.uid }} | {{ sub.users.email }})</p>
+                        <p class="text-[9px] text-emerald-600 font-bold"> can earn: ৳ {{ sub.tasks.reward }}</p>
+                        <a href="{{ sub.proof_image_url }}" target="_blank" class="text-[10px] text-blue-500 font-bold hover:underline inline-block mt-1">প্রুফ স্ক্রিনশট দেখুন (Click to View) <i class="fa-solid fa-external-link text-[8px]"></i></a>
+                    </div>
+                    
+                    <div class="flex gap-2 w-full sm:w-auto shrink-0">
+                        <form action="/admin/task-action" method="POST" class="w-full sm:w-auto">
+                            <input type="hidden" name="submission_id" value="{{ sub.id }}">
+                            <input type="hidden" name="action" value="approve">
+                            <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-[10px] px-4 py-2 rounded-xl transition">Approve</button>
+                        </form>
+                        <form action="/admin/task-action" method="POST" class="w-full sm:w-auto">
+                            <input type="hidden" name="submission_id" value="{{ sub.id }}">
+                            <input type="hidden" name="action" value="reject">
+                            <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold text-[10px] px-4 py-2 rounded-xl transition">Reject</button>
+                        </form>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-xs text-slate-400 text-center py-4">বর্তমানে কোনো টাস্ক ভেরিফিকেশন পেন্ডিং নেই।</p>
+                {% endfor %}
+            </div>
+        </div>
+
     </main>
+
+    <!-- মোবাইল টগল ড্রপডাউন স্ক্রিপ্ট -->
+    <script>
+        function toggleAdminMenu() {
+            const menu = document.getElementById('top-dropdown-menu');
+            const icon = document.getElementById('menu-icon');
+            if (menu.classList.contains('hidden')) {
+                menu.classList.remove('hidden');
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-xmark');
+            } else {
+                menu.classList.add('hidden');
+                icon.classList.remove('fa-xmark');
+                icon.classList.add('fa-bars');
+            }
+        }
+    </script>
 
 </body>
 </html>
