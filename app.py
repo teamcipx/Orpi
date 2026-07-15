@@ -81,6 +81,7 @@ def generate_withdraw_amount():
     return float(round_to_nearest_5(amount))
 
 
+
 @app.route('/api/cron/simulate-traffic', methods=['GET'])
 def simulate_traffic_cron():
     cron_key = request.args.get('key')
