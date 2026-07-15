@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="space-y-4 max-w-2xl mx-auto pb-10">
+    
+    <!-- হেডার কার্ড -->
+    <div class="blockio-card p-5 flex justify-between items-center bg-white border border-slate-200 shadow-sm">
+        <div class="space-y-1">
+            <h2 class="text-sm font-extrabold text-slate-800 flex items-center gap-1.5">
+                <i class="fa-solid fa-bullhorn text-[#fba82f] animate-pulse"></i> অফিশিয়াল ঘোষণা ও আপডেটসমূহ
+            </h2>
+            <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Opti Work - Live Channel Announcements</p>
+        </div>
+    </div>
+
+    <!-- ডাইনামিক আপডেট ফিড (সর্বশেষ পোস্টটি ওপরে দেখাবে) -->
+    <div class="space-y-5">
+        {% for item in updates %}
+        <div class="blockio-card p-5 bg-white border border-slate-200 shadow-sm flex flex-col items-center space-y-4">
+            
+            <!-- অফিসিয়াল টেলিগ্রাম পোস্ট স্ক্রিপ্ট জেনারেটর -->
+            <div class="w-full flex justify-center bg-slate-50/50 p-2 rounded-2xl border border-slate-100 overflow-hidden">
+                <script async 
+                        src="https://telegram.org/js/telegram-widget.js?22" 
+                        data-telegram-post="{{ item.post_path }}" 
+                        data-width="100%">
+                </script>
+            </div>
+
+            <!-- ভিউ ইন চ্যানেল বাটন (সলিড ব্ল্যাক) -->
+            <a href="https://t.me/{{ item.post_path }}" target="_blank" class="blockio-btn text-[10px] uppercase font-bold px-6 py-2.5 transition flex items-center gap-1.5 shadow-sm">
+                <i class="fa-brands fa-telegram text-xs text-[#fba82f]"></i> View in Channel
+            </a>
+        </div>
+        {% else %}
+        <p class="text-xs text-slate-400 text-center py-4">বর্তমানে কোনো অফিসিয়াল ঘোষণা পাওয়া যায়নি।</p>
+        {% endfor %}
+    </div>
+
+</div>
+
+{% endblock %}
