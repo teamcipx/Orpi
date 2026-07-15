@@ -1963,7 +1963,159 @@ def claim_mining():
     else:
         return jsonify({"status": "error", "message": "এই নোডের মাইনিং প্রসেস এখনও সম্পন্ন হয়নি।"})
 
+# (অন্যান্য কোডের সাথে নিচের নতুন অ্যাডস শেয়ারিং সম্পর্কিত রাউটগুলো যুক্ত করুন)
 
+# ১. অ্যাডস শেয়ার টাস্ক তালিকা রাউট (/adshear)
+@app.route('/adshear')
+def adshear_list():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+        
+    user = supabase.table("users").select("*").eq("id", user_id).execute().data[0]
+    
+    # এডমিনের তৈরি সমস্ত অ্যাক্টিভ অ্যাডস শেয়ার টাস্কসমূহ
+    all_ads_tasks = supabase.table("adshear_tasks").select("*").order("created_at", desc=True).execute().data or []
+    
+    # ইউজারের সাবমিট করা পূর্ববর্তী কাজের রেকর্ডসমূহ
+    submissions = supabase.table("adshear_submissions").select("task_id, status").eq("user_id", user_id).execute().data or []
+    submission_map = {s['task_id']: s['status'] for s in submissions}
+    
+    # ফিল্টারিং: অনুমোদিত (Approved) বা প্রক্রিয়াধীন (Pending) কাজগুলো হাইড থাকবে, রিজেক্টেড কাজ পুনরায় করা যাবে
+    active_ads_tasks = []
+    for task in all_ads_tasks:
+        status = submission_map.get(task['id'])
+        if status is None or status == 'Rejected':
+            active_ads_tasks.append(task)
+            
+    return render_template('adshear.html', user=user, all_ads_tasks=active_ads_tasks, submission_map=submission_map)
+
+
+# ২. ডেডিকেটেড অ্যাডস ডিটেইলস ও স্টেপ-বাই-স্টেপ সাবমিশন রাউট (/adshear/<task_id>)
+@app.route('/adshear/<task_id>')
+def adshear_detail(task_id):
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+        
+    user = supabase.table("users").select("username").eq("id", user_id).execute().data[0]
+    
+    # নির্দিষ্ট টাস্ক আইডি দিয়ে ডাটা কুয়েরি
+    task_query = supabase.table("adshear_tasks").select("*").eq("id", task_id).execute().data
+    if not task_query:
+        flash("অ্যাড টাস্কটি খুঁজে পাওয়া যায়নি।", "danger")
+        return redirect(url_for('adshear_list'))
+        
+    task = task_query[0]
+    
+    # এই কাজের পূর্ববর্তী সাবমিশন চেক করা
+    submission_query = supabase.table("adshear_submissions") \
+        .select("status, proof_image_url") \
+        .eq("user_id", user_id).eq("task_id", task_id).execute().data
+        
+    status = submission_query[0]['status'] if submission_query else None
+    proof_url = submission_query[0]['proof_image_url'] if submission_query else None
+    
+    return render_template('adshear_detail.html', task=task, status=status, proof_url=proof_url)
+
+
+# ৩. অ্যাডস প্রুফ সাবমিট এপিআই
+@app.route('/adshear/submit', methods=['POST'])
+def submit_adshear():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+        
+    task_id = request.form.get('task_id')
+    proof_url = request.form.get('proof_image_url')
+    
+    if not proof_url:
+        flash("দয়া করে কাজের প্রুফ (স্ক্রিনশট) আপলোড করুন।", "danger")
+        return redirect(url_for('adshear_detail', task_id=task_id))
+        
+    try:
+        # রিজেক্টেড থাকলে তা মুছে দেওয়া হচ্ছে পুনরায় সাবমিটের জন্য
+        supabase.table("adshear_submissions").delete() \
+            .eq("user_id", user_id).eq("task_id", task_id).eq("status", "Rejected").execute()
+            
+        supabase.table("adshear_submissions").insert({
+            "user_id": user_id,
+            "task_id": task_id,
+            "proof_image_url": proof_url,
+            "status": "Pending"
+        }).execute()
+        flash("অ্যাডস শেয়ার প্রুফ সফলভাবে জমা দেওয়া হয়েছে। এডমিন ভেরিফাই করবে।", "success")
+    except Exception:
+        flash("এই কাজটি ইতিমধ্যে প্রক্রিয়াধীন (Pending) অথবা অনুমোদিত (Approved) আছে।", "danger")
+        
+    return redirect(url_for('adshear_list'))
+
+
+# ৪. এডমিন অ্যাডস টাস্ক ম্যানেজার রাউট (/admin/adshear)
+@app.route('/admin/adshear', methods=['GET', 'POST'])
+def admin_adshear():
+    if not check_admin_auth():
+        return "Unauthorized Access", 403
+        
+    if request.method == 'POST':
+        title = request.form.get('title')
+        caption = request.form.get('caption')
+        image_url = request.form.get('image_url') # এডমিন আপলোড করা ইমেজের লিঙ্ক (রোটেশন প্রক্সি দিয়ে আপলোড হবে)
+        reward = float(request.form.get('reward', 0))
+        
+        supabase.table("adshear_tasks").insert({
+            "title": title,
+            "caption": caption,
+            "image_url": image_url,
+            "reward": reward
+        }).execute()
+        flash("নতুন অ্যাডস শেয়ার টাস্কটি সফলভাবে যুক্ত হয়েছে।", "success")
+        return redirect(url_for('admin_adshear'))
+        
+    # এডমিনের এপ্রুভালের জন্য পেন্ডিং সমস্ত প্রুফ রিকোয়েস্ট রিট্রিভ করা
+    pending = supabase.table("adshear_submissions") \
+        .select("id, proof_image_url, status, created_at, users(username, email, uid), adshear_tasks(title, reward)") \
+        .eq("status", "Pending").execute().data or []
+        
+    return render_template('admin_adshear.html', pending_submissions=pending)
+
+
+# ৫. এডমিন অ্যাডস ক্লেইম এপ্রুভ/রিজেক্ট অ্যাকশন রাউট
+@app.route('/admin/adshear/action', methods=['POST'])
+def admin_adshear_action():
+    if not check_admin_auth():
+        return "Unauthorized Action", 403
+        
+    submission_id = request.form.get('submission_id')
+    action = request.form.get('action') # 'approve' or 'reject'
+    
+    submission = supabase.table("adshear_submissions").select("*, adshear_tasks(reward, title)").eq("id", submission_id).execute().data
+    if not submission:
+        flash("রেকর্ড পাওয়া যায়নি।", "danger")
+        return redirect(url_for('admin_adshear'))
+        
+    sub = submission[0]
+    target_user_id = sub['user_id']
+    reward = float(sub['adshear_tasks']['reward'])
+    task_title = sub['adshear_tasks']['title']
+    
+    if action == 'approve':
+        supabase.table("adshear_submissions").update({"status": "Approved"}).eq("id", submission_id).execute()
+        supabase.rpc("increment_balance", {"user_id": target_user_id, "amount": reward}).execute()
+        
+        # লেনদেন হিস্ট্রি লগ সেভ
+        supabase.table("transactions").insert({
+            "user_id": target_user_id,
+            "title": f"Ad Share Approved: {task_title}",
+            "amount": reward
+        }).execute()
+        flash("অ্যাডস শেয়ারিং কাজ সফলভাবে এপ্রুভ এবং রিওয়ার্ড যোগ করা হয়েছে।", "success")
+    elif action == 'reject':
+        supabase.table("adshear_submissions").update({"status": "Rejected"}).eq("id", submission_id).execute()
+        flash("কাজটি রিজেক্ট করা হয়েছে।", "success")
+        
+    return redirect(url_for('admin_adshear'))
+    
 # ৮. লগআউট
 @app.route('/logout')
 def logout():
