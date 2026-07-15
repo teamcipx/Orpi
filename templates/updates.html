@@ -48,13 +48,12 @@
         </div>
     </div>
 
-    <!-- ================= ১. পিন করা গুরুত্বপূর্ণ নোটিশ (৪৯ নম্বর পোস্ট) ================= -->
+    <!-- ================= ১. পিন করা গুরুত্বপূর্ণ নোটিশ (২২vh আল্ট্রা-কম্প্যাক্ট সাইজ) ================= -->
     <div class="shine-card p-5 rounded-3xl border-l-4 border-[#fba82f] space-y-4 relative flex flex-col items-center">
         
-        <!-- পিন ও বাধ্যতামূলক ভিউ নোটিশ হেডার -->
+        <!-- পিন নোটিশ হেডার -->
         <div class="w-full flex justify-between items-center border-b border-slate-100 pb-3 text-[10px] font-bold">
             <div class="flex items-center gap-2">
-                <!-- লাল নিয়ন পালসিং বাটন - পড়া বাধ্যতামূলক বোঝাতে -->
                 <span id="must-read-dot" class="w-2 h-2 bg-red-500 rounded-full shadow-[0_0_8px_#ef4444] animate-ping"></span>
                 <span id="must-read-text" class="text-red-500 uppercase tracking-widest text-[8px] font-black">🔴 নতুন নোটিশ (পড়া বাধ্যতামূলক)</span>
                 <span id="read-success-text" class="hidden text-emerald-600 uppercase tracking-widest text-[8px] font-black">✓ ভেরিফাইড পঠিত</span>
@@ -62,9 +61,9 @@
             <span class="text-slate-500 uppercase tracking-wider text-[9px] font-extrabold"><i class="fa-solid fa-thumbtack text-[#fba82f]"></i> PINNED POST</span>
         </div>
         
-        <!-- লিমিটেড হাইট কন্টেইনার (৪০vh সর্বোচ্চ) -->
-        <div id="pinned-container" class="w-full max-h-[40vh] overflow-hidden relative transition-all duration-500 ease-in-out">
-            <!-- ফেইড-আউট মাস্ক ইফেক্ট (বটম প্রজেকশন) -->
+        <!-- আল্ট্রা-লিমিটেড হাইট কন্টেইনার (২২vh সর্বোচ্চ) -->
+        <div id="pinned-container" class="w-full max-h-[22vh] overflow-hidden relative transition-all duration-500 ease-in-out">
+            <!-- ফেইড-আউট মাস্ক ইফেক্ট -->
             <div id="pinned-fade-overlay" class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white via-white/80 to-transparent z-10 pointer-events-none"></div>
 
             <div class="w-full flex justify-center bg-slate-50/50 p-2 rounded-2xl border border-slate-100 overflow-hidden">
@@ -76,7 +75,7 @@
             </div>
         </div>
 
-        <!-- কন্ট্রোল বোতাম গ্রুপ (রিড-মোর এবং মার্ক-অ্যাজ-রিড) -->
+        <!-- কন্ট্রোল বোতাম গ্রুপ -->
         <div class="w-full pt-1.5 flex flex-col sm:flex-row justify-between items-center gap-2 border-t border-slate-100">
             <!-- বিস্তারিত পড়ুন বোতাম -->
             <button id="read-more-btn" onclick="togglePinnedHeight()" class="text-xs text-blue-500 hover:text-blue-600 font-extrabold flex items-center gap-1.5 focus:outline-none">
@@ -85,15 +84,14 @@
             
             <!-- আমি পড়েছি বোতাম -->
             <button id="mark-read-btn" onclick="markAsRead()" class="bg-black hover:opacity-90 text-white text-[9px] font-black uppercase tracking-wider px-4 py-2 rounded-full transition shadow-sm">
-                আমি পড়েছি (Mark as Read)
+                मैं পড়েছি (Mark as Read)
             </button>
         </div>
     </div>
 
-    <!-- ================= ২. ডাইনামিক আপডেট ফিড (অন্যান্য সাধারণ নোটিশসমূহ) ================= -->
+    <!-- ================= ২. ডাইনামিক আপডেট ফিড ================= -->
     <div class="space-y-4">
         {% for item in updates %}
-        <!-- পিন করা ৪৯ নম্বর পোস্টটি যেন ডুপ্লিকেট হয়ে সাধারণ তালিকায় আবার না আসে -->
         {% if item.post_path != 'ortiwokr/49' %}
         <div class="shine-card p-5 rounded-3xl flex flex-col items-center space-y-4">
             
@@ -124,31 +122,29 @@
 </div>
 
 <script>
-// ১. পিন করা নোটিশটির সাইজ ছোট-বড় করার টগল স্ক্রিপ্ট
+// পিন করা নোটিফিকেশন ২২vh সাইজে বড়-ছোট করার টগল স্ক্রিপ্ট
 function togglePinnedHeight() {
     const container = document.getElementById('pinned-container');
     const overlay = document.getElementById('pinned-fade-overlay');
     const btnText = document.getElementById('read-more-text');
     const btnIcon = document.getElementById('read-more-icon');
 
-    if (container.classList.contains('max-h-[40vh]')) {
-        // ওপেন বা এক্সপেন্ড করা
-        container.classList.remove('max-h-[40vh]');
+    if (container.classList.contains('max-h-[22vh]')) {
+        container.classList.remove('max-h-[22vh]');
         container.classList.add('max-h-full');
-        overlay.classList.add('hidden'); // ফেইড শ্যাডো লুকানো
+        overlay.classList.add('hidden');
         btnText.innerText = "সংকুচিত করুন (Show Less)";
         btnIcon.className = "fa-solid fa-angles-up text-[10px]";
     } else {
-        // ছোট বা সংকুচিত করা
         container.classList.remove('max-h-full');
-        container.classList.add('max-h-[40vh]');
-        overlay.classList.remove('hidden'); // ফেইড শ্যাডো দেখানো
+        container.classList.add('max-h-[22vh]');
+        overlay.classList.remove('hidden');
         btnText.innerText = "বিস্তারিত পড়ুন (Read More)";
         btnIcon.className = "fa-solid fa-angles-down text-[10px]";
     }
 }
 
-// ২. লোকাল স্টোরেজ দিয়ে ওয়ান-টাইম ভিউ ট্র্যাকিং স্ক্রিপ্ট
+// লোকাল স্টোরেজ ওয়ান-টাইম ভিউ ট্র্যাকিং স্ক্রিপ্ট
 document.addEventListener("DOMContentLoaded", function() {
     const isRead = localStorage.getItem('opti_pinned_post_49_read');
     if (isRead === 'true') {
@@ -156,14 +152,12 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 });
 
-// ৩. 'আমি পড়েছি' বাটনে ক্লিক কন্ডিশন
 function markAsRead() {
     localStorage.setItem('opti_pinned_post_49_read', 'true');
     applyReadState();
     alert("আপডেটটি পড়ার জন্য ধন্যবাদ। আপনার ভেরিফিকেশন সফল হয়েছে।");
 }
 
-// ৪. পঠিত বা রিড স্টাইল অ্যাপ্লাই করা
 function applyReadState() {
     const dot = document.getElementById('must-read-dot');
     const text = document.getElementById('must-read-text');
@@ -174,11 +168,10 @@ function applyReadState() {
     if (text) text.classList.add('hidden');
     if (successText) successText.classList.remove('hidden');
     
-    // বাটনটি চিরতরে ডিজেবল বা রিমুভ করা
     if (markBtn) {
         markBtn.setAttribute('disabled', 'true');
         markBtn.className = "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed text-[9px] font-bold px-4 py-2 rounded-full shadow-none";
-        markBtn.innerText = "Panned Pushed (Read)";
+        markBtn.innerText = "Announcement Read";
     }
 }
 </script>
