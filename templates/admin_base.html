@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Opti Work - Admin Panel{% endblock %}</title>
+    <title>Opti Work - Admin Console</title>
     
     <!-- Google Fonts: Plus Jakarta Sans -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -24,8 +24,9 @@
         }
     </script>
     <style>
+        /* মডার্ন টেকনোলজি ডট গ্রিড মেস ব্যাকগ্রাউন্ড */
         body {
-            background-color: #EDEDF0; /* Blockio ম্যাট অফ-হোয়াইট ব্যাকগ্রাউন্ড */
+            background-color: #EDEDF0; 
         }
         .blockio-card {
             background: #FFFFFF;
@@ -39,6 +40,17 @@
             transform: translateY(-1.5px);
             box-shadow: 0 10px 25px rgba(251, 168, 47, 0.03);
         }
+        .blockio-btn {
+            background-color: #000000;
+            color: #FFFFFF;
+            border-radius: 9999px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+        .blockio-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
     </style>
 </head>
 <body class="text-[#000000] min-h-screen flex flex-col md:flex-row pb-10 md:pb-0">
@@ -46,16 +58,16 @@
     <!-- ================= ১. ডেস্কটপ এডমিন সাইডবার (লাক্সারি ডার্ক থিম) ================= -->
     <aside class="hidden md:flex flex-col justify-between w-64 bg-[#070A13] border-r border-[#111726] h-screen fixed left-0 top-0 p-5 z-40">
         <div class="space-y-6">
-            <!-- এডমিন লোগো -->
+            <!-- এডমিন প্যানেল লোগো -->
             <a href="/admin" class="flex items-center space-x-2.5 px-2">
-                <div class="w-2.5 h-2.5 bg-[#fba82f] rounded-full shadow-[0_0_8px_#fba82f] animate-pulse"></div>
+                <div class="w-2.5 h-2.5 bg-[#fba82f] rounded-full shadow-[0_0_10px_#fba82f] animate-pulse"></div>
                 <span class="text-xs font-extrabold tracking-widest text-white uppercase">
                     OPTIWORK <span class="text-[#fba82f]">ADMIN</span>
                 </span>
             </a>
 
-            <!-- এডমিন ক্যাটাগরি মেনু লিংকসমূহ -->
-            <div class="space-y-2 text-xs font-bold uppercase tracking-wider text-gray-400">
+            <!-- সমস্ত এডমিন নেভিগেশন লিংকসমূহ (SaaS ক্যাটাগরি) -->
+            <div class="space-y-1.5 text-xs font-bold uppercase tracking-wider text-gray-400 overflow-y-auto max-h-[70vh] pr-1">
                 <a href="/admin" class="flex items-center gap-3 px-3.5 py-3 rounded-xl hover:bg-[#111726] hover:text-white transition-all duration-200">
                     <i class="fa-solid fa-chart-line text-sm text-slate-500"></i> Dashboard
                 </a>
@@ -69,7 +81,16 @@
                     <i class="fa-solid fa-money-bill-transfer text-sm text-slate-500"></i> Withdraws
                 </a>
                 <a href="/admin/task" class="flex items-center gap-3 px-3.5 py-3 rounded-xl hover:bg-[#111726] hover:text-white transition-all duration-200">
-                    <i class="fa-solid fa-list-check text-sm text-slate-500"></i> Tasks Manage
+                    <i class="fa-solid fa-list-check text-sm text-slate-500"></i> Tasks Hub
+                </a>
+                <a href="/admin/adshear" class="flex items-center gap-3 px-3.5 py-3 rounded-xl hover:bg-[#111726] hover:text-white transition-all duration-200">
+                    <i class="fa-solid fa-rectangle-ad text-sm text-slate-500"></i> Ad Share
+                </a>
+                <a href="/admin/gmails" class="flex items-center gap-3 px-3.5 py-3 rounded-xl hover:bg-[#111726] hover:text-white transition-all duration-200">
+                    <i class="fa-solid fa-envelope text-sm text-slate-500"></i> Gmail Tasks
+                </a>
+                <a href="/admin/keys" class="flex items-center gap-3 px-3.5 py-3 rounded-xl hover:bg-[#111726] hover:text-white transition-all duration-200">
+                    <i class="fa-solid fa-key text-sm text-slate-500"></i> API Rotator
                 </a>
                 <a href="/admin/payout" class="flex items-center gap-3 px-3.5 py-3 rounded-xl hover:bg-[#111726] hover:text-white transition-all duration-200">
                     <i class="fa-solid fa-image text-sm text-slate-500"></i> Reports
@@ -77,9 +98,9 @@
             </div>
         </div>
 
-        <!-- সাইডবার প্রোফাইল সেকশন -->
+        <!-- সাইডবার ফুটার (ইউজার অ্যাপে ফিরে যাওয়ার লিংক) -->
         <div class="border-t border-[#111726] pt-4 flex items-center justify-between">
-            <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Admin Terminal</span>
+            <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Admin Console</span>
             <a href="/dashboard" class="text-slate-500 hover:text-white transition text-xs font-bold uppercase tracking-wider flex items-center gap-1">App <i class="fa-solid fa-arrow-right-to-bracket text-[10px]"></i></a>
         </div>
     </aside>
@@ -94,31 +115,33 @@
                 </span>
             </a>
             
-            <!-- হ্যামবার্গার টগল বোতাম -->
             <button onclick="toggleAdminMenu()" class="text-slate-800 bg-slate-50 hover:bg-slate-100 border border-slate-200 p-2 rounded-xl focus:outline-none transition-all duration-300">
                 <i id="menu-icon" class="fa-solid fa-bars text-sm"></i>
             </button>
         </div>
 
-        <!-- মোবাইল ড্রপডাউন টগল মেনু কার্ড -->
-        <div id="top-dropdown-menu" class="hidden mt-2 border border-slate-200/80 bg-[#070A13] text-gray-300 px-5 py-4 space-y-2 text-[10px] font-bold uppercase tracking-wider w-full rounded-2xl shadow-xl">
+        <!-- মোবাইল মেনু টগল ড্রপডাউন (ট্যাবলেট বা মোবাইলের জন্য সব লিংক সহ) -->
+        <div id="top-dropdown-menu" class="hidden mt-2 border border-slate-200/80 bg-[#070A13] text-gray-300 px-5 py-4 space-y-2 text-[10px] font-bold uppercase tracking-wider w-full rounded-2xl shadow-xl max-h-[70vh] overflow-y-auto">
             <a href="/admin" class="block py-2.5 text-white border-b border-white/5"><i class="fa-solid fa-chart-line mr-2 text-[#fba82f]"></i> Dashboard</a>
             <a href="/admin/user-search" class="block py-2.5 hover:text-white border-b border-white/5"><i class="fa-solid fa-magnifying-glass-chart mr-2"></i> User Audit</a>
             <a href="/admin/deposits" class="block py-2.5 hover:text-white border-b border-white/5"><i class="fa-solid fa-plus-circle mr-2"></i> Deposits</a>
             <a href="/admin/withdrawals" class="block py-2.5 hover:text-white border-b border-white/5"><i class="fa-solid fa-money-bill-transfer mr-2"></i> Withdraws</a>
-            <a href="/admin/task" class="block py-2.5 hover:text-white border-b border-white/5"><i class="fa-solid fa-list-check mr-2"></i> Tasks Manage</a>
+            <a href="/admin/task" class="block py-2.5 hover:text-white border-b border-white/5"><i class="fa-solid fa-list-check mr-2"></i> Tasks Hub</a>
+            <a href="/admin/adshear" class="block py-2.5 hover:text-white border-b border-white/5"><i class="fa-solid fa-rectangle-ad mr-2"></i> Ad Share</a>
+            <a href="/admin/gmails" class="block py-2.5 hover:text-white border-b border-white/5"><i class="fa-solid fa-envelope mr-2"></i> Gmail Tasks</a>
+            <a href="/admin/keys" class="block py-2.5 hover:text-white border-b border-white/5"><i class="fa-solid fa-key mr-2"></i> API Rotator</a>
             <a href="/admin/payout" class="block py-2.5 hover:text-white border-b border-white/5"><i class="fa-solid fa-image mr-2"></i> Reports</a>
             <a href="/dashboard" class="block py-2.5 text-[#fba82f]"><i class="fa-solid fa-arrow-right-to-bracket mr-2"></i> Exit to App</a>
         </div>
     </div>
 
-    <!-- মূল কনটেন্ট ফ্রেম -->
+    <!-- ওয়াইড মেইন উইন্ডো (ডেস্কটপে বামে সাইড-মেনুর জন্য মার্জিন রাখা হয়েছে) -->
     <main class="max-w-5xl mx-auto p-4 mt-2 w-full flex-grow md:pl-64 shadow-none">
         {% block admin_content %}{% endblock %}
     </main>
 
-    <!-- মোবাইল টগল ড্রপডাউন স্ক্রিপ্ট -->
     <script>
+        // মোবাইল মেনু টগল ড্রপডাউন স্ক্রিপ্ট
         function toggleAdminMenu() {
             const menu = document.getElementById('top-dropdown-menu');
             const icon = document.getElementById('menu-icon');
