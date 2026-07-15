@@ -727,6 +727,88 @@ def referrals():
     
 # (অন্যান্য এডমিন রাউটের সাথে নিচের নতুন রাউট দুটি যুক্ত করুন)
 
+# (অন্যান্য কোড অপরিবর্তিত থাকবে, এডমিন টাস্ক হাব রাউটগুলো নিচে দেওয়া কোড দ্বারা প্রতিস্থাপন করুন)
+
+# ১. মূল এডমিন টাস্ক হাব রাউট (টাস্ক তৈরি, অ্যাক্টিভ তালিকা ও পেন্ডিং ভেরিফিকেশন প্যানেল)
+@app.route('/admin/task', methods=['GET'])
+def admin_task_hub():
+    if not check_admin_auth():
+        return "Unauthorized Access", 403
+        
+    # সমস্ত অ্যাক্টিভ নরমাল কাজের তালিকা রিট্রিভ করা হচ্ছে
+    all_tasks = supabase.table("tasks").select("*").order("created_at", desc=True).execute().data or []
+    
+    pending_submissions = supabase.table("task_submissions") \
+        .select("id, proof_image_url, status, created_at, users(username, email, uid), tasks(title, reward)") \
+        .eq("status", "Pending").execute().data or []
+        
+    return render_template('admin_task_hub.html', tasks=all_tasks, pending_submissions=pending_submissions)
+
+
+# ২. নতুন টাস্ক তৈরি করার রাউট
+@app.route('/admin/task/create', methods=['POST'])
+def admin_create_task():
+    if not check_admin_auth():
+        return "Unauthorized Action", 403
+        
+    title = request.form.get('title')
+    description = request.form.get('description')
+    link = request.form.get('link')
+    reward = float(request.form.get('reward', 0))
+    
+    supabase.table("tasks").insert({
+        "title": title,
+        "description": description,
+        "link": link,
+        "reward": reward
+    }).execute()
+    
+    flash("নতুন নরমাল টাস্কটি সফলভাবে যুক্ত হয়েছে।", "success")
+    return redirect(url_for('admin_task_hub'))
+
+
+# ৩. টাস্ক এডিট করার রাউট (আলাদা এডিট পেজ)
+@app.route('/admin/task/edit/<task_id>', methods=['GET', 'POST'])
+def admin_edit_task(task_id):
+    if not check_admin_auth():
+        return "Unauthorized Access", 403
+        
+    if request.method == 'POST':
+        title = request.form.get('title')
+        description = request.form.get('description')
+        link = request.form.get('link')
+        reward = float(request.form.get('reward', 0))
+        
+        supabase.table("tasks").update({
+            "title": title,
+            "description": description,
+            "link": link,
+            "reward": reward
+        }).eq("id", task_id).execute()
+        
+        flash("টাস্ক তথ্য সফলভাবে আপডেট করা হয়েছে।", "success")
+        return redirect(url_for('admin_task_hub'))
+        
+    task_query = supabase.table("tasks").select("*").eq("id", task_id).execute().data
+    if not task_query:
+        flash("টাস্কটি খুঁজে পাওয়া যায়নি।", "danger")
+        return redirect(url_for('admin_task_hub'))
+        
+    return render_template('admin_task_edit.html', task=task_query[0])
+
+
+# ৪. অ্যাক্টিভ টাস্ক ডিলিট করার রাউট
+@app.route('/admin/task/delete', methods=['POST'])
+def admin_delete_task():
+    if not check_admin_auth():
+        return "Unauthorized Action", 403
+        
+    task_id = request.form.get('task_id')
+    supabase.table("tasks").delete().eq("id", task_id).execute()
+    
+    flash("টাস্কটি ডাটাবেজ থেকে মুছে ফেলা হয়েছে।", "success")
+    return redirect(url_for('admin_task_hub'))
+    
 # ১. এডমিন উইথড্রয়াল লিস্ট রাউট
 @app.route('/admin/withdrawals')
 def admin_withdrawals():
