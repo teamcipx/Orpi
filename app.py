@@ -725,26 +725,15 @@ def referrals():
                            failed_count=failed_count,
                            total_earnings=total_earnings)
     
-# (অন্যান্য এডমিন রাউটের সাথে নিচের নতুন রাউট দুটি যুক্ত করুন)
-
-# (অন্যান্য কোড অপরিবর্তিত থাকবে, এডমিন টাস্ক হাব রাউটগুলো নিচে দেওয়া কোড দ্বারা প্রতিস্থাপন করুন)
-
-# ১. মূল এডমিন টাস্ক হাব রাউট (টাস্ক তৈরি, অ্যাক্টিভ তালিকা ও পেন্ডিং ভেরিফিকেশন প্যানেল)
 @app.route('/admin/task', methods=['GET'])
 def admin_task_hub():
     if not check_admin_auth():
         return "Unauthorized Access", 403
         
-    # সমস্ত অ্যাক্টিভ নরমাল কাজের তালিকা রিট্রিভ করা হচ্ছে
+    # শুধুমাত্র একটিভ নরমাল কাজের তালিকা কোয়েরি করা হচ্ছে
     all_tasks = supabase.table("tasks").select("*").order("created_at", desc=True).execute().data or []
+    return render_template('admin_task_hub.html', tasks=all_tasks)
     
-    pending_submissions = supabase.table("task_submissions") \
-        .select("id, proof_image_url, status, created_at, users(username, email, uid), tasks(title, reward)") \
-        .eq("status", "Pending").execute().data or []
-        
-    return render_template('admin_task_hub.html', tasks=all_tasks, pending_submissions=pending_submissions)
-
-
 # ২. নতুন টাস্ক তৈরি করার রাউট
 @app.route('/admin/task/create', methods=['POST'])
 def admin_create_task():
