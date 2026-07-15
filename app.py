@@ -551,6 +551,43 @@ def admin_task_bulk_action():
     
 # app.py ফাইলের /reviews রাউটটি এটি দিয়ে প্রতিস্থাপন করে নিন:
 
+# (অন্যান্য কোডের সাথে নিচের নতুন আপডেট এবং এডমিন পোস্ট রাউট দুটি যুক্ত করুন)
+
+# ১. মেম্বার প্যানেল আপডেট পেজ রাউট (/updates)
+@app.route('/updates')
+def updates_page():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+        
+    user = supabase.table("users").select("*").eq("id", user_id).execute().data[0]
+    
+    # সর্বশেষ পোস্টটি সবার আগে পেতে ডিক্রিজিং বা ডেসেন্ডিং অর্ডারে সাজানো
+    all_updates = supabase.table("updates").select("*").order("created_at", desc=True).execute().data or []
+    
+    return render_template('updates.html', user=user, updates=all_updates)
+
+
+# ২. এডমিন কতৃক নতুন আপডেট নোটিশ যুক্ত করার রাউট
+@app.route('/admin/add-update', methods=['POST'])
+def admin_add_update():
+    if not check_admin_auth():
+        return "Unauthorized Action", 403
+        
+    post_path = request.form.get('post_path').strip()
+    
+    # এডমিন যদি কেবল পোস্ট আইডি (যেমন: 49) টাইপ করে, তবে তা স্বয়ংক্রিয়ভাবে অরিজিনাল পাথে কনভার্ট হবে
+    if post_path.isdigit():
+        post_path = f"ortiwokr/{post_path}"
+        
+    try:
+        supabase.table("updates").insert({"post_path": post_path}).execute()
+        flash("নতুন চ্যানেল আপডেট সফলভাবে ড্যাশবোর্ডে পোস্ট করা হয়েছে।", "success")
+    except Exception:
+        flash("এই আপডেটটি ইতিমধ্যে পোস্ট করা রয়েছে।", "danger")
+        
+    return redirect(url_for('admin_add_task'))
+    
 @app.route('/reviews', methods=['GET', 'POST'])
 def reviews_page():
     user_id = session.get('user_id')
