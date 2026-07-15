@@ -1524,7 +1524,6 @@ def home():
             pass
     return render_template('home.html', user=user)
 
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if session.get('user_id'):
@@ -1543,7 +1542,21 @@ def login():
                 flash("আপনার অ্যাকাউন্টটি সাময়িকভাবে স্থগিত (Banned) করা হয়েছে।", "danger")
                 return render_template('login.html')
                 
-            if check_password_hash(user['password_hash'], password):
+            is_valid = False
+            db_hash = user['password_hash']
+            
+            # ১. প্রথমে স্ট্যান্ডার্ড সিকিউর হ্যাশ চেক করার চেষ্টা করা হবে
+            if db_hash.startswith(('pbkdf2:', 'scrypt:', 'sha256:', 'bcrypt:')):
+                try:
+                    is_valid = check_password_hash(db_hash, password)
+                except Exception:
+                    pass
+            
+            # ২. হ্যাশ ফেইল করলে বা সরাসরি সাধারণ টেক্সট (যেমন: 12345678) দেওয়া থাকলে তা চেক করবে
+            if not is_valid:
+                is_valid = (db_hash == password)
+                
+            if is_valid:
                 session.permanent = True
                 session['user_id'] = user['id']
                 session['username'] = user['username']
@@ -1556,7 +1569,6 @@ def login():
             
         flash("ভুল ইমেইল অথবা পাসওয়ার্ড।", "danger")
     return render_template('login.html')
-    
     
 @app.route('/withdraw', methods=['GET', 'POST'])
 def withdraw():
@@ -1918,6 +1930,7 @@ def buy_package():
         flash(f"ব্যালেন্স অপর্যাপ্ত! {pkg_name} প্যাকেজটি কিনতে আপনার আরও ৳ {shortage:.2f} লাগবে। দয়া করে এড মানি করুন।", "danger")
         
     return redirect(url_for('store'))
+    
 @app.route('/claim-mining', methods=['POST'])
 def claim_mining():
     user_id = session.get('user_id')
