@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Edit Task</title>
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #F8FAFC; }
+        .blockio-card {
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+        }
+    </style>
+</head>
+<body class="text-[#0F172A] min-h-screen pb-10">
+
+    <!-- হেডার বার -->
+    <nav class="bg-white border-b border-slate-100 py-3.5 px-4 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <span class="text-sm font-extrabold tracking-wider text-slate-800">
+                <i class="fa-solid fa-pen-to-square text-[#fba82f] mr-1.5"></i> EDIT TASK PROFILE
+            </span>
+            <a href="/admin/task" class="text-xs font-bold text-slate-500 hover:text-slate-900"><i class="fa-solid fa-arrow-left"></i> Back to Hub</a>
+        </div>
+    </nav>
+
+    <main class="max-w-2xl mx-auto p-4 mt-4">
+        
+        <div class="blockio-card p-6 bg-white">
+            <form action="/admin/task/edit/{{ task.id }}" method="POST" class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">টাস্ক টাইটেল</label>
+                        <input type="text" name="title" value="{{ task.title }}" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-slate-350 font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">রিওয়ার্ড অ্যামাউন্ট (৳)</label>
+                        <input type="number" step="0.1" name="reward" value="{{ task.reward }}" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-slate-350 font-bold">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">লিংক</label>
+                    <input type="url" name="link" value="{{ task.link }}" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-slate-350 font-mono font-bold">
+                </div>
+                <div>
+                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">ডেসক্রিপশন / নির্দেশাবলী</label>
+                    <textarea name="description" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-slate-350 h-24 font-bold">{{ task.description }}</textarea>
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                    <a href="/admin/task" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs py-3 rounded-xl transition text-center flex items-center justify-center">
+                        Cancel
+                    </a>
+                    <button type="submit" class="w-1/2 bg-black hover:opacity-90 text-white font-extrabold text-xs py-3 rounded-xl transition">
+                        Update Task
+                    </button>
+                </div>
+            </form>
+        </div>
+
+    </main>
+
+</body>
+</html>
