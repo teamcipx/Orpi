@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Ad Share Management</title>
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #F8FAFC; }
+        .blockio-card {
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+        }
+    </style>
+</head>
+<body class="text-[#0F172A] min-h-screen pb-10">
+
+    <!-- এডমিন নেভিগেশন বার -->
+    <nav class="bg-white border-b border-slate-100 py-3.5 px-4 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <span class="text-sm font-extrabold tracking-wider text-slate-800">
+                <i class="fa-solid fa-rectangle-ad text-purple-600 mr-1.5"></i> OPTIWORK ADSHARE MANAGER
+            </span>
+            <div class="flex space-x-4">
+                <a href="/admin" class="text-xs font-bold text-slate-500 hover:text-slate-900"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+                <a href="/admin/task" class="text-xs font-bold text-slate-500 hover:text-slate-900"><i class="fa-solid fa-list-check"></i> Tasks Hub</a>
+                <a href="/dashboard" class="text-xs font-bold text-slate-500 hover:text-slate-900"><i class="fa-solid fa-home"></i> App</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto p-4 space-y-6">
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="p-3 text-xs text-center rounded-xl border {% if category == 'success' %}bg-emerald-50 text-emerald-600 border-emerald-100{% else %}bg-red-50 text-red-600 border-red-100{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- ১. নতুন অ্যাডস শেয়ার টাস্ক অ্যাড ফরম -->
+        <div class="blockio-card p-6 bg-white">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-4 border-b border-slate-50 pb-2 flex items-center gap-1.5">
+                <i class="fa-solid fa-circle-plus text-slate-400"></i> নতুন অ্যাডস শেয়ার ক্যাম্পেইন যুক্ত করুন
+            </h2>
+            <form action="/admin/adshear" method="POST" class="space-y-4">
+                <input type="hidden" name="image_url" id="proof-input-admin-ad">
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">ক্যাম্পেইন টাইটেল</label>
+                        <input type="text" name="title" required placeholder="যেমন: নতুন ইনকাম প্রজেক্ট শেয়ার করুন" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-slate-350">
+                    </div>
+                    <div>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">পুরস্কার / রিওয়ার্ড অ্যামাউন্ট (৳)</label>
+                        <input type="number" step="0.1" name="reward" required placeholder="10.0" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-slate-350">
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <!-- এডমিন সরাসরি প্রক্সি আপলোডার দিয়ে ব্যানার আপলোড করবেন -->
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1.5">শেয়ার করার ব্যানার ইমেজ (Upload Banner)</label>
+                        <div class="flex items-center gap-3">
+                            <label for="admin-ad-file" class="cursor-pointer bg-slate-200 hover:bg-slate-300 text-slate-700 text-[10px] font-bold px-3.5 py-1.5 rounded-xl border border-slate-250 transition shadow-sm">
+                                Upload Banner
+                            </label>
+                            <input type="file" id="admin-ad-file" class="hidden" accept="image/*" onchange="uploadAdBanner(this)">
+                            <span id="label-admin-ad" class="text-[9px] text-slate-400 font-bold">আপলোড করা হয়নি</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">প্রমোশনাল ক্যাপশন লিংক (Optional)</label>
+                        <input type="url" name="link" placeholder="যেমন রেফারেল ড্যাশবোর্ড বা হোম পেজের লিংক..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-slate-350">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">শেয়ার করার ক্যাপশন টেক্সট (Ad Caption)</label>
+                    <textarea name="caption" required placeholder="ঘরে বসে প্রতিদিন মোবাইল দিয়ে ৩০০-৫০০ টাকা আয় করুন..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-slate-350 h-20"></textarea>
+                </div>
+                
+                <button type="submit" id="submit-ad-btn" disabled class="w-full bg-slate-300 cursor-not-allowed text-white font-extrabold text-xs py-2.5 rounded-xl transition">
+                    ক্যাম্পেইনটি লাইভ করুন
+                </button>
+            </form>
+        </div>
+
+        <!-- ২. পেন্ডিং প্রুফ ভেরিফিকেশন প্যানেল -->
+        <div class="blockio-card p-6 bg-white">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-4 border-b border-slate-50 pb-2 flex items-center gap-1.5">
+                <i class="fa-solid fa-clock-rotate-left text-slate-400"></i> পেন্ডিং অ্যাডস শেয়ার ভেরিফিকেশন প্যানেল
+            </h2>
+            <div class="space-y-4">
+                {% for sub in pending_submissions %}
+                <div class="border border-slate-100 p-4 rounded-xl bg-slate-50/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-xs font-semibold">
+                    <div class="space-y-1.5">
+                        <p class="font-bold text-slate-800 text-xs">{{ sub.adshear_tasks.title }}</p>
+                        <p class="text-[9px] text-slate-500">ইউজার: <span class="font-bold">{{ sub.users.username }}</span> (UID: {{ sub.users.uid }} | {{ sub.users.email }})</p>
+                        <p class="text-[9px] text-emerald-600 font-bold">রিওয়ার্ড: ৳ {{ sub.adshear_tasks.reward }}</p>
+                        <a href="{{ sub.proof_image_url }}" target="_blank" class="text-[10px] text-blue-500 font-bold hover:underline inline-block mt-1">ফেসবুক শেয়ার স্ক্রিনশট প্রুফ দেখুন <i class="fa-solid fa-external-link text-[8px]"></i></a>
+                    </div>
+                    
+                    <div class="flex gap-2 w-full sm:w-auto shrink-0">
+                        <form action="/admin/adshear/action" method="POST" class="w-full sm:w-auto">
+                            <input type="hidden" name="submission_id" value="{{ sub.id }}">
+                            <input type="hidden" name="action" value="approve">
+                            <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-[10px] px-4 py-2 rounded-xl transition">Approve</button>
+                        </form>
+                        <form action="/admin/adshear/action" method="POST" class="w-full sm:w-auto">
+                            <input type="hidden" name="submission_id" value="{{ sub.id }}">
+                            <input type="hidden" name="action" value="reject">
+                            <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold text-[10px] px-4 py-2 rounded-xl transition">Reject</button>
+                        </form>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-xs text-slate-400 text-center py-4">বর্তমানে কোনো অ্যাডস শেয়ারিং প্রুফ পেন্ডিং নেই।</p>
+                {% endfor %}
+            </div>
+        </div>
+
+    </main>
+
+    <!-- অটো-রোটেশন এপিআই প্রক্সি আপলোডার (এডমিনের জন্য) -->
+    <script>
+    function uploadAdBanner(input) {
+        const file = input.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append("image", file);
+
+        const label = document.getElementById("label-admin-ad");
+        const submitBtn = document.getElementById("submit-ad-btn");
+        
+        label.innerText = "Uploading Banner...";
+        label.className = "text-[9px] text-slate-500 font-bold animate-pulse";
+
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "/api/upload", true); // সুরক্ষীত রোটেশন প্রক্সি
+
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                const data = JSON.parse(xhr.responseText);
+                if (data.status === "success") {
+                    document.getElementById("proof-input-admin-ad").value = data.url;
+                    label.innerText = "Banner Uploaded Successfully! ✓";
+                    label.className = "text-[9px] text-emerald-500 font-extrabold";
+                    
+                    // এডমিন সাবমিট বাটন সক্রিয় করা
+                    submitBtn.removeAttribute('disabled');
+                    submitBtn.className = "w-full bg-slate-950 hover:bg-slate-800 text-white font-extrabold text-xs py-2.5 rounded-xl transition cursor-pointer";
+                } else {
+                    label.innerText = "Upload Failed. Please try again.";
+                    label.className = "text-[9px] text-red-500 font-bold";
+                }
+            } else {
+                label.innerText = "Error: Invalid API Key or network issue.";
+                label.className = "text-[9px] text-red-500 font-bold";
+            }
+        };
+
+        xhr.onerror = function() {
+            label.innerText = "Network connection failed.";
+            label.className = "text-[9px] text-red-500 font-bold";
+        };
+
+        xhr.send(formData);
+    }
+    </script>
+
+</body>
+</html>
