@@ -331,19 +331,34 @@
                     <i class="fa-solid fa-star"></i>
                 </div>
             </a>
-
-            <a href="/store" class="premium-card p-4 rounded-2xl flex items-center justify-between">
-                <div class="flex items-center gap-3.5">
-                    <div class="text-purple-600 text-lg w-10 h-10 flex items-center justify-center rounded-xl bg-purple-50 border border-purple-100">
-                        <i class="fa-solid fa-circle-arrow-up animate-bounce"></i>
-                    </div>
-                    <div class="text-left">
-                        <p class="font-extrabold text-slate-800 text-xs">প্যাকেজ আপগ্রেড করুন</p>
-                        <p class="text-[10px] text-slate-500 mt-1 font-medium">পছন্দের মাইনিং স্পিড বাড়াতে প্যাকেজ কিনুন</p>
-                    </div>
+<!-- Upgrade Package CTA Card (কপি করে ড্যাশবোর্ডের যেকোনো সুবিধাজনক স্থানে বসিয়ে দিন) -->
+<a href="/store" class="blockio-card p-5 flex items-center justify-between hover:border-purple-500/30 transition bg-white border border-slate-200 shadow-sm relative overflow-hidden group mb-4">
+    <!-- হালকা পার্পল গ্রেডিয়েন্ট গ্লোআভা ব্যাকগ্রাউন্ড -->
+    <div class="absolute -right-8 -top-8 w-24 h-24 bg-purple-500/5 rounded-full blur-2xl group-hover:bg-purple-500/10 transition"></div>
+    
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 z-10 relative w-full">
+        <div class="flex items-center gap-3.5">
+            <!-- স্পিড মিটার আইকন উইথ গ্লো ইন্ডিকেটর -->
+            <div class="w-10 h-10 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-500 shadow-sm animate-pulse">
+                <i class="fa-solid fa-gauge-high text-base"></i>
+            </div>
+            
+            <div class="space-y-0.5 text-left">
+                <div class="flex items-center gap-2">
+                    <span class="text-[8px] bg-purple-50 text-purple-600 border border-purple-100 px-2 py-0.5 rounded-full font-black uppercase tracking-widest leading-none">Speed Booster</span>
                 </div>
-                <span class="text-[9px] bg-purple-50 text-purple-600 border border-purple-100 px-3 py-1 rounded-full font-extrabold">আপগ্রেড</span>
-            </a>
+                <h3 class="text-xs font-black text-slate-800 mt-1">মাইনিং স্পিড এবং দৈনিক আয় বৃদ্ধি করুন</h3>
+                <!-- কাজের আসল তাৎপর্য মেম্বারদের সহজে বোঝানোর জন্য ডেসক্রিপশন -->
+                <p class="text-[9px] text-slate-400 font-medium leading-relaxed">যেকোনো প্রিমিয়াম প্যাকেজ চালু করলেই রেফারেল ছাড়াই সরাসরি ৩০০ টাকা হলে উইথড্র করতে পারবেন!</p>
+            </div>
+        </div>
+        
+        <!-- সলিড ব্ল্যাক পিল বাটন -->
+        <span class="bg-black hover:opacity-90 text-white text-[9px] font-black uppercase tracking-wider px-4 py-2.5 rounded-full transition whitespace-nowrap shadow w-full sm:w-auto text-center">
+            আপগ্রেড করুন <i class="fa-solid fa-arrow-right text-[8px] ml-1"></i>
+        </span>
+    </div>
+</a>
 
             </div>
 
