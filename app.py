@@ -1801,9 +1801,8 @@ def add_money():
             
     history = supabase.table("deposits").select("*").eq("user_id", user_id).order("created_at", desc=True).execute().data
     return render_template('add_money.html', history=history)
-
 # app.py ফাইলের /register রাউটটি এটি দিয়ে পরিবর্তন করুন
-# (এখানে আইপি ব্লকিং নেই, তবে একই ডিভাইস দিয়ে নিজের লিংকে অ্যাকাউন্ট খোলা সম্পূর্ণ লকড থাকবে)
+# (এখানে সব রেফারেলকে ২৪ ঘণ্টার জন্য 'Processing' বা পেন্ডিং অবস্থায় রাখা হচ্ছে)
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     ref_by = request.args.get('ref', '')
@@ -1819,40 +1818,33 @@ def register():
         if ip_address:
             ip_address = ip_address.split(',')[0].strip()
 
+        if device_fingerprint and device_fingerprint.strip() != "":
+            if not device_fingerprint.startswith("fallback_") and not device_fingerprint.startswith("secure_fallback_"):
+                device_exists = supabase.table("users").select("id").eq("device_fingerprint", device_fingerprint.strip()).execute().data
+                if device_exists:
+                    flash("নিরাপত্তা সতর্কতা: আপনার ডিভাইস থেকে ইতিমধ্যে একটি অ্যাকাউন্ট তৈরি করা হয়েছে। একই ডিভাইস থেকে একাধিক অ্যাকাউন্ট খোলা সম্পূর্ণ নিষিদ্ধ।", "danger")
+                    return redirect(url_for('register', ref=ref_by))
+
         hashed_password = generate_password_hash(password)
         initial_balance = 0.00
         referrer_id = None
         referrer_device_name = None
-        referrer_fingerprint = None
 
         if referrer_code and referrer_code.isdigit():
             ref_uid = int(referrer_code)
-            referrer_res = supabase.table("users").select("id", "device_name", "device_fingerprint").eq("uid", ref_uid).execute()
+            referrer_res = supabase.table("users").select("id", "device_name").eq("uid", ref_uid).execute()
             if referrer_res.data:
                 referrer_id = referrer_res.data[0]['id']
                 referrer_device_name = referrer_res.data[0].get('device_name')
-                referrer_fingerprint = referrer_res.data[0].get('device_fingerprint')
                 initial_balance = 50.00 # নতুন মেম্বার পাবেন ৫০ টাকা বোনাস
 
-        # --- কঠোর একই ডিভাইস সেলফ-রেফারেল ব্লকার (WebGL + ThumbmarkJS চেক) ---
-        if referrer_id:
-            # ক. জিপিইউ ড্রাইভার ও ফিজিক্যাল ডিভাইস মডেল ম্যাচিং চেক
-            if referrer_device_name and device_name:
-                ref_dev_clean = referrer_device_name.strip().lower()
-                my_dev_clean = device_name.strip().lower()
-                is_generic_dev = "unknown" in my_dev_clean or "android" in my_dev_clean or "pc" in my_dev_clean
-                if not is_generic_dev and ref_dev_clean == my_dev_clean:
-                    flash("নিরাপত্তা সতর্কতা: রেফারার এবং আপনার মোবাইল ডিভাইসের মডেল একই হওয়ায় রেজিস্ট্রেশন বাতিল করা হয়েছে।", "danger")
-                    return redirect(url_for('register', ref=ref_by))
-
-            # খ. ThumbmarkJS লাইব্রেরি জেনারেটেড ডিভাইস ফিঙ্গারপ্রিন্ট ম্যাচিং চেক
-            if referrer_fingerprint and device_fingerprint:
-                ref_fp_clean = referrer_fingerprint.strip().lower()
-                my_fp_clean = device_fingerprint.strip().lower()
-                is_generic_fp = my_fp_clean in ["undefined", "null", "none", ""] or len(my_fp_clean) < 5 or my_fp_clean.startswith("fallback_")
-                if not is_generic_fp and ref_fp_clean == my_fp_clean:
-                    flash("নিরাপত্তা সতর্কতা: আপনি একই ডিভাইস ব্যবহার করে নিজের রেফারেল লিংকে অ্যাকাউন্ট খুলতে পারবেন না।", "danger")
-                    return redirect(url_for('register', ref=ref_by))
+        if referrer_id and referrer_device_name and device_name:
+            ref_dev_clean = referrer_device_name.strip().lower()
+            my_dev_clean = device_name.strip().lower()
+            is_generic = "unknown" in my_dev_clean or "android" in my_dev_clean or "pc" in my_dev_clean
+            if not is_generic and ref_dev_clean == my_dev_clean:
+                flash("নিরাপত্তা সতর্কতা: আপনার এবং রেফারারের মোবাইল ডিভাইসের মডেল একই হওয়ায় রেজিস্ট্রেশন বাতিল করা হয়েছে।", "danger")
+                return redirect(url_for('register', ref=ref_by))
 
         user_data = {
             "username": username,
@@ -1868,7 +1860,6 @@ def register():
             new_user_res = supabase.table("users").insert(user_data).execute()
             if new_user_res.data:
                 new_user_id = new_user_res.data[0]['id']
-                new_uid = new_user_res.data[0]['uid']
                 
                 free_expiry = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=30)
                 supabase.table("user_packages").insert({
@@ -1877,27 +1868,15 @@ def register():
                     "expires_at": free_expiry.isoformat()
                 }).execute()
                 
+                # রেফারেলটি ২৪ ঘণ্টার জন্য পেন্ডিং রাখা হচ্ছে
                 if referrer_id:
-                    now_str = datetime.datetime.now(datetime.timezone.utc).isoformat()
+                    scheduled_time = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=24)
                     
-                    if random.random() < 0.80:
-                        status = "Success"
-                        supabase.rpc("increment_balance", {"user_id": referrer_id, "amount": 15.00}).execute()
-                        
-                        supabase.table("transactions").insert({
-                            "user_id": referrer_id,
-                            "title": f"Referral Bonus (New UID: #{new_uid})",
-                            "amount": 15.00
-                        }).execute()
-                    else:
-                        status = "Failed"
-                        
                     supabase.table("referrals").insert({
                         "referrer_id": referrer_id,
                         "referred_id": new_user_id,
-                        "status": status,
-                        "scheduled_payout_at": now_str,
-                        "processed_at": now_str
+                        "status": "Processing",
+                        "scheduled_payout_at": scheduled_time.isoformat()
                     }).execute()
                         
                 flash("নিবন্ধন সফল হয়েছে। লগইন করুন।", "success")
