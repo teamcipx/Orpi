@@ -687,35 +687,80 @@ def about():
         
     user = supabase.table("users").select("*").eq("id", user_id).execute().data[0]
     return render_template('about.html', user=user)
-
+# app.py ফাইলের /referrals রাউটটি এটি দিয়ে পরিবর্তন করুন
+# (এখানে ২৪ ঘণ্টা অতিবাহিত হওয়ার পর ১২ ঘণ্টা একটিভিটি এবং ২ টি এপ্রুভড টাস্ক সম্পন্নের শর্ত যাচাই হবে)
 @app.route('/referrals')
 def referrals():
     user_id = session.get('user_id')
     if not user_id:
         return redirect(url_for('login'))
         
+    now = datetime.datetime.now(datetime.timezone.utc)
     user = supabase.table("users").select("uid").eq("id", user_id).execute().data[0]
     
-    # ডাটাবেজ থেকে সরাসরি রেফারেল হিস্ট্রি ডেটা রিট্রিভ করা হচ্ছে
+    # বকেয়া থাকা 'Processing' রেফারেলগুলোর অন-ডিমান্ড চেকিং লুপ (২৪ ঘণ্টা পূর্ণ হওয়া সাপেক্ষে)
+    due_referrals = supabase.table("referrals") \
+        .select("id, referred_id") \
+        .eq("referrer_id", user_id) \
+        .eq("status", "Processing") \
+        .lte("scheduled_payout_at", now.isoformat()) \
+        .execute().data or []
+
+    for ref in due_referrals:
+        referred_id = ref['referred_id']
+        
+        # ক. আমন্ত্রিত ইউজারের শেষ লগইন টাইমস্ট্যাম্প রিট্রিভ করা
+        ref_user = supabase.table("users").select("last_login").eq("id", referred_id).execute().data
+        
+        # খ. আমন্ত্রিত ইউজারের এপ্রুভড নরমাল টাস্কের মোট সংখ্যা গণনা করা
+        task_res = supabase.table("task_submissions") \
+            .select("id", count="exact") \
+            .eq("user_id", referred_id) \
+            .eq("status", "Approved").execute()
+            
+        approved_task_count = task_res.count if task_res.count is not None else 0
+        
+        is_valid = False
+        
+        if ref_user:
+            last_login_str = ref_user[0]['last_login']
+            last_login = datetime.datetime.fromisoformat(last_login_str.replace('Z', '+00:00'))
+            twelve_hours_ago = now - datetime.timedelta(hours=12)
+            
+            # শর্ত: শেষ ১২ ঘণ্টায় একটিভ হতে হবে এবং কমপক্ষে ২টি নরমাল টাস্ক সফলভাবে এপ্রুভড থাকতে হবে
+            if last_login >= twelve_hours_ago and approved_task_count >= 2:
+                is_valid = True
+                
+        if is_valid:
+            new_status = "Success"
+            # রেফার প্রতি ১৫ টাকা কমিশন যোগ করা হচ্ছে
+            supabase.rpc("increment_balance", {"user_id": user_id, "amount": 15.00}).execute()
+            
+            # সফল ট্রানজেকশন হিস্ট্রি সেভ
+            supabase.table("transactions").insert({
+                "user_id": user_id,
+                "title": f"Referral Bonus (UID: #{user['uid']})",
+                "amount": 15.00
+            }).execute()
+        else:
+            new_status = "Failed" # শর্ত অপূর্ণ থাকলে সরাসরি Failed বা বাতিল দেখাবে
+            
+        supabase.rpc("process_referral_payout", {
+            "p_referral_id": ref['id'],
+            "p_referrer_id": user_id,
+            "p_new_status": new_status,
+            "p_reward_amount": 15.00
+        }).execute()
+            
     referrals_data = supabase.table("referrals") \
         .select("status, created_at, users:referred_id(username, email)") \
         .eq("referrer_id", user_id).execute().data or []
         
-    success_count = 0
-    processing_count = 0
-    failed_count = 0
-    
-    for r in referrals_data:
-        status = r.get('status', 'Processing')
-        if status == 'Success':
-            success_count += 1
-        elif status == 'Processing':
-            processing_count += 1
-        elif status == 'Failed':
-            failed_count += 1
-            
-    # রেফার প্রতি ১৫ টাকা সফল কমিশন হিসাব
+    success_count = sum(1 for r in referrals_data if r['status'] == 'Success')
+    processing_count = sum(1 for r in referrals_data if r['status'] == 'Processing')
+    failed_count = sum(1 for r in referrals_data if r['status'] == 'Failed')
     total_earnings = success_count * 15.00
+        
     ref_link = request.url_root + "register?ref=" + str(user['uid'])
     
     return render_template('referrals.html', 
