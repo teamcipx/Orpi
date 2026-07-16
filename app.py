@@ -756,7 +756,88 @@ def admin_create_task():
     flash("নতুন নরমাল টাস্কটি সফলভাবে যুক্ত হয়েছে।", "success")
     return redirect(url_for('admin_task_hub'))
 
+# (অন্যান্য কোডের সাথে নিচের নতুন অপটিবুস্ট ইউজার এবং এডমিন ভেরিফিকেশন রাউটগুলো যুক্ত করুন)
 
+# ১. ইউজার অপটিবুস্ট পেজ রাউট (/optiboost)
+@app.route('/optiboost', methods=['GET', 'POST'])
+def optiboost_page():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+        
+    user = supabase.table("users").select("*").eq("id", user_id).execute().data[0]
+    
+    # ইউজারের পূর্ববর্তী কোনো অপটিবুস্ট রিকোয়েস্ট আছে কিনা তা চেক
+    boost_query = supabase.table("optiboost_requests").select("status").eq("user_id", user_id).execute().data
+    boost_status = boost_query[0]['status'] if boost_query else None
+    
+    if request.method == 'POST':
+        method = request.form.get('method')
+        number = request.form.get('number')
+        tx_id = request.form.get('transaction_id')
+        
+        if boost_status == 'Pending' or boost_status == 'Approved':
+            flash("আপনার একটি রিকোয়েস্ট ইতিমধ্যে প্রক্রিয়াধীন অথবা অনুমোদিত রয়েছে।", "danger")
+            return redirect(url_for('optiboost_page'))
+            
+        try:
+            supabase.table("optiboost_requests").insert({
+                "user_id": user_id,
+                "payment_method": method,
+                "payment_number": number,
+                "transaction_id": tx_id.strip(),
+                "status": "Pending"
+            }).execute()
+            flash("আপনার অপটিবুস্ট রিকোয়েস্ট সফলভাবে জমা হয়েছে। এডমিন ভেরিফাই করবে।", "success")
+            return redirect(url_for('optiboost_page'))
+        except Exception:
+            flash("এই ট্রানজেকশন আইডিটি ইতিমধ্যে ব্যবহৃত হয়েছে।", "danger")
+            
+    return render_template('optiboost.html', user=user, boost_status=boost_status)
+
+
+# ২. এডমিন অপটিবুস্ট ভেরিফিকেশন প্যানেল (/admin/opti)
+@app.route('/admin/opti')
+def admin_opti():
+    if not check_admin_auth():
+        return "Unauthorized Access", 403
+        
+    pending = supabase.table("optiboost_requests") \
+        .select("id, payment_method, payment_number, transaction_id, status, created_at, users(username, email, uid)") \
+        .eq("status", "Pending") \
+        .order("created_at", desc=True).execute().data or []
+        
+    return render_template('admin_opti.html', pending_boosts=pending)
+
+
+# ৩. এডমিন অপটিবুস্ট এপ্রুভ/রিজেক্ট অ্যাকশন রাউট
+@app.route('/admin/opti/action', methods=['POST'])
+def admin_opti_action():
+    if not check_admin_auth():
+        return "Unauthorized Action", 403
+        
+    request_id = request.form.get('request_id')
+    action = request.form.get('action') # 'approve' or 'reject'
+    
+    boost_req = supabase.table("optiboost_requests").select("user_id").eq("id", request_id).execute().data
+    if not boost_req:
+        flash("রেকর্ড খুঁজে পাওয়া যায়নি।", "danger")
+        return redirect(url_for('admin_opti'))
+        
+    target_user_id = boost_req[0]['user_id']
+    
+    if action == 'approve':
+        # অপটিবুস্ট রিকোয়েস্ট এপ্রুভ করা
+        supabase.table("optiboost_requests").update({"status": "Approved"}).eq("id", request_id).execute()
+        # ইউজারের প্রফাইল কার্ডে OptiBoost সক্রিয় (TRUE) করা
+        supabase.table("users").update({"is_optiboost": True}).eq("id", target_user_id).execute()
+        flash("অপটিবুস্ট রিকোয়েস্ট সফলভাবে অনুমোদিত (Approved) হয়েছে।", "success")
+    elif action == 'reject':
+        supabase.table("optiboost_requests").update({"status": "Rejected"}).eq("id", request_id).execute()
+        flash("অপটিবুস্ট রিকোয়েস্ট বাতিল (Rejected) করা হয়েছে।", "success")
+        
+    return redirect(url_for('admin_opti'))
+            
 # ৩. টাস্ক এডিট করার রাউট (আলাদা এডিট পেজ)
 @app.route('/admin/task/edit/<task_id>', methods=['GET', 'POST'])
 def admin_edit_task(task_id):
