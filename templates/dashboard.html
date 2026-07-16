@@ -148,6 +148,67 @@
     </div>
 </a>
 
+    <!-- dashboard.html ফাইলের নোটিশ ব্যানারের ঠিক নিচে এই বুস্টার নোটিফিকেশন কার্ডটি বসিয়ে দিন -->
+{% if not user.is_optiboost %}
+<a href="/optiboost" class="relative block p-[1.5px] rounded-3xl overflow-hidden group shadow-[0_0_25px_rgba(0,229,117,0.1)] hover:shadow-[0_0_35px_rgba(0,229,117,0.25)] transition-all duration-500 mb-4 animate-pulse-slow">
+    
+    <!-- Premium Animated Glowing Border Background -->
+    <div class="absolute inset-0 bg-[conic-gradient(from_0deg,transparent_40%,#00E575_50%,transparent_60%)] animate-[spin_4s_linear_infinite] group-hover:animate-[spin_2s_linear_infinite]"></div>
+    
+    <!-- Main Card Body -->
+    <div class="relative bg-gradient-to-br from-[#02110a] via-[#010603] to-[#041a10] p-5 rounded-[22px] z-10 overflow-hidden">
+        
+        <!-- Ambient Neon Glow Overlays -->
+        <div class="absolute -right-6 -top-6 w-32 h-32 bg-[#00E575]/10 rounded-full blur-3xl group-hover:bg-[#00E575]/20 transition-all duration-500"></div>
+        <div class="absolute -left-10 -bottom-10 w-32 h-32 bg-[#00E575]/5 rounded-full blur-2xl"></div>
+
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 relative z-20">
+            
+            <!-- Content Area -->
+            <div class="flex items-start sm:items-center gap-4">
+                
+                <!-- Glowing Rocket Icon -->
+                <div class="w-12 h-12 shrink-0 rounded-2xl bg-[#00E575]/10 border border-[#00E575]/30 flex items-center justify-center text-[#00E575] shadow-[inset_0_0_12px_rgba(0,229,117,0.2),0_0_20px_rgba(0,229,117,0.2)] relative group-hover:scale-110 transition-transform duration-300">
+                    <span class="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00E575] opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#00E575]"></span>
+                    </span>
+                    <i class="fa-solid fa-rocket text-lg animate-bounce"></i>
+                </div>
+                
+                <!-- Text Details -->
+                <div class="space-y-1.5 text-left">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <!-- Hot Campaign Badge -->
+                        <span class="text-[9px] bg-gradient-to-r from-[#00E575]/20 to-[#00E575]/5 text-[#00E575] border border-[#00E575]/40 font-black px-2.5 py-0.5 rounded-md uppercase tracking-widest leading-none shadow-[0_0_10px_rgba(0,229,117,0.1)]">
+                            <i class="fa-solid fa-fire-flame-curved mr-1 text-[8px]"></i>HOT Campaign
+                        </span>
+                        <!-- Limited Time Offer Badge -->
+                        <span class="text-[9px] bg-red-500/10 text-red-400 border border-red-500/30 font-bold px-2.5 py-0.5 rounded-md uppercase tracking-wider leading-none animate-pulse">
+                            <i class="fa-regular fa-clock mr-1 text-[8px]"></i>সীমিত অফার: ১৮ তারিখ পর্যন্ত
+                        </span>
+                    </div>
+                    
+                    <h3 class="text-sm font-black text-white tracking-wide group-hover:text-[#00E575] transition-colors duration-300">
+                        OptiBoost সক্রিয় করুন এবং উইথড্রয়াল আনলক করুন!
+                    </h3>
+                    <p class="text-[11px] text-slate-400 font-medium leading-relaxed max-w-xl">
+                        মাত্র <span class="text-[#00E575] font-bold">৳ ৭০</span> ডিপোজিটে কোনো রেফার ছাড়াই উইথড্র ও <span class="text-[#00E575] font-bold">৳ ৫০</span> হলেই ক্যাশ-আউটের সুবর্ণ সুযোগ!
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Premium CTA Button -->
+            <div class="w-full lg:w-auto shrink-0 pt-2 lg:pt-0">
+                <span class="block w-full lg:w-auto bg-gradient-to-r from-[#00E575] to-[#00c363] text-black text-[11px] font-black uppercase tracking-wider px-6 py-3 rounded-2xl text-center shadow-[0_4px_20px_rgba(0,229,117,0.3)] hover:shadow-[0_4px_25px_rgba(0,229,117,0.5)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 cursor-pointer">
+                    সক্রিয় করুন <i class="fa-solid fa-arrow-right text-[9px] ml-1.5 transition-transform group-hover:translate-x-1"></i>
+                </span>
+            </div>
+            
+        </div>
+    </div>
+</a>
+{% endif %}
     
 
     <!-- ডান পাশের ১-কলাম (শর্টকাট ও সাপোর্টস) -->
