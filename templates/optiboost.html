@@ -1,89 +1,96 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<div class="space-y-4 max-w-2xl mx-auto pb-10">
+<div class="space-y-4 max-w-2xl mx-auto pb-10 px-3">
     
     <!-- অপটিবুস্ট ব্যানার এবং মূল্য -->
-    <div class="blockio-card p-5 bg-white border border-slate-200 shadow-sm flex justify-between items-center relative overflow-hidden">
-        <div class="absolute -right-8 -top-8 w-24 h-24 bg-[#fba82f]/5 rounded-full blur-2xl animate-pulse"></div>
-        <div>
-            <span class="bg-[#fba82f]/10 text-[#fba82f] border border-[#fba82f]/20 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">Premium Booster</span>
-            <h2 class="text-sm font-extrabold text-slate-800 mt-1.5 flex items-center gap-1.5">
-                <i class="fa-solid fa-rocket text-[#fba82f] animate-bounce"></i> OPTI BOOST ACTIVATOR
-            </h2>
-        </div>
-        <div class="text-right">
-            <span class="text-[8px] text-slate-400 uppercase font-bold tracking-wider">প্যাকেজ মূল্য</span>
-            <p class="text-xl font-black text-black">৳ ৭০.০০</p>
+    <div class="relative p-[1px] rounded-3xl overflow-hidden shadow-[0_0_20px_rgba(251,168,47,0.08)]">
+        <div class="absolute inset-0 bg-gradient-to-r from-[#fba82f]/30 via-transparent to-[#fba82f]/15"></div>
+        <div class="relative p-5 bg-gradient-to-br from-[#0c0d0a] to-[#030403] rounded-[23px] flex justify-between items-center overflow-hidden">
+            <div class="absolute -right-8 -top-8 w-24 h-24 bg-[#fba82f]/10 rounded-full blur-2xl animate-pulse"></div>
+            <div>
+                <span class="bg-gradient-to-r from-[#fba82f]/20 to-transparent text-[#fba82f] border border-[#fba82f]/30 text-[8px] font-black px-2.5 py-0.5 rounded-md uppercase tracking-widest shadow-[0_0_10px_rgba(251,168,47,0.05)]">Premium Booster</span>
+                <h2 class="text-xs font-black text-white mt-2 flex items-center gap-2 tracking-wide">
+                    <i class="fa-solid fa-rocket text-[#fba82f] animate-bounce text-sm"></i> OPTI BOOST ACTIVATOR
+                </h2>
+            </div>
+            <div class="text-right z-10">
+                <span class="text-[8px] text-slate-400 uppercase font-bold tracking-wider block">প্যাকেজ মূল্য</span>
+                <p class="text-2xl font-black bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">৳ ৭০.০০</p>
+            </div>
         </div>
     </div>
 
     <!-- ৭-টি প্রিমিয়াম সুযোগ-সুবিধা চেকলিস্ট (Facilities Grid) -->
-    <div class="blockio-card p-5 bg-white border border-slate-200">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-3 border-b border-slate-100 pb-2">
-            <i class="fa-solid fa-gem text-[#fba82f]"></i> OptiBoost কেন সক্রিয় করবেন? (সুবিধাসমূহ)
+    <div class="p-5 bg-gradient-to-br from-[#020b06] to-[#010302] border border-[#00E575]/10 rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
+        <h3 class="text-[10px] font-black uppercase tracking-wider text-slate-200 mb-4 border-b border-slate-800 pb-2.5 flex items-center gap-2">
+            <i class="fa-solid fa-gem text-[#00E575] animate-pulse"></i> OptiBoost কেন সক্রিয় করবেন? (সুবিধাসমূহ)
         </h3>
         
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-semibold text-slate-600">
-            <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                <i class="fa-solid fa-circle-check text-emerald-500"></i> <span>৳ ৫০ হলেই আনলিমিটেড উইথড্র</span>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-medium text-slate-300">
+            <div class="flex items-center gap-2.5 bg-[#03140b]/60 p-3 rounded-2xl border border-[#00E575]/10 hover:border-[#00E575]/20 transition duration-300">
+                <i class="fa-solid fa-circle-check text-[#00E575] drop-shadow-[0_0_5px_rgba(0,229,117,0.5)]"></i> <span>৳ ৫০ হলেই আনলিমিটেড উইথড্র</span>
             </div>
-            <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                <i class="fa-solid fa-circle-check text-emerald-500"></i> <span>কোনো প্রকার রেফারেল লাগবে না (No Refer)</span>
+            <div class="flex items-center gap-2.5 bg-[#03140b]/60 p-3 rounded-2xl border border-[#00E575]/10 hover:border-[#00E575]/20 transition duration-300">
+                <i class="fa-solid fa-circle-check text-[#00E575] drop-shadow-[0_0_5px_rgba(0,229,117,0.5)]"></i> <span>কোনো প্রকার রেফারেল লাগবে না (No Refer)</span>
             </div>
-            <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                <i class="fa-solid fa-circle-check text-emerald-500"></i> <span>এক্সক্লুসিভ প্রিমিয়াম টাস্ক অ্যাক্সেস</span>
+            <div class="flex items-center gap-2.5 bg-[#03140b]/60 p-3 rounded-2xl border border-[#00E575]/10 hover:border-[#00E575]/20 transition duration-300">
+                <i class="fa-solid fa-circle-check text-[#00E575] drop-shadow-[0_0_5px_rgba(0,229,117,0.5)]"></i> <span>এক্সক্লুসিভ প্রিমিয়াম টাস্ক অ্যাক্সেস</span>
             </div>
-            <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                <i class="fa-solid fa-circle-check text-emerald-500"></i> <span>স্টার্টার মাইনার নোডে ১০% মূল্যছাড়</span>
+            <div class="flex items-center gap-2.5 bg-[#03140b]/60 p-3 rounded-2xl border border-[#00E575]/10 hover:border-[#00E575]/20 transition duration-300">
+                <i class="fa-solid fa-circle-check text-[#00E575] drop-shadow-[0_0_5px_rgba(0,229,117,0.5)]"></i> <span>স্টার্টার মাইনার নোডে ১০% মূল্যছাড়</span>
             </div>
-            <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                <i class="fa-solid fa-circle-check text-emerald-500"></i> <span>মাত্র ১০ মিনিটে টাস্ক অনুমোদন</span>
+            <div class="flex items-center gap-2.5 bg-[#03140b]/60 p-3 rounded-2xl border border-[#00E575]/10 hover:border-[#00E575]/20 transition duration-300">
+                <i class="fa-solid fa-circle-check text-[#00E575] drop-shadow-[0_0_5px_rgba(0,229,117,0.5)]"></i> <span>মাত্র ১০ মিনিটে টাস্ক অনুমোদন</span>
             </div>
-            <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                <i class="fa-solid fa-circle-check text-emerald-500"></i> <span>মাত্র ১০ মিনিটে ক্যাশ-আউট প্রসেস</span>
+            <div class="flex items-center gap-2.5 bg-[#03140b]/60 p-3 rounded-2xl border border-[#00E575]/10 hover:border-[#00E575]/20 transition duration-300">
+                <i class="fa-solid fa-circle-check text-[#00E575] drop-shadow-[0_0_5px_rgba(0,229,117,0.5)]"></i> <span>মাত্র ১০ মিনিটে ক্যাশ-আউট প্রসেস</span>
             </div>
-            <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100 md:col-span-2">
-                <i class="fa-solid fa-circle-check text-emerald-500"></i> <span>২৪ ঘণ্টা প্রিমিয়াম কাস্টমার সাপোর্ট</span>
+            <div class="flex items-center gap-2.5 bg-[#03140b]/60 p-3 rounded-2xl border border-[#00E575]/10 hover:border-[#00E575]/20 transition duration-300 sm:col-span-2">
+                <i class="fa-solid fa-circle-check text-[#00E575] drop-shadow-[0_0_5px_rgba(0,229,117,0.5)]"></i> <span>২৪ ঘণ্টা প্রিমিয়াম কাস্টমার সাপোর্ট</span>
             </div>
         </div>
     </div>
 
-    <!-- অফিশিয়াল পেমেন্ট নম্বরসমূহ (কপি বাটন সহ) -->
-    <div class="blockio-card p-5 bg-white border border-slate-200">
-        <h3 class="text-xs font-bold text-slate-700 mb-3 border-b border-slate-100 pb-2 flex items-center gap-1.5">
+    <!-- অফিশিয়াল পেমেন্ট নম্বরসমূহ -->
+    <div class="p-5 bg-gradient-to-br from-[#06080c] to-[#010204] border border-slate-800 rounded-3xl">
+        <h3 class="text-[10px] font-black uppercase tracking-wider text-slate-200 mb-2.5 border-b border-slate-800 pb-2 flex items-center gap-2">
             <i class="fa-solid fa-circle-info text-slate-400"></i> রিচার্জ করার নিয়মাবলী
         </h3>
-        <p class="text-[10px] text-slate-500 leading-relaxed mb-3">
+        <p class="text-[10px] text-slate-400 leading-relaxed mb-4">
             নিচে দেওয়া বিকাশ বা নগদ নম্বরে সেন্ড মানি (Send Money) করার পর, ট্রানজেকশন আইডি (Transaction ID) এবং মোবাইল নম্বর নিচের ফরমে সাবমিট করুন।
-            <br><b class="text-[#fba82f]">* সতর্কতা: এটি মূল ব্যালেন্স দিয়ে কেনা যাবে না। সরাসরি পেমেন্ট করতে হবে।</b>
+            <br><span class="text-[#fba82f] font-bold"><i class="fa-solid fa-triangle-exclamation text-[9px] mr-1"></i> সতর্কবার্তা: এটি ওয়ালেট ব্যালেন্স দিয়ে কেনা যাবে না। সরাসরি পেমেন্ট করতে হবে।</span>
         </p>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <!-- bKash -->
-            <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100">
-                <div class="flex items-center gap-2.5">
-                    <img src="https://images.seeklogo.com/logo-png/27/1/bkash-logo-png_seeklogo-273684.png" class="h-5 object-contain">
+            <div class="flex justify-between items-center bg-[#12080f]/40 p-3.5 rounded-2xl border border-pink-500/10 hover:border-pink-500/20 transition group">
+                <div class="flex items-center gap-3">
+                    <div class="bg-white/5 p-1.5 rounded-xl border border-white/5">
+                        <img src="https://images.seeklogo.com/logo-png/27/1/bkash-logo-png_seeklogo-273684.png" class="h-5 object-contain">
+                    </div>
                     <div class="leading-tight">
-                        <span class="text-[8px] text-slate-400 font-bold block uppercase">bKash (Personal)</span>
-                        <span class="text-xs font-mono font-bold text-slate-800">01618897806</span>
+                        <span class="text-[8px] text-pink-400 font-extrabold block uppercase tracking-wider">bKash (Personal)</span>
+                        <span class="text-xs font-mono font-black text-white">01618897806</span>
                     </div>
                 </div>
-                <button onclick="copyNumber('01618897806', 'bkash-btn')" id="bkash-btn" class="bg-slate-950 hover:bg-slate-800 text-white text-[9px] font-bold px-3 py-1.5 rounded-lg transition">
+                <button onclick="copyNumber('01618897806', 'bkash-btn')" id="bkash-btn" class="bg-white text-black hover:bg-slate-200 text-[10px] font-black px-3 py-2 rounded-xl transition-all duration-300 shadow-[0_4px_12px_rgba(255,255,255,0.05)]">
                     Copy
                 </button>
             </div>
             
             <!-- Nagad -->
-            <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100">
-                <div class="flex items-center gap-2.5">
-                    <img src="https://images.seeklogo.com/logo-png/41/1/nagad-logo-png_seeklogo-411803.png" class="h-5 object-contain">
+            <div class="flex justify-between items-center bg-[#140b07]/40 p-3.5 rounded-2xl border border-orange-500/10 hover:border-orange-500/20 transition group">
+                <div class="flex items-center gap-3">
+                    <div class="bg-white/5 p-1.5 rounded-xl border border-white/5">
+                        <img src="https://images.seeklogo.com/logo-png/41/1/nagad-logo-png_seeklogo-411803.png" class="h-5 object-contain">
+                    </div>
                     <div class="leading-tight">
-                        <span class="text-[8px] text-slate-400 font-bold block uppercase">Nagad (Personal)</span>
-                        <span class="text-xs font-mono font-bold text-slate-800">01912107604</span>
+                        <span class="text-[8px] text-orange-400 font-extrabold block uppercase tracking-wider">Nagad (Personal)</span>
+                        <span class="text-xs font-mono font-black text-white">01912107604</span>
                     </div>
                 </div>
-                <button onclick="copyNumber('01912107604', 'nagad-btn')" id="nagad-btn" class="bg-slate-950 hover:bg-slate-800 text-white text-[9px] font-bold px-3 py-1.5 rounded-lg transition">
+                <button onclick="copyNumber('01912107604', 'nagad-btn')" id="nagad-btn" class="bg-white text-black hover:bg-slate-200 text-[10px] font-black px-3 py-2 rounded-xl transition-all duration-300 shadow-[0_4px_12px_rgba(255,255,255,0.05)]">
                     Copy
                 </button>
             </div>
@@ -91,15 +98,15 @@
     </div>
 
     <!-- রিকোয়েস্ট সাবমিশন প্যানেল -->
-    <div class="blockio-card p-5 bg-white border border-slate-200">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-3 border-b border-slate-50 pb-2">
+    <div class="p-5 bg-gradient-to-br from-[#06080c] to-[#010204] border border-slate-800 rounded-3xl relative overflow-hidden">
+        <h3 class="text-[10px] font-black uppercase tracking-wider text-slate-200 mb-4 border-b border-slate-800 pb-2.5">
             অ্যাক্টিভেশন রিকোয়েস্ট সাবমিট করুন
         </h3>
         
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="p-2.5 mb-3 text-[10px] rounded-lg border text-center {% if category == 'success' %}bg-emerald-50 text-emerald-600 border-emerald-100{% else %}bg-red-50 text-red-600 border-red-100{% endif %}">
+                    <div class="p-3 mb-4 text-[11px] font-bold rounded-xl border text-center {% if category == 'success' %}bg-[#03140b]/80 text-[#00E575] border-[#00E575]/20 shadow-[0_0_15px_rgba(0,229,117,0.05)]{% else %}bg-red-500/10 text-red-400 border-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.05)]{% endif %}">
                         {{ message }}
                     </div>
                 {% endfor %}
@@ -107,48 +114,50 @@
         {% endwith %}
 
         {% if boost_status == 'Approved' %}
-            <div class="text-center py-6 bg-emerald-50/50 border border-emerald-100 rounded-2xl">
-                <i class="fa-solid fa-circle-check text-emerald-500 text-2xl block mb-1.5 animate-bounce"></i>
-                <p class="text-xs font-bold text-slate-800">অভিনন্দন! আপনার OptiBoost সফলভাবে সক্রিয় রয়েছে ⚡</p>
+            <div class="text-center py-8 bg-[#03140b]/40 border border-[#00E575]/20 rounded-2xl shadow-[inset_0_0_20px_rgba(0,229,117,0.05)] relative overflow-hidden group">
+                <div class="absolute -right-10 -top-10 w-28 h-28 bg-[#00E575]/5 rounded-full blur-2xl"></div>
+                <i class="fa-solid fa-circle-check text-[#00E575] text-3xl block mb-2 drop-shadow-[0_0_10px_rgba(0,229,117,0.4)] animate-pulse"></i>
+                <p class="text-xs font-black text-white tracking-wide">অভিনন্দন! আপনার OptiBoost সফলভাবে সক্রিয় রয়েছে ⚡</p>
             </div>
         {% elif boost_status == 'Pending' %}
-            <div class="text-center py-6 bg-yellow-50/50 border border-yellow-100 rounded-2xl">
-                <i class="fa-solid fa-hourglass-half text-yellow-500 text-2xl block mb-1.5 animate-pulse"></i>
-                <p class="text-xs font-bold text-slate-800">আপনার রিকোয়েস্টটি প্রক্রিয়াধীন রয়েছে। এডমিন শীঘ্রই এপ্রুভ করবে।</p>
+            <div class="text-center py-8 bg-[#171207]/40 border border-[#fba82f]/20 rounded-2xl shadow-[inset_0_0_20px_rgba(251,168,47,0.05)] relative overflow-hidden">
+                <div class="absolute -right-10 -top-10 w-28 h-28 bg-[#fba82f]/5 rounded-full blur-2xl"></div>
+                <i class="fa-solid fa-hourglass-half text-[#fba82f] text-3xl block mb-2 drop-shadow-[0_0_10px_rgba(251,168,47,0.4)] animate-spin-slow"></i>
+                <p class="text-xs font-black text-white tracking-wide">আপনার রিকোয়েস্টটি প্রক্রিয়াধীন রয়েছে। এডমিন শীঘ্রই এপ্রুভ করবে।</p>
             </div>
         {% else %}
             <!-- নতুন রিকোয়েস্ট ফরম -->
             <form action="/optiboost" method="POST" class="space-y-4">
                 <div>
-                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-2">পেমেন্ট গেটওয়ে নির্বাচন করুন</label>
-                    <div class="grid grid-cols-2 gap-2">
+                    <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2.5">পেমেন্ট গেটওয়ে নির্বাচন করুন</label>
+                    <div class="grid grid-cols-2 gap-3">
                         <!-- bKash -->
-                        <label class="cursor-pointer border border-slate-200 rounded-xl p-2.5 flex flex-col items-center justify-center bg-slate-50/50 hover:bg-slate-50 transition relative text-center" id="label-bkash">
+                        <label class="cursor-pointer border border-slate-800 rounded-2xl p-3 flex flex-col items-center justify-center bg-slate-950/40 hover:bg-slate-900/40 transition duration-300 relative text-center group" id="label-bkash">
                             <input type="radio" name="method" value="Bkash" checked class="hidden" onclick="selectGateway('Bkash')">
-                            <img src="https://images.seeklogo.com/logo-png/27/1/bkash-logo-png_seeklogo-273684.png" class="h-6 object-contain mb-1">
-                            <span class="text-[9px] font-bold text-slate-600">bKash</span>
+                            <img src="https://images.seeklogo.com/logo-png/27/1/bkash-logo-png_seeklogo-273684.png" class="h-6 object-contain mb-1.5 opacity-70 group-hover:opacity-100 transition">
+                            <span class="text-[10px] font-bold text-slate-400 group-hover:text-slate-200 transition">bKash</span>
                         </label>
                         <!-- Nagad -->
-                        <label class="cursor-pointer border border-slate-200 rounded-xl p-2.5 flex flex-col items-center justify-center bg-slate-50/50 hover:bg-slate-50 transition relative text-center" id="label-nagad">
+                        <label class="cursor-pointer border border-slate-800 rounded-2xl p-3 flex flex-col items-center justify-center bg-slate-950/40 hover:bg-slate-900/40 transition duration-300 relative text-center group" id="label-nagad">
                             <input type="radio" name="method" value="Nagad" class="hidden" onclick="selectGateway('Nagad')">
-                            <img src="https://images.seeklogo.com/logo-png/41/1/nagad-logo-png_seeklogo-411803.png" class="h-6 object-contain mb-1">
-                            <span class="text-[9px] font-bold text-slate-600">Nagad</span>
+                            <img src="https://images.seeklogo.com/logo-png/41/1/nagad-logo-png_seeklogo-411803.png" class="h-6 object-contain mb-1.5 opacity-70 group-hover:opacity-100 transition">
+                            <span class="text-[10px] font-bold text-slate-400 group-hover:text-slate-200 transition">Nagad</span>
                         </label>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1.5">আপনার পেমেন্ট নম্বর (017XXXXXXXX)</label>
-                        <input type="text" name="number" required placeholder="01XXXXXXXXX" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none">
+                        <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5">আপনার পেমেন্ট নম্বর</label>
+                        <input type="text" name="number" required placeholder="01XXXXXXXXX" class="w-full px-4 py-3 bg-[#030508] border border-slate-800 rounded-2xl text-xs text-white placeholder-slate-600 focus:outline-none focus:border-[#00E575]/40 focus:shadow-[0_0_15px_rgba(0,229,117,0.05)] transition-all font-mono font-bold">
                     </div>
                     <div>
-                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1.5">Transaction ID (TxID)</label>
-                        <input type="text" name="transaction_id" required placeholder="8JN4X9K3" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none">
+                        <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Transaction ID (TxID)</label>
+                        <input type="text" name="transaction_id" required placeholder="8JN4X9K3" class="w-full px-4 py-3 bg-[#030508] border border-slate-800 rounded-2xl text-xs text-white placeholder-slate-600 focus:outline-none focus:border-[#00E575]/40 focus:shadow-[0_0_15px_rgba(0,229,117,0.05)] transition-all font-mono font-bold">
                     </div>
                 </div>
 
-                <button type="submit" class="w-full bg-slate-950 hover:bg-slate-800 text-white font-extrabold text-xs py-2.5 rounded-xl transition">
+                <button type="submit" class="w-full bg-gradient-to-r from-[#00E575] to-[#00c363] text-black font-black text-xs py-3.5 rounded-2xl tracking-wider shadow-[0_4px_20px_rgba(0,229,117,0.2)] hover:shadow-[0_4px_25px_rgba(0,229,117,0.4)] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 mt-2">
                     Booster রিকোয়েস্ট পাঠান
                 </button>
             </form>
@@ -156,26 +165,40 @@
     </div>
 </div>
 
+<style>
+@keyframes spin-slow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+.animate-spin-slow {
+    animation: spin-slow 4s linear infinite;
+}
+</style>
+
 <script>
 function copyNumber(num, btnId) {
     navigator.clipboard.writeText(num);
     const btn = document.getElementById(btnId);
     btn.innerText = "Copied!";
-    btn.className = "bg-emerald-500 text-white text-[9px] font-bold px-3 py-1.5 rounded-lg transition shadow-sm";
+    btn.className = "bg-[#00E575] text-black text-[10px] font-black px-3 py-2 rounded-xl transition shadow-[0_0_15px_rgba(0,229,117,0.3)]";
     
     setTimeout(() => {
         btn.innerText = "Copy";
-        btn.className = "bg-slate-950 hover:bg-slate-800 text-white text-[9px] font-bold px-3 py-1.5 rounded-lg transition shadow-sm";
+        btn.className = "bg-white text-black hover:bg-slate-200 text-[10px] font-black px-3 py-2 rounded-xl transition-all duration-300 shadow-[0_4px_12px_rgba(255,255,255,0.05)]";
     }, 1500);
 }
 
 function selectGateway(method) {
     document.querySelectorAll('label[id^="label-"]').forEach(lbl => {
-        lbl.className = "cursor-pointer border border-slate-200 rounded-xl p-2.5 flex flex-col items-center justify-center bg-slate-50/50 hover:bg-slate-50 transition relative text-center";
+        lbl.className = "cursor-pointer border border-slate-800 rounded-2xl p-3 flex flex-col items-center justify-center bg-slate-950/40 hover:bg-slate-900/40 transition duration-300 relative text-center group";
     });
     const activeLabel = document.getElementById(`label-${method.toLowerCase()}`);
     if (activeLabel) {
-        activeLabel.className = "cursor-pointer border-2 border-emerald-500 bg-emerald-50/10 rounded-xl p-2.5 flex flex-col items-center justify-center transition relative text-center shadow-sm";
+        activeLabel.className = "cursor-pointer border-2 border-[#00E575] bg-[#03140b]/30 rounded-2xl p-3 flex flex-col items-center justify-center transition relative text-center shadow-[0_0_20px_rgba(0,229,117,0.08)] group";
+        const textSpan = activeLabel.querySelector('span');
+        if(textSpan) textSpan.className = "text-[10px] font-black text-[#00E575] transition";
+        const img = activeLabel.querySelector('img');
+        if(img) img.className = "h-6 object-contain mb-1.5 opacity-100 transition";
     }
 }
 setTimeout(() => selectGateway('Bkash'), 50);
