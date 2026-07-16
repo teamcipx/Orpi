@@ -1,6 +1,43 @@
 {% extends 'base.html' %}
 {% block content %}
 
+<!-- কাস্টম গ্লসি শাইন এবং পালস অ্যানিমেশন স্টাইলস -->
+<style>
+    @keyframes shine {
+        100% {
+            left: 125%;
+        }
+    }
+    .premium-shine-card {
+        position: relative;
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        box-shadow: 0 4px 20px -2px rgba(148, 163, 184, 0.05);
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .premium-shine-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -75%;
+        width: 50%;
+        height: 100%;
+        background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 100%);
+        transform: skewX(-25deg);
+    }
+    .premium-shine-card:hover {
+        border-color: rgba(37, 99, 235, 0.25);
+        box-shadow: 0 12px 30px rgba(37, 99, 235, 0.06);
+        transform: translateY(-2px);
+    }
+    .premium-shine-card:hover::after {
+        animation: shine 0.8s ease-in-out;
+    }
+</style>
+
 <div class="space-y-6 max-w-3xl mx-auto pb-10">
     
     <!-- ১. লাইভ রেফারেল পরিসংখ্যান (প্রিমিয়াম ৩-কলাম গ্রিড) -->
@@ -37,7 +74,7 @@
             <!-- কানেক্টিং টাইমলাইন লাইন -->
             <div class="absolute left-5 top-6 bottom-6 w-1 bg-slate-200 z-0"></div>
 
-            <!-- ================= ১ম ধাপ: লিংক কপি করুন ================= -->
+            <!-- ================= ১ম  ধাপ: লিংক কপি করুন ================= -->
             <div class="relative z-10 space-y-3.5">
                 <!-- স্টেপ সার্কেল -->
                 <div class="absolute -left-[38px] w-6 h-6 rounded-full border-2 border-[#0F172A] bg-white flex items-center justify-center text-[10px] font-bold text-slate-800 shadow-sm z-10">
@@ -45,7 +82,7 @@
                 </div>
                 
                 <div class="flex items-center gap-2">
-                    <span class="text-xs font-black text-[#0F172A]">১ম ধাপ: আপনার আমন্ত্রণ লিংক কপি করুন</span>
+                    <span class="text-xs font-black text-[#0F172A]">১ম  ধাপ: আপনার আমন্ত্রণ লিংক কপি করুন</span>
                     <span class="text-[8px] px-2 py-0.5 rounded-full font-black bg-blue-50 text-blue-600 border border-blue-100 uppercase">Refer & Earn</span>
                 </div>
 
@@ -74,7 +111,7 @@
                 </div>
             </div>
 
-            <!-- ================= ২য় ধাপ: বন্ধুকে আমন্ত্রণ ও কমিশন ক্লেইম ================= -->
+            <!-- ================= ২য় ধাপ: বন্ধু আমন্ত্রণ ও অ্যাক্টিভিটি ভেরিফিকেশন ================= -->
             <div class="relative z-10 space-y-3">
                 <!-- স্টেপ সার্কেল -->
                 <div class="absolute -left-[38px] w-6 h-6 rounded-full border-2 border-[#0F172A] bg-white flex items-center justify-center text-[10px] font-bold text-slate-800 shadow-sm z-10">
@@ -82,24 +119,27 @@
                 </div>
                 
                 <div class="flex items-center gap-2">
-                    <span class="text-xs font-black text-[#0F172A]">২য় ধাপ: বন্ধু সফলভাবে সাইন-আপ করলে কমিশন পান</span>
-                    <span class="text-[8px] px-2 py-0.5 rounded-full font-black bg-emerald-50 text-emerald-600 border border-emerald-100 uppercase">Commission Active</span>
+                    <span class="text-xs font-black text-[#0F172A]">২য় ধাপ: আমন্ত্রিত বন্ধু সক্রিয় থাকলে কমিশন পান</span>
+                    <span class="text-[8px] px-2 py-0.5 rounded-full font-black bg-emerald-50 text-emerald-600 border border-emerald-100 uppercase">Verification Policy</span>
                 </div>
 
-                <!-- কন্টেন্ট এরিয়া -->
+                <!-- কন্টেন্ট এরিয়া (২৪ ঘণ্টা ভেরিফিকেশন ও অ্যাক্টিভ থাকার শর্ত) -->
                 <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-4.5 space-y-3 text-xs text-slate-700 leading-relaxed font-bold shadow-inner">
                     <div class="flex justify-between border-b border-slate-200/50 pb-2">
                         <span class="text-slate-400">আপনার বন্ধু পাবেন (Welcome Bonus)</span>
-                        <span class="text-blue-600 font-black">৳ 50</span>
+                        <span class="text-blue-600 font-black">৳ ৭০.০০</span>
                     </div>
                     <div class="flex justify-between border-b border-slate-200/50 pb-2">
                         <span class="text-slate-400">আপনি পাবেন (Referral Bonus)</span>
                         <span class="text-emerald-600 font-black">৳ ১৫.০০</span>
                     </div>
-                    <!-- ২০% উইথড্রয়াল কমিশন পলিসি হাইলাইট -->
-                    <div class="bg-blue-50/60 border border-blue-100 rounded-xl p-3 text-[10px] text-blue-800 space-y-1">
-                        <p class="font-extrabold flex items-center gap-1.5 text-blue-900"><i class="fa-solid fa-circle-arrow-up text-xs"></i> আজীবন ২০% উইথড্রয়াল কমিশন!</p>
-                        <p class="font-medium text-[9px] text-blue-700/95">আপনার আমন্ত্রিত কোনো মেম্বার যখনই টাকা উইথড্র (Withdraw) করবে, তার মোট উইথড্রয়াল অ্যামাউন্টের ২০% প্রফিট সরাসরি কমিশন হিসেবে আপনার একাউন্ট ব্যালেন্সে অটোমেটিক যোগ হবে!</p>
+                    <!-- অ্যাক্টিভিটি এবং ২৪ ঘণ্টা ভেরিফিকেশন নোটিশ -->
+                    <div class="bg-blue-50/60 border border-blue-100 rounded-xl p-3 text-[10px] text-blue-800 space-y-1.5">
+                        <p class="font-extrabold flex items-center gap-1.5 text-blue-900"><i class="fa-solid fa-circle-check text-xs"></i> ২৪ ঘণ্টার অ্যাক্টিভ ভেরিফিকেশন পলিসি:</p>
+                        <ul class="font-medium text-[9px] text-blue-700/95 space-y-1 pl-1">
+                            <li class="flex items-start gap-1"><span class="w-1 h-1 bg-blue-500 rounded-full shrink-0 mt-1"></span> <span>যাকে রেফার করবেন, সিকিউরিটি এবং সত্যতা নিশ্চিত করতে তার একাউন্টটি <strong>২৪ ঘণ্টা ভেরিফিকেশন অবস্থায় থাকবে</strong>।</span></li>
+                            <li class="flex items-start gap-1"><span class="w-1 h-1 bg-blue-500 rounded-full shrink-0 mt-1"></span> <span>ভেরিফিকেশন সময়ে আমন্ত্রিত সদস্য যদি <strong>নিয়মিত কাজ করে এবং সক্রিয় থাকে</strong>, তবেই কেবল রেফারেল সফল (Success) হবে এবং কমিশন ব্যালেন্সে যোগ হবে।</span></li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -116,7 +156,7 @@
                     <span class="text-[8px] px-2 py-0.5 rounded-full font-black bg-red-50 text-red-600 border border-red-100 uppercase">Warning</span>
                 </div>
 
-                <!-- অফিসিয়াল ওয়ার্নিং বাটন সেকশন -->
+                <!-- অফিসিয়াল ওয়ার্নিং বাটন সেকশন (ভিপিএন ওয়ার্নিং রিমুভড) -->
                 <div class="bg-red-50/50 border border-red-200/80 rounded-2xl p-4.5 space-y-3 text-[10px] text-red-800 leading-relaxed font-bold">
                     <div class="flex items-center gap-2 border-b border-red-100 pb-2 text-red-900 font-black uppercase text-xs">
                         <i class="fa-solid fa-triangle-exclamation animate-pulse"></i> গুরুত্বপূর্ণ সতর্কবার্তা (Warning Notice)
@@ -130,10 +170,6 @@
                         <li class="flex items-start gap-2">
                             <span class="w-1.5 h-1.5 bg-red-500 rounded-full shrink-0 mt-1.5"></span>
                             <span><strong>ফেক রেফার নিষিদ্ধ:</strong> কোনো প্রকার অসৎ উপায়ে করা ফেক রেফার, সেলফ রেফার বা বট রেফার গ্রহণযোগ্য নয় এবং এর জন্য অ্যাকাউন্ট বাতিল করা হবে।</span>
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <span class="w-1.5 h-1.5 bg-red-500 rounded-full shrink-0 mt-1.5"></span>
-                            <span><strong>ভিপিএন (VPN) নিষেধাজ্ঞা:</strong> এই অ্যাপ্লিকেশন ভিপিএন ব্যবহার করে বা অসৎ আইপি দিয়ে ব্যবহার করা সম্পূর্ণ নিষিদ্ধ। সবসময় অরিজিনাল ইন্টারনেট ব্যবহার করুন।</span>
                         </li>
                     </ul>
                 </div>
@@ -181,7 +217,7 @@
 </div>
 
 <script>
-// কপি লিংক স্ক্রিপ্ট (ফিগমা অরেঞ্জ থিম ট্রানজিশন সহ)
+// কপি লিংক স্ক্রিপ্ট
 function copyLink() {
     const linkInput = document.getElementById('referral-link');
     linkInput.select();
