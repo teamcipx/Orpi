@@ -7,7 +7,7 @@
     <!-- Google Fonts: Plus Jakarta Sans -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link class="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -71,18 +71,18 @@
             {% endif %}
         {% endwith %}
 
-        <!-- অ্যাক্টিভ টাস্ক তালিকা উইজেট (ইউজার ফ্রেন্ডলি ক্যাপসুল ডিজাইন) -->
+        <!-- অ্যাক্টিভ টাস্ক তালিকা উইজেট (লং লিংক ট্রাঙ্কেশন ফিক্স সহ) -->
         <div class="premium-card p-6 bg-white rounded-3xl border border-slate-200 shadow-sm">
             <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-800 mb-5 border-b border-slate-50 pb-3 flex items-center gap-2">
                 <i class="fa-solid fa-list-ul text-slate-500"></i> অ্যাক্টিভ নরমাল টাস্ক তালিকা
             </h2>
             <div class="overflow-x-auto text-[11px] font-bold">
-                <table class="w-full text-left">
+                <table class="w-full text-left table-fixed min-w-[500px]">
                     <thead>
                         <tr class="bg-slate-50 border-b border-slate-100 text-slate-400 font-extrabold uppercase">
-                            <th class="p-3">কাজের বিবরণ</th>
-                            <th class="p-3">পুরস্কার</th>
-                            <th class="p-3 text-right">মডারেট অ্যাকশন</th>
+                            <th class="p-3 w-3/5">কাজের বিবরণ</th>
+                            <th class="p-3 w-1/5">পুরস্কার</th>
+                            <th class="p-3 w-1/5 text-right">মডারেট অ্যাকশন</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-50">
@@ -90,7 +90,11 @@
                         <tr class="text-slate-700 hover:bg-slate-50/50 transition">
                             <td class="p-3.5">
                                 <span class="font-extrabold text-[#0F172A] text-xs leading-none block">{{ t.title }}</span>
-                                <a href="{{ t.link }}" target="_blank" class="text-[10px] text-blue-600 hover:underline font-bold block mt-1.5"><i class="fa-solid fa-link text-[8px] mr-1"></i> {{ t.link }}</a>
+                                <!-- মাউস রাখলে সম্পূর্ণ লিংক শো করবে এবং ওভারফ্লো হবে না -->
+                                <a href="{{ t.link }}" target="_blank" title="{{ t.link }}" class="text-[10px] text-blue-600 hover:underline font-bold flex items-center gap-1.5 mt-1.5">
+                                    <i class="fa-solid fa-link text-[8px] shrink-0"></i>
+                                    <span class="truncate max-w-[120px] sm:max-w-xs md:max-w-md block">{{ t.link }}</span>
+                                </a>
                             </td>
                             <td class="p-3.5 font-black text-emerald-600 text-sm">৳ {{ t.reward }}</td>
                             <td class="p-3.5 text-right space-x-2 flex justify-end items-center">
