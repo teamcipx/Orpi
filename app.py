@@ -2118,7 +2118,9 @@ def admin_adshear_action():
         flash("কাজটি রিজেক্ট করা হয়েছে।", "success")
         
     return redirect(url_for('admin_adshear'))
-    # ------------------ সম্পূর্ণ সুরক্ষিত ও অ্যাডভান্সড রিভিউ সিস্টেম রাউটস ------------------
+    
+
+
 # app.py ফাইলের /reviews রাউটটি এটি দিয়ে প্রতিস্থাপন করুন:
 @app.route('/reviews', methods=['GET', 'POST'])
 def reviews_page():
@@ -2134,12 +2136,16 @@ def reviews_page():
         rating = int(request.form.get('rating', 5))
         image_url = request.form.get('image_url')
         
+        # ডাটাবেজ ক্লোন এড়াতে এবং নিখুঁত সময় সংরক্ষণে সার্ভার টাইমস্ট্যাম্প পুশ
+        now_str = datetime.datetime.now(datetime.timezone.utc).isoformat()
+        
         insert_data = {
             "user_id": user_id,
             "reviewer_name": user['username'],
             "rating": rating,
             "comment": comment,
-            "is_admin_fake": False
+            "is_admin_fake": False,
+            "created_at": now_str # পাইথন সার্ভার থেকে জেনারেট করা সঠিক সময়
         }
         
         if image_url and image_url.strip() != "":
@@ -2153,7 +2159,7 @@ def reviews_page():
             
         return redirect(url_for('reviews_page'))
         
-    # --- নিরাপদ ডাটা কুয়েরি ও ডাইনামিক ডেট-অবজেক্ট সর্টিং ---
+    # --- নিরাপদ ডাটা কুয়েরি ও ক্রনোলজিক্যাল সর্টিং ---
     try:
         if is_admin:
             reviews_data = supabase.table("reviews").select("*").execute().data or []
@@ -2162,23 +2168,21 @@ def reviews_page():
             my_reviews = supabase.table("reviews").select("*").eq("user_id", user_id).eq("is_admin_fake", False).execute().data or []
             reviews_data = fake_reviews + my_reviews
             
-        # ডেট-অবজেক্ট অনুযায়ী নিখুঁত সর্টিং হেল্পার ফাংশন
-        def get_review_date_key(x):
-            val = x.get('created_at')
+        # ISO-8601 স্ট্রিং স্লাইসিং এবং ক্রনোলজিক্যাল তুলনা হেল্পার (যা পাইথনের সব সংস্করণে ১০০% কাজ করবে)
+        def get_clean_iso_key(x):
+            val = x.get('created_at', '')
             if not val:
-                return datetime.datetime.min.replace(tzinfo=datetime.timezone.utc)
-            try:
-                # টাইমজোন সামঞ্জস্যপূর্ণ অবজেক্টে রূপান্তর
-                return datetime.datetime.fromisoformat(val.replace('Z', '+00:00'))
-            except Exception:
-                return datetime.datetime.min.replace(tzinfo=datetime.timezone.utc)
-                
+                return ""
+            # প্রথম ১৯টি ক্যারেক্টার নেওয়া হচ্ছে (যেমন: YYYY-MM-DDTHH:MM:SS) যা আলফানিউমেরিক্যালি নিখুঁত সর্ট হবে
+            return val[:19]
+            
         # সফল সর্টিং এক্সিকিউশন (Newest first)
-        reviews_data.sort(key=get_review_date_key, reverse=True)
+        reviews_data.sort(key=get_clean_iso_key, reverse=True)
     except Exception:
         reviews_data = []
             
     return render_template('reviews.html', reviews=reviews_data, is_admin=is_admin)
+    
 @app.route('/admin/reviews/create', methods=['POST'])
 def admin_create_fake_review():
     user_id = session.get('user_id')
