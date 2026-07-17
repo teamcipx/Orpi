@@ -5,6 +5,7 @@ import urllib.request
 import urllib.parse
 import json
 import base64
+import math
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from supabase import create_client, Client
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -217,7 +218,6 @@ def check_admin_auth():
 
 
 # (অন্যান্য কোড অপরিবর্তিত থাকবে, app.py ফাইলের একদম ওপরের দিকে import math যুক্ত করে নিন এবং admin_dashboard রাউটটি নিচের কোড দ্বারা পরিবর্তন করুন)
-import math
 
 @app.route('/admin', methods=['GET', 'POST'])
 def admin_dashboard():
@@ -589,65 +589,9 @@ def admin_add_update():
         
     return redirect(url_for('admin_add_task'))
     
-@app.route('/reviews', methods=['GET', 'POST'])
-def reviews_page():
-    user_id = session.get('user_id')
-    if not user_id:
-        return redirect(url_for('login'))
-        
-    user = supabase.table("users").select("username, is_admin").eq("id", user_id).execute().data[0]
-    is_admin = user.get('is_admin', False)
-    
-    if request.method == 'POST':
-        comment = request.form.get('comment')
-        rating = int(request.form.get('rating', 5))
-        image_url = request.form.get('image_url')
-        
-        insert_data = {
-            "user_id": user_id,
-            "reviewer_name": user['username'],
-            "rating": rating,
-            "comment": comment,
-            "is_admin_fake": False
-        }
-        
-        if image_url and image_url.strip() != "":
-            insert_data["image_url"] = image_url.strip()
-            
-        try:
-            supabase.table("reviews").insert(insert_data).execute()
-            flash("আপনার মূল্যবান মতামতটি সফলভাবে জমা হয়েছে।", "success")
-        except Exception:
-            flash("রিভিউ জমা দিতে ত্রুটি ঘটেছে। অনুগ্রহ করে আবার চেষ্টা করুন।", "danger")
-            
-        return redirect(url_for('reviews_page'))
-        
-    # --- ১০০% নিরাপদ পাইথন-লেভেল ফিল্টারিং ও রেন্ডারিং ---
-    try:
-        # প্রথমে ডাটাবেজ থেকে কোনো ফিল্টার ছাড়া সম্পূর্ণ জেনেরিক তালিকা নিয়ে আসা হচ্ছে (যা কখনোই ক্র্যাশ করবে না)
-        all_reviews = supabase.table("reviews").select("*").execute().data or []
-        
-        reviews_data = []
-        for r in all_reviews:
-            if is_admin:
-                # এডমিন হলে সব দেখতে পাবেন
-                reviews_data.append(r)
-            else:
-                # সাধারণ মেম্বার হলে:
-                # ১. এডমিনের তৈরি ফেক রিভিউগুলো দেখতে পাবেন (is_admin_fake == True)
-                # ২. অথবা নিজের তৈরি করা রিভিউটি দেখতে পাবেন (user_id ম্যাচ করলে)
-                db_user_id = str(r.get('user_id')) if r.get('user_id') else None
-                if r.get('is_admin_fake') == True or db_user_id == str(user_id):
-                    reviews_data.append(r)
-            
-        # তারিখ অনুযায়ী সাজানো (Newest first)
-        reviews_data.sort(key=lambda x: x.get('created_at', ''), reverse=True)
-    except Exception as e:
-        print("Reviews Filter Error:", e)
-        reviews_data = []
-            
-    return render_template('reviews.html', reviews=reviews_data, is_admin=is_admin)
-    
+import math
+
+
 
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
@@ -1213,64 +1157,6 @@ def admin_deposit_action():
     # অ্যাকশন শেষ হওয়ার পর পুনরায় ডিপোজিট লিস্ট পেজে রিডাইরেক্ট করা
     return redirect(url_for('admin_deposits'))
     
-
-@app.route('/admin/reviews/create', methods=['POST'])
-def admin_create_fake_review():
-    user_id = session.get('user_id')
-    if not user_id or not check_admin_auth():
-        return "Unauthorized Action", 403
-        
-    fake_name = request.form.get('fake_name')
-    rating = int(request.form.get('rating', 5))
-    comment = request.form.get('comment')
-    image_url = request.form.get('image_url')
-    custom_date = request.form.get('custom_date')
-    
-    review_data = {
-        "reviewer_name": fake_name,
-        "rating": rating,
-        "comment": comment,
-        "is_admin_fake": True
-    }
-    
-    if image_url and image_url.strip() != "":
-        review_data["image_url"] = image_url.strip()
-        
-    if custom_date:
-        try:
-            parsed_date = datetime.datetime.strptime(custom_date, "%Y-%m-%d").replace(tzinfo=datetime.timezone.utc)
-            review_data["created_at"] = parsed_date.isoformat()
-        except Exception as date_err:
-            print("Date Parse Error:", date_err)
-            
-    try:
-        supabase.table("reviews").insert(review_data).execute()
-        flash("ফেক রিভিউটি সফলভাবে লাইভ করা হয়েছে।", "success")
-    except Exception as e:
-        error_msg = str(e)
-        flash(f"ডাটাবেজ ত্রুটি: {error_msg}", "danger")
-        print("Database Insert Error:", error_msg)
-        
-    return redirect(url_for('reviews_page'))
-
-
-@app.route('/admin/reviews/delete', methods=['POST'])
-def admin_delete_review():
-    user_id = session.get('user_id')
-    if not user_id or not check_admin_auth():
-        return "Unauthorized Action", 403
-        
-    review_id = request.form.get('review_id')
-    try:
-        supabase.table("reviews").delete().eq("id", review_id).execute()
-        flash("রিভিউটি সফলভাবে ডিলিট করা হয়েছে।", "success")
-    except Exception:
-        flash("রিভিউটি ডিলিট করা যায়নি।", "danger")
-        
-    return redirect(url_for('reviews_page'))
-    
-# (অন্যান্য কোড অপরিবর্তিত থাকবে, টাস্ক সম্পর্কিত রাউটগুলো নিচের কোড দ্বারা প্রতিস্থাপন করুন)
-
 # ১. টাস্ক তালিকা রাউট (/tasks)
 @app.route('/tasks')
 def tasks():
