@@ -2119,7 +2119,7 @@ def admin_adshear_action():
         
     return redirect(url_for('admin_adshear'))
     # ------------------ সম্পূর্ণ সুরক্ষিত ও অ্যাডভান্সড রিভিউ সিস্টেম রাউটস ------------------
-
+# app.py ফাইলের /reviews রাউটটি এটি দিয়ে প্রতিস্থাপন করুন:
 @app.route('/reviews', methods=['GET', 'POST'])
 def reviews_page():
     user_id = session.get('user_id')
@@ -2153,6 +2153,7 @@ def reviews_page():
             
         return redirect(url_for('reviews_page'))
         
+    # --- নিরাপদ ডাটা কুয়েরি ও ডাইনামিক ডেট-অবজেক্ট সর্টিং ---
     try:
         if is_admin:
             reviews_data = supabase.table("reviews").select("*").execute().data or []
@@ -2161,13 +2162,23 @@ def reviews_page():
             my_reviews = supabase.table("reviews").select("*").eq("user_id", user_id).eq("is_admin_fake", False).execute().data or []
             reviews_data = fake_reviews + my_reviews
             
-        reviews_data.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+        # ডেট-অবজেক্ট অনুযায়ী নিখুঁত সর্টিং হেল্পার ফাংশন
+        def get_review_date_key(x):
+            val = x.get('created_at')
+            if not val:
+                return datetime.datetime.min.replace(tzinfo=datetime.timezone.utc)
+            try:
+                # টাইমজোন সামঞ্জস্যপূর্ণ অবজেক্টে রূপান্তর
+                return datetime.datetime.fromisoformat(val.replace('Z', '+00:00'))
+            except Exception:
+                return datetime.datetime.min.replace(tzinfo=datetime.timezone.utc)
+                
+        # সফল সর্টিং এক্সিকিউশন (Newest first)
+        reviews_data.sort(key=get_review_date_key, reverse=True)
     except Exception:
         reviews_data = []
             
     return render_template('reviews.html', reviews=reviews_data, is_admin=is_admin)
-
-
 @app.route('/admin/reviews/create', methods=['POST'])
 def admin_create_fake_review():
     user_id = session.get('user_id')
