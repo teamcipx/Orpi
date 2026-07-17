@@ -1,16 +1,56 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<div class="space-y-6 max-w-3xl mx-auto pb-10">
+<!-- কাস্টম ৩ডি গ্লসি সাইন এবং পালস গ্লো অ্যানিমেশন স্টাইলস -->
+<style>
+    @keyframes shine {
+        100% {
+            left: 125%;
+        }
+    }
+    .premium-shine-card {
+        position: relative;
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        box-shadow: 0 4px 20px -2px rgba(148, 163, 184, 0.05);
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .premium-shine-card:hover {
+        border-color: rgba(37, 99, 235, 0.25);
+        box-shadow: 0 12px 30px rgba(37, 99, 235, 0.06);
+        transform: translateY(-2px);
+    }
+    .premium-shine-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -75%;
+        width: 50%;
+        height: 100%;
+        background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 100%);
+        transform: skewX(-25deg);
+    }
+    .premium-shine-card:hover::after {
+        animation: shine 0.8s ease-in-out;
+    }
+</style>
+
+<div class="space-y-6 max-w-2xl mx-auto pb-10">
     
-    <!-- ১. টাইটেল কার্ড (স্মুথ রাউন্ডেড ও স্পিনিং গোল্ড স্টার) -->
+    <!-- টাইটেল কার্ড (স্মুথ রাউন্ডেড কোণ ও গ্রেডিয়েন্ট শ্যাডো) -->
     <div class="premium-card p-5 rounded-3xl border border-white/40 shadow-[0_4px_20px_rgba(37,99,235,0.04)]">
-        <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-800 flex items-center gap-2">
-            <i class="fa-solid fa-star text-amber-500 animate-pulse"></i> ব্যবহারকারীদের মতামত ও রিভিউসমূহ
-        </h2>
+        <div class="space-y-1">
+            <h2 class="text-xs font-extrabold text-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-star text-amber-500 animate-pulse"></i> ব্যবহারকারীদের মতামত ও রিভিউসমূহ
+            </h2>
+            <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Opti Work - Live User Testimonials</p>
+        </div>
     </div>
 
-    <!-- ফ্ল্যাশ মেসেজ নোটিশ -->
+    <!-- ফ্ল্যাশ এরর নোটিশ প্যানেল -->
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
@@ -21,7 +61,7 @@
         {% endif %}
     {% endwith %}
 
-    <!-- ================= কেবল এডমিনদের জন্য ফেক রিভিউ তৈরির উইজেট ================= -->
+    <!-- ================= ১. কেবল এডমিনদের জন্য ফেক রিভিউ তৈরির উইজেট ================= -->
     {% if is_admin %}
     <div class="premium-card p-6 rounded-3xl border-2 border-dashed border-purple-300/80 bg-purple-50/10">
         <h3 class="text-xs font-extrabold uppercase tracking-wider text-purple-700 mb-4 border-b border-purple-100 pb-2.5 flex items-center gap-1.5">
@@ -74,7 +114,7 @@
     </div>
     {% endif %}
 
-    <!-- ৩. সাধারণ ইউজারের জন্য নিজস্ব রিভিউ ফর্ম -->
+    <!-- ২. সাধারণ ইউজারের জন্য নিজস্ব রিভিউ ফর্ম -->
     {% if not is_admin %}
     <div class="premium-card p-6 rounded-3xl border border-white/40 shadow-[0_12px_40px_rgba(0,0,0,0.02)]">
         <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-800 mb-4 border-b border-slate-50 pb-2.5">
@@ -116,24 +156,22 @@
     </div>
     {% endif %}
 
-    <!-- ৪. রিভিউ ফিড সেকশন (গ্লোয়িং আভাটার ও রাউন্ডেড প্রুফ ইমেজ) -->
+    <!-- ৩. থ্রি-ডি শিমার উইজেট সম্পন্ন রিভিউ ফিড সেকশন (সর্টিং: নতুন রিভিউ সবার আগে) -->
     <div class="space-y-4">
-        {% for r in reviews %}
-        <div class="premium-card p-5 rounded-3xl border border-white/40 shadow-sm flex flex-col justify-between space-y-4">
-            <div class="flex justify-between items-start">
-                <div class="flex items-center gap-3">
-                    <!-- আভাটার গোল্ডেন বর্ডার সহ -->
-                    <div class="w-10 h-10 rounded-full bg-slate-50 border border-slate-200/80 flex items-center justify-center text-slate-400">
+        {% for r in reviews | sort(attribute='id', reverse=true) %}
+        <div class="premium-shine-card p-5 rounded-3xl flex flex-col justify-between space-y-4">
+            <div class="flex justify-between items-start leading-none">
+                <div class="flex items-center gap-3 leading-none">
+                    <div class="w-10 h-10 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-400">
                         <i class="fa-solid fa-user-circle text-2xl"></i>
                     </div>
-                    <div class="space-y-0.5">
-                        <h4 class="text-xs font-extrabold text-slate-900">{{ r.reviewer_name }}</h4>
-                        <span class="text-[9px] text-slate-400 font-bold block">{{ r.created_at[:10] }}</span>
+                    <div class="space-y-0.5 leading-none">
+                        <h4 class="text-xs font-extrabold text-slate-800 leading-none">{{ r.reviewer_name }}</h4>
+                        <span class="text-[9px] text-slate-400 font-mono font-bold block mt-1.5 leading-none">{{ r.created_at[:10] }}</span>
                     </div>
                 </div>
                 
-                <!-- গোল্ডেন রেটিং স্টারসমূহ -->
-                <div class="flex text-amber-400 text-[10px] gap-0.5 bg-amber-500/5 px-2 py-1 rounded-lg border border-amber-500/10">
+                <div class="flex text-amber-400 text-[10px] leading-none gap-0.5 bg-amber-500/5 px-2 py-1 rounded-lg border border-amber-500/10">
                     {% for i in range(r.rating) %}
                         <i class="fa-solid fa-star"></i>
                     {% endfor %}
@@ -141,20 +179,20 @@
             </div>
 
             <!-- রিভিউ টেক্সট -->
-            <p class="text-xs text-slate-700 leading-relaxed pl-1">
+            <p class="text-xs text-slate-600 leading-relaxed pl-1 font-semibold">
                 "{{ r.comment }}"
             </p>
 
             <!-- যদি রিভিউতে কোনো পেমেন্ট প্রুফ ইমেজ থাকে -->
             {% if r.image_url %}
             <div class="mt-2">
-                <a href="{{ r.image_url }}" target="_blank" class="inline-block border border-slate-200/80 p-2 rounded-2xl bg-slate-50 hover:bg-slate-100/50 transition">
+                <a href="{{ r.image_url }}" target="_blank" class="inline-block border border-slate-200 p-2 rounded-2xl bg-slate-50 hover:bg-slate-100/50 transition">
                     <img src="{{ r.image_url }}" alt="Proof" class="max-h-28 rounded-xl object-contain">
                 </a>
             </div>
             {% endif %}
 
-            <!-- এডমিন ডিলিট অপশন -->
+            <!-- এডমিন কন্ট্রোল ডিলিট অপশন -->
             {% if is_admin %}
             <div class="text-right pt-3 border-t border-slate-100 flex justify-between items-center text-[10px] font-bold">
                 <span class="text-slate-400 font-extrabold uppercase tracking-wider">
@@ -176,14 +214,11 @@
 
 </div>
 
-<!-- ৫. ImgBB ইমেজ আপলোড স্ক্রিপ্ট -->
+<!-- ৪. ওয়ান-ক্লিক অটোমেটিক ফেইলওভার প্রক্সি আপলোডার (ImgBB) -->
 <script>
 function uploadReviewPhoto(input, fieldId) {
     const file = input.files[0];
     if (!file) return;
-
-    // আপনার ImgBB API Key
-    const IMGBB_API_KEY = "1cb6f7d4b65dfd982d0435de86bb8aff"; 
 
     const formData = new FormData();
     formData.append("image", file);
@@ -193,13 +228,13 @@ function uploadReviewPhoto(input, fieldId) {
     label.className = "text-[10px] text-slate-600 font-bold animate-pulse";
 
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", `https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, true);
+    xhr.open("POST", "/api/upload", true); // সুরক্ষিত রোটেশন প্রক্সি
 
     xhr.onload = function() {
         if (xhr.status === 200) {
             const data = JSON.parse(xhr.responseText);
-            if (data.success) {
-                document.getElementById(`proof-input-${fieldId}`).value = data.data.url;
+            if (data.status === "success") {
+                document.getElementById(`proof-input-${fieldId}`).value = data.url;
                 label.innerText = "Uploaded! ✓";
                 label.className = "text-[10px] text-emerald-600 font-extrabold animate-none";
             } else {
