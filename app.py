@@ -667,10 +667,10 @@ def referrals():
         if ref_user:
             last_login_str = ref_user[0]['last_login']
             last_login = datetime.datetime.fromisoformat(last_login_str.replace('Z', '+00:00'))
-            twelve_hours_ago = now - datetime.timedelta(hours=12)
+            twelve_hours_ago = now - datetime.timedelta(hours=10)
             
             # শর্ত: শেষ ১২ ঘণ্টায় একটিভ হতে হবে এবং কমপক্ষে ২টি নরমাল টাস্ক সফলভাবে এপ্রুভড থাকতে হবে
-            if last_login >= twelve_hours_ago and approved_task_count >= 2:
+            if last_login >= twelve_hours_ago and approved_task_count >= 3:
                 is_valid = True
                 
         if is_valid:
@@ -1685,8 +1685,7 @@ def add_money():
             
     history = supabase.table("deposits").select("*").eq("user_id", user_id).order("created_at", desc=True).execute().data
     return render_template('add_money.html', history=history)
-# app.py ফাইলের /register রাউটটি এটি দিয়ে পরিবর্তন করুন
-# (এখানে সব রেফারেলকে ২৪ ঘণ্টার জন্য 'Processing' বা পেন্ডিং অবস্থায় রাখা হচ্ছে)
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     ref_by = request.args.get('ref', '')
@@ -1754,7 +1753,7 @@ def register():
                 
                 # রেফারেলটি ২৪ ঘণ্টার জন্য পেন্ডিং রাখা হচ্ছে
                 if referrer_id:
-                    scheduled_time = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=24)
+                    scheduled_time = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=16)
                     
                     supabase.table("referrals").insert({
                         "referrer_id": referrer_id,
