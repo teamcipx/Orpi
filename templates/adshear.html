@@ -1,253 +1,43 @@
-{% extends 'base.html' %}
-{% block content %}
-
-<!-- কাস্টম ৩ডি গ্লসি সাইন এবং পালস গ্লো অ্যানিমেশন স্টাইলস -->
-<style>
-    @keyframes shine {
-        100% {
-            left: 125%;
-        }
-    }
-    .shine-card {
-        position: relative;
-        overflow: hidden;
-        background: linear-gradient(135deg, #FFFFFF 0%, #F5F9FC 100%);
-        border: 1px solid rgba(226, 232, 240, 0.9);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.01);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .shine-card:hover {
-        border-color: rgba(251, 168, 47, 0.25);
-        box-shadow: 0 10px 30px rgba(251, 168, 47, 0.03);
-        transform: translateY(-2px);
-    }
-    .shine-card:hover::after {
-        animation: shine 0.8s ease-in-out;
-    }
-    .shine-card::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -75%;
-        width: 50%;
-        height: 100%;
-        background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.4) 100%);
-        transform: skewX(-25deg);
-    }
-</style>
-
-<div class="space-y-4 max-w-2xl mx-auto pb-10">
+<!-- ২. অ্যাডস টাস্ক তালিকা প্যানেল -->
+<div class="blockio-card p-5 bg-white">
+    <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-700 mb-4 border-b border-slate-100 pb-2.5">
+        <i class="fa-solid fa-list-ul"></i> রানিং অ্যাডস শেয়ার টাস্কসমূহ
+    </h3>
     
-    <!-- টাইটেল কার্ড -->
-    <div class="blockio-card p-5 flex justify-between items-center bg-white border border-slate-200 shadow-sm">
-        <div class="space-y-1">
-            <h2 class="text-sm font-extrabold text-slate-800 flex items-center gap-1.5">
-                <i class="fa-solid fa-star text-[#fba82f] animate-pulse"></i> ব্যবহারকারীদের মতামত ও রিভিউসমূহ
-            </h2>
-            <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Opti Work - Live User Testimonials</p>
-        </div>
-    </div>
-
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
-                <div class="p-3 text-xs text-center rounded-xl border font-bold {% if category == 'success' %}bg-emerald-50 text-emerald-600 border-emerald-100{% else %}bg-red-50 text-red-600 border-red-100{% endif %}">
+                <div class="p-2.5 mb-3 text-[10px] rounded-lg border text-center {% if category == 'success' %}bg-emerald-50 text-emerald-600 border-emerald-100{% else %}bg-red-50 text-red-600 border-red-100{% endif %}">
                     {{ message }}
                 </div>
             {% endfor %}
         {% endif %}
     {% endwith %}
 
-    <!-- ================= ১. কেবল এডমিনদের জন্য ফেক রিভিউ তৈরির উইজেট ================= -->
-    {% if is_admin %}
-    <div class="blockio-card p-6 bg-white border-2 border-dashed border-purple-200">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-purple-700 mb-3 border-b border-purple-100 pb-2 flex items-center gap-1.5">
-            <i class="fa-solid fa-user-shield"></i> Admin Control: Create Fake Review
-        </h3>
-        <form action="/admin/reviews/create" method="POST" class="space-y-3.5">
-            <input type="hidden" name="image_url" id="proof-input-admin-fake">
-            
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">ফেক নাম (Fake Name)</label>
-                    <input type="text" name="fake_name" required placeholder="যেমন: রাহুল হাসান" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-slate-300">
-                </div>
-                <div>
-                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">ফেক ডেট (Fake Date)</label>
-                    <input type="date" name="custom_date" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-slate-300">
-                </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">রেটিং (১-৫ স্টার)</label>
-                    <select name="rating" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-slate-300">
-                        <option value="5">⭐⭐⭐⭐★ (5 Star)</option>
-                        <option value="4">⭐⭐⭐⭐☆ (4 Star)</option>
-                        <option value="3">⭐⭐⭐☆☆ (3 Star)</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">ছবি বা প্রমাণ সংযুক্ত করুন</label>
-                    <div class="flex items-center gap-2">
-                        <label for="admin-fake-file" class="cursor-pointer bg-purple-50 text-purple-700 text-[10px] font-bold px-3.5 py-1.5 rounded-xl border border-purple-100 transition shadow-sm">
-                            Select Photo
-                        </label>
-                        <input type="file" id="admin-fake-file" class="hidden" accept="image/*" onchange="uploadReviewPhoto(this, 'admin-fake')">
-                        <span id="label-admin-fake" class="text-[9px] text-slate-400 font-bold">সিলেক্ট করা হয়নি</span>
-                    </div>
-                </div>
-            </div>
-
-            <div>
-                <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">রিভিউ ডেসক্রিপশন (Comment)</label>
-                <textarea name="comment" required placeholder="খুবই চমৎকার সাইট, আমি নিয়মিত পেমেন্ট পাচ্ছি..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-slate-300 h-16"></textarea>
-            </div>
-
-            <button type="submit" class="w-full bg-slate-950 hover:bg-slate-800 text-white font-extrabold text-xs py-2.5 rounded-xl transition">
-                লাইভ করুন (Post to Public)
-            </button>
-        </form>
-    </div>
-    {% endif %}
-
-    <!-- ২. সাধারণ ইউজারের জন্য নিজস্ব রিভিউ ফর্ম -->
-    {% if not is_admin %}
-    <div class="blockio-card p-5 bg-white border border-slate-200 shadow-sm">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-3 border-b border-slate-50 pb-2">
-            আপনার অভিজ্ঞতা শেয়ার করুন (Write Review)
-        </h3>
-        <form action="/reviews" method="POST" class="space-y-3.5">
-            <input type="hidden" name="image_url" id="proof-input-user-review">
-
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">আপনার রেটিং</label>
-                    <select name="rating" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-slate-300">
-                        <option value="5">⭐⭐⭐⭐★ (5/5)</option>
-                        <option value="4">⭐⭐⭐⭐☆ (4/5)</option>
-                        <option value="3">⭐⭐⭐☆☆ (3/5)</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">পেমেন্ট প্রুফ / স্ক্রিনশট</label>
-                    <div class="flex items-center gap-2">
-                        <label for="user-review-file" class="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold px-3 py-1.5 rounded-xl border border-slate-200 transition">
-                            Upload Proof
-                        </label>
-                        <input type="file" id="user-review-file" class="hidden" accept="image/*" onchange="uploadReviewPhoto(this, 'user-review')">
-                        <span id="label-user-review" class="text-[9px] text-slate-400 font-bold">আপলোড করা হয়নি</span>
-                    </div>
-                </div>
-            </div>
-
-            <div>
-                <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">মতামত বিবরণী</label>
-                <textarea name="comment" required placeholder="সাইটটি কেমন লাগলো? আপনার পেমেন্ট অভিজ্ঞতা আমাদের লিখে জানান..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-slate-300 h-16"></textarea>
-            </div>
-
-            <button type="submit" class="w-full bg-slate-950 hover:bg-slate-800 text-white font-extrabold text-xs py-2.5 rounded-xl transition">
-                মতামত সাবমিট করুন
-            </button>
-        </form>
-    </div>
-    {% endif %}
-
-    <!-- ৩. থ্রি-ডি শিমার উইজেট সম্পন্ন রিভিউ ফিড সেকশন -->
     <div class="space-y-3">
-        {% for r in reviews %}
-        <div class="shine-card p-5 rounded-2xl flex flex-col justify-between space-y-3.5">
-            <div class="flex justify-between items-start leading-none">
-                <div class="flex items-center gap-2.5 leading-none">
-                    <div class="w-8 h-8 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-400">
-                        <i class="fa-solid fa-user-circle text-lg"></i>
-                    </div>
-                    <div class="leading-none">
-                        <h4 class="text-xs font-bold text-slate-850 leading-none">{{ r.reviewer_name }}</h4>
-                        <span class="text-[9px] text-slate-400 font-mono block mt-1 leading-none">{{ r.created_at[:10] }}</span>
-                    </div>
+        {% for task in all_ads_tasks %}
+        <div class="flex justify-between items-center bg-slate-50/70 border border-slate-100 p-4 rounded-2xl">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-purple-500 shadow-sm">
+                    <i class="fa-solid fa-bullhorn text-sm animate-pulse"></i>
                 </div>
-                
-                <div class="flex text-amber-400 text-[10px] leading-none">
-                    {% for i in range(r.rating) %}
-                        <i class="fa-solid fa-star"></i>
-                    {% endfor %}
+                <div>
+                    <h3 class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                        {{ task.title }}
+                        {% if task.id in submission_map and submission_map[task.id] == 'Rejected' %}
+                            <span class="bg-red-100 text-red-700 text-[8px] font-extrabold px-1.5 py-0.5 rounded border border-red-200">Rejected / Resubmit</span>
+                        {% endif %}
+                    </h3>
+                    <p class="text-[9px] text-slate-400 font-semibold">পুরস্কার: ৳ {{ task.reward }}</p>
                 </div>
             </div>
-
-            <p class="text-xs text-slate-600 leading-relaxed pl-10 font-medium">
-                "{{ r.comment }}"
-            </p>
-
-            {% if r.image_url %}
-            <div class="pl-10 mt-1">
-                <a href="{{ r.image_url }}" target="_blank" class="inline-block border border-slate-200 p-1.5 rounded-2xl bg-slate-50 hover:bg-slate-100 transition shadow-inner">
-                    <img src="{{ r.image_url }}" alt="Proof" class="max-h-24 rounded-lg object-contain">
-                </a>
-            </div>
-            {% endif %}
-
-            {% if is_admin %}
-            <div class="text-right pt-2.5 border-t border-slate-100 flex justify-between items-center text-[10px] font-bold">
-                <span class="text-slate-400 font-extrabold uppercase tracking-wider">
-                    {% if r.is_admin_fake %}Type: Fake Review{% else %}Type: Real User{% endif %}
-                </span>
-                <form action="/admin/reviews/delete" method="POST" onsubmit="return confirm('আপনি কি নিশ্চিত যে এই রিভিউটি ডিলিট করতে চান?');">
-                    <input type="hidden" name="review_id" value="{{ r.id }}">
-                    <button type="submit" class="bg-red-50 text-red-600 px-3 py-1.5 rounded-lg hover:bg-red-100 transition border border-red-150">
-                        Delete Review
-                    </button>
-                </form>
-            </div>
-            {% endif %}
+            
+            <a href="/adshear/{{ task.id }}" class="bg-slate-900 hover:bg-slate-800 text-white text-[10px] font-black px-4 py-2 rounded-full transition shadow-sm">
+                View Task
+            </a>
         </div>
         {% else %}
-        <p class="text-xs text-slate-400 text-center py-4">বর্তমানে কোনো পাবলিক রিভিউ উপলব্ধ নেই।</p>
+        <p class="text-xs text-slate-400 text-center py-4">বর্তমানে কোনো অ্যাক্টিভ অ্যাডস শেয়ার টাস্ক উপলব্ধ নেই।</p>
         {% endfor %}
     </div>
-
 </div>
-
-<!-- ৪. ওয়ান-ক্লিক অটোমেটিক ফেইলওভার প্রক্সি আপলোডার (ImgBB) -->
-<script>
-function uploadReviewPhoto(input, fieldId) {
-    const file = input.files[0];
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append("image", file);
-
-    const label = document.getElementById(`label-${fieldId}`);
-    label.innerText = "Uploading Image...";
-    label.className = "text-[9px] text-slate-500 font-bold animate-pulse";
-
-    const xhr = new XMLHttpRequest();
-    xhr.open("POST", "/api/upload", true); // সুরক্ষিত রোটেশন প্রক্সি
-
-    xhr.onload = function() {
-        if (xhr.status === 200) {
-            const data = JSON.parse(xhr.responseText);
-            if (data.status === "success") {
-                document.getElementById(`proof-input-${fieldId}`).value = data.url;
-                label.innerText = "Uploaded! ✓";
-                label.className = "text-[9px] text-emerald-500 font-extrabold animate-none";
-            } else {
-                label.innerText = "Upload Failed.";
-                label.className = "text-[9px] text-red-500 font-bold animate-none";
-            }
-        } else {
-            label.innerText = "Connection Error.";
-            label.className = "text-[9px] text-red-500 font-bold animate-none";
-        }
-    };
-
-    xhr.onerror = function() {
-        label.innerText = "Network Error.";
-        label.className = "text-[9px] text-red-500 font-bold animate-none";
-    };
-
-    xhr.send(formData);
-}
-</script>
-
-{% endblock %}
