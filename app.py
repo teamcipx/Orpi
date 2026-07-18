@@ -629,71 +629,19 @@ def about():
         
     user = supabase.table("users").select("*").eq("id", user_id).execute().data[0]
     return render_template('about.html', user=user)
-# app.py ফাইলের /referrals রাউটটি এটি দিয়ে পরিবর্তন করুন
-# (এখানে ২৪ ঘণ্টা অতিবাহিত হওয়ার পর ১২ ঘণ্টা একটিভিটি এবং ২ টি এপ্রুভড টাস্ক সম্পন্নের শর্ত যাচাই হবে)
+    
+
+    
+# app.py ফাইলের /referrals রাউটটি এটি দিয়ে প্রতিস্থাপন করুন
 @app.route('/referrals')
 def referrals():
     user_id = session.get('user_id')
     if not user_id:
         return redirect(url_for('login'))
         
-    now = datetime.datetime.now(datetime.timezone.utc)
     user = supabase.table("users").select("uid").eq("id", user_id).execute().data[0]
     
-    # বকেয়া থাকা 'Processing' রেফারেলগুলোর অন-ডিমান্ড চেকিং লুপ (২৪ ঘণ্টা পূর্ণ হওয়া সাপেক্ষে)
-    due_referrals = supabase.table("referrals") \
-        .select("id, referred_id") \
-        .eq("referrer_id", user_id) \
-        .eq("status", "Processing") \
-        .lte("scheduled_payout_at", now.isoformat()) \
-        .execute().data or []
-
-    for ref in due_referrals:
-        referred_id = ref['referred_id']
-        
-        # ক. আমন্ত্রিত ইউজারের শেষ লগইন টাইমস্ট্যাম্প রিট্রিভ করা
-        ref_user = supabase.table("users").select("last_login").eq("id", referred_id).execute().data
-        
-        # খ. আমন্ত্রিত ইউজারের এপ্রুভড নরমাল টাস্কের মোট সংখ্যা গণনা করা
-        task_res = supabase.table("task_submissions") \
-            .select("id", count="exact") \
-            .eq("user_id", referred_id) \
-            .eq("status", "Approved").execute()
-            
-        approved_task_count = task_res.count if task_res.count is not None else 0
-        
-        is_valid = False
-        
-        if ref_user:
-            last_login_str = ref_user[0]['last_login']
-            last_login = datetime.datetime.fromisoformat(last_login_str.replace('Z', '+00:00'))
-            twelve_hours_ago = now - datetime.timedelta(hours=10)
-            
-            # শর্ত: শেষ ১২ ঘণ্টায় একটিভ হতে হবে এবং কমপক্ষে ২টি নরমাল টাস্ক সফলভাবে এপ্রুভড থাকতে হবে
-            if last_login >= twelve_hours_ago and approved_task_count >= 3:
-                is_valid = True
-                
-        if is_valid:
-            new_status = "Success"
-            # রেফার প্রতি ১৫ টাকা কমিশন যোগ করা হচ্ছে
-            supabase.rpc("increment_balance", {"user_id": user_id, "amount": 15.00}).execute()
-            
-            # সফল ট্রানজেকশন হিস্ট্রি সেভ
-            supabase.table("transactions").insert({
-                "user_id": user_id,
-                "title": f"Referral Bonus (UID: #{user['uid']})",
-                "amount": 15.00
-            }).execute()
-        else:
-            new_status = "Failed" # শর্ত অপূর্ণ থাকলে সরাসরি Failed বা বাতিল দেখাবে
-            
-        supabase.rpc("process_referral_payout", {
-            "p_referral_id": ref['id'],
-            "p_referrer_id": user_id,
-            "p_new_status": new_status,
-            "p_reward_amount": 15.00
-        }).execute()
-            
+    # সরাসরি ডাটাবেজ থেকে রিয়েল-টাইম রেফারেল তথ্য সংগ্রহ করা হচ্ছে
     referrals_data = supabase.table("referrals") \
         .select("status, created_at, users:referred_id(username, email)") \
         .eq("referrer_id", user_id).execute().data or []
@@ -711,8 +659,8 @@ def referrals():
                            success_count=success_count,
                            processing_count=processing_count,
                            failed_count=failed_count,
-                           total_earnings=total_earnings)
-    
+                           total_earnings=total_earnings)    
+        
 @app.route('/admin/task', methods=['GET'])
 def admin_task_hub():
     if not check_admin_auth():
@@ -1686,6 +1634,7 @@ def add_money():
     history = supabase.table("deposits").select("*").eq("user_id", user_id).order("created_at", desc=True).execute().data
     return render_template('add_money.html', history=history)
 
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     ref_by = request.args.get('ref', '')
@@ -1701,33 +1650,49 @@ def register():
         if ip_address:
             ip_address = ip_address.split(',')[0].strip()
 
+        # ১. সর্বোচ্চ কঠোর ফিজিক্যাল ডিভাইস ফিঙ্গারপ্রিন্ট প্রটেকশন (১ ডিভাইসে কেবল ১টি অ্যাকাউন্ট সম্ভব)
         if device_fingerprint and device_fingerprint.strip() != "":
-            if not device_fingerprint.startswith("fallback_") and not device_fingerprint.startswith("secure_fallback_"):
-                device_exists = supabase.table("users").select("id").eq("device_fingerprint", device_fingerprint.strip()).execute().data
-                if device_exists:
-                    flash("নিরাপত্তা সতর্কতা: আপনার ডিভাইস থেকে ইতিমধ্যে একটি অ্যাকাউন্ট তৈরি করা হয়েছে। একই ডিভাইস থেকে একাধিক অ্যাকাউন্ট খোলা সম্পূর্ণ নিষিদ্ধ।", "danger")
-                    return redirect(url_for('register', ref=ref_by))
+            fp_clean = device_fingerprint.strip().lower()
+            # ব্রাউজার এরর বা ডামি ভ্যালু ব্যতীত প্রকৃত ইউনিক হ্যাশ চেক
+            if fp_clean not in ["undefined", "null", "none", ""] and len(fp_clean) > 4:
+                if not fp_clean.startswith("fallback_") and not fp_clean.startswith("secure_fallback_"):
+                    device_exists = supabase.table("users").select("id").eq("device_fingerprint", fp_clean).execute().data
+                    if device_exists:
+                        flash("নিরাপত্তা সতর্কতা: আপনার ডিভাইস থেকে ইতিমধ্যে একটি অ্যাকাউন্ট তৈরি করা হয়েছে। একই ডিভাইস থেকে একাধিক অ্যাকাউন্ট খোলা সম্পূর্ণ নিষিদ্ধ।", "danger")
+                        return redirect(url_for('register', ref=ref_by))
 
         hashed_password = generate_password_hash(password)
         initial_balance = 0.00
         referrer_id = None
         referrer_device_name = None
+        referrer_fingerprint = None
 
         if referrer_code and referrer_code.isdigit():
             ref_uid = int(referrer_code)
-            referrer_res = supabase.table("users").select("id", "device_name").eq("uid", ref_uid).execute()
+            referrer_res = supabase.table("users").select("id", "device_name", "device_fingerprint").eq("uid", ref_uid).execute()
             if referrer_res.data:
                 referrer_id = referrer_res.data[0]['id']
                 referrer_device_name = referrer_res.data[0].get('device_name')
+                referrer_fingerprint = referrer_res.data[0].get('device_fingerprint')
                 initial_balance = 50.00 # নতুন মেম্বার পাবেন ৫০ টাকা বোনাস
 
-        if referrer_id and referrer_device_name and device_name:
-            ref_dev_clean = referrer_device_name.strip().lower()
-            my_dev_clean = device_name.strip().lower()
-            is_generic = "unknown" in my_dev_clean or "android" in my_dev_clean or "pc" in my_dev_clean
-            if not is_generic and ref_dev_clean == my_dev_clean:
-                flash("নিরাপত্তা সতর্কতা: আপনার এবং রেফারারের মোবাইল ডিভাইসের মডেল একই হওয়ায় রেজিস্ট্রেশন বাতিল করা হয়েছে।", "danger")
-                return redirect(url_for('register', ref=ref_by))
+        # ২. নিজের ফোনে নিজে রেফার করার চিটিং সম্পূর্ণ ব্লক করা হচ্ছে
+        if referrer_id:
+            if referrer_device_name and device_name:
+                ref_dev_clean = referrer_device_name.strip().lower()
+                my_dev_clean = device_name.strip().lower()
+                is_generic_dev = "unknown" in my_dev_clean or "android" in my_dev_clean or "pc" in my_dev_clean
+                if not is_generic_dev and ref_dev_clean == my_dev_clean:
+                    flash("নিরাপত্তা সতর্কতা: রেফারার এবং আপনার মোবাইল ডিভাইসের মডেল একই হওয়ায় রেজিস্ট্রেশন বাতিল করা হয়েছে।", "danger")
+                    return redirect(url_for('register', ref=ref_by))
+
+            if referrer_fingerprint and device_fingerprint:
+                ref_fp_clean = referrer_fingerprint.strip().lower()
+                my_fp_clean = device_fingerprint.strip().lower()
+                is_generic_fp = my_fp_clean in ["undefined", "null", "none", ""] or len(my_fp_clean) < 5 or my_fp_clean.startswith("fallback_")
+                if not is_generic_fp and ref_fp_clean == my_fp_clean:
+                    flash("নিরাপত্তা সতর্কতা: আপনি একই ডিভাইস ব্যবহার করে নিজের রেফারের লিংকে অ্যাকাউন্ট খুলতে পারবেন না।", "danger")
+                    return redirect(url_for('register', ref=ref_by))
 
         user_data = {
             "username": username,
@@ -1743,6 +1708,7 @@ def register():
             new_user_res = supabase.table("users").insert(user_data).execute()
             if new_user_res.data:
                 new_user_id = new_user_res.data[0]['id']
+                new_uid = new_user_res.data[0]['uid']
                 
                 free_expiry = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=30)
                 supabase.table("user_packages").insert({
@@ -1751,15 +1717,30 @@ def register():
                     "expires_at": free_expiry.isoformat()
                 }).execute()
                 
-                # রেফারেলটি ২৪ ঘণ্টার জন্য পেন্ডিং রাখা হচ্ছে
+                # ৩. ইনস্ট্যান্ট রেফারেল সাকসেস চেক এবং ৮০% রেভিনিউ প্রব্যাবিলিটি রোল
                 if referrer_id:
-                    scheduled_time = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=16)
+                    now_str = datetime.datetime.now(datetime.timezone.utc).isoformat()
                     
+                    if random.random() < 0.80:
+                        status = "Success"
+                        # রেফারকারী সাথে সাথে ১৫ টাকা বোনাস পাবেন
+                        supabase.rpc("increment_balance", {"user_id": referrer_id, "amount": 15.00}).execute()
+                        
+                        # লেনদেন হিস্ট্রি লগ
+                        supabase.table("transactions").insert({
+                            "user_id": referrer_id,
+                            "title": f"Referral Bonus (New UID: #{new_uid})",
+                            "amount": 15.00
+                        }).execute()
+                    else:
+                        status = "Failed" # ২০% ক্ষেত্রে রেফারেল বাতিল বা ফেইলড দেখাবে
+                        
                     supabase.table("referrals").insert({
                         "referrer_id": referrer_id,
                         "referred_id": new_user_id,
-                        "status": "Processing",
-                        "scheduled_payout_at": scheduled_time.isoformat()
+                        "status": status,
+                        "scheduled_payout_at": now_str,
+                        "processed_at": now_str
                     }).execute()
                         
                 flash("নিবন্ধন সফল হয়েছে। লগইন করুন।", "success")
@@ -1768,6 +1749,8 @@ def register():
             flash("ইউজারনেম অথবা ইমেইলটি ইতিমধ্যে ব্যবহৃত হয়েছে।", "danger")
             
     return render_template('register.html', ref_by=ref_by)
+    
+
     
 @app.route('/claim-daily', methods=['POST'])
 def claim_daily():
