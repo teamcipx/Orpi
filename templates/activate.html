@@ -17,6 +17,21 @@
         </div>
     </div>
 
+    <!-- ⏰ 🔥 লিমিটেড টাইম অফার নোটিশ (নতুন যোগ করা হয়েছে) -->
+    <div class="bg-gradient-to-r from-amber-500 to-red-500 p-3.5 rounded-2xl text-white shadow-md relative overflow-hidden border border-amber-300">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-white/20 rounded-xl flex items-center justify-center shrink-0 text-lg">
+                ⏳
+            </div>
+            <div class="text-xs">
+                <span class="bg-white/20 text-[9px] font-black uppercase px-2 py-0.5 rounded-full tracking-wider block w-max mb-0.5">সীমিত সময়ের অফার</span>
+                <p class="font-bold leading-snug">
+                    আগামী <span class="underline decoration-yellow-300 font-extrabold text-yellow-200">২৩ তারিখের পর</span> ফি হবে <span class="line-through opacity-80">৳১০০</span> টাকা! এখন অফারে মাত্র <span class="bg-yellow-300 text-slate-950 font-black px-1.5 py-0.5 rounded-md text-sm shadow-sm animate-pulse">৳৪০</span> টাকা!
+                </p>
+            </div>
+        </div>
+    </div>
+
     <!-- 🛡️ ২. ইমোশনাল সিকিউরিটি ও টাকা নেওয়ার স্পষ্ট কারণ -->
     <div class="blockio-card p-5 bg-white border border-slate-200 shadow-sm rounded-2xl relative overflow-hidden">
         <div class="absolute -right-8 -top-8 w-24 h-24 bg-blue-500/5 rounded-full blur-2xl"></div>
@@ -48,7 +63,7 @@
                 <span class="font-bold text-indigo-600">১. নম্বর কপি:</span> বিকাশ/নগদ নম্বরটি কপি করুন।
             </div>
             <div class="bg-slate-50 p-2 rounded-xl border border-slate-100">
-                <span class="font-bold text-indigo-600">২. সেন্ড মানি:</span> আপনার অ্যাপ থেকে ৳৪০ সেন্ড মানি করুন।
+                <span class="font-bold text-indigo-600">২. সেন্ড মানি:</span> আপনার অ্যাপ থেকে <strong class="text-emerald-600 font-black">৳৪০</strong> সেন্ড মানি করুন।
             </div>
             <div class="bg-slate-50 p-2 rounded-xl border border-slate-100">
                 <span class="font-bold text-indigo-600">৩. TrxID সংগ্রহ:</span> মেসেজ থেকে Transaction ID কপি করুন।
@@ -72,7 +87,10 @@
                 <div class="flex items-center gap-2.5">
                     <img src="https://images.seeklogo.com/logo-png/27/1/bkash-logo-png_seeklogo-273684.png" class="h-6 object-contain" alt="bKash">
                     <div class="leading-tight">
-                        <span class="text-[9px] text-pink-600 font-bold block uppercase">bKash Personal [৳৪০]</span>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[9px] text-pink-600 font-bold uppercase">bKash Personal</span>
+                            <span class="bg-pink-600 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full">৳৪০</span>
+                        </div>
                         <span class="text-xs font-mono font-bold text-slate-800">01618897806</span>
                     </div>
                 </div>
@@ -86,7 +104,10 @@
                 <div class="flex items-center gap-2.5">
                     <img src="https://images.seeklogo.com/logo-png/41/1/nagad-logo-png_seeklogo-411803.png" class="h-6 object-contain" alt="Nagad">
                     <div class="leading-tight">
-                        <span class="text-[9px] text-orange-600 font-bold block uppercase">Nagad Personal [৳৪০]</span>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[9px] text-orange-600 font-bold uppercase">Nagad Personal</span>
+                            <span class="bg-orange-600 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full">৳৪০</span>
+                        </div>
                         <span class="text-xs font-mono font-bold text-slate-800">01912107604</span>
                     </div>
                 </div>
@@ -155,18 +176,18 @@
                 </div>
 
                 <button type="submit" class="w-full bg-slate-950 hover:bg-slate-800 active:scale-[0.98] text-white font-extrabold text-xs py-3 rounded-xl transition shadow flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-circle-check text-emerald-400"></i> সাবমিট করুন
+                    <i class="fa-solid fa-circle-check text-emerald-400"></i> সাবমিট করুন (৳৪০)
                 </button>
             </form>
         {% endif %}
     </div>
 
-    <!-- 💬 ৬. লাইভ সাপোর্ট কার্ড -->
+    <!-- 💬 ৬. লাইভ সাপোর্ট কার্ড (ইউজারনেম আপডেট করা হয়েছে) -->
     <div class="bg-indigo-50/60 border border-indigo-100 rounded-2xl p-4 text-center">
         <p class="text-[11px] text-indigo-900 font-semibold mb-1">কোনো সমস্যা হচ্ছে বা সাহায্য প্রয়োজন?</p>
         <p class="text-[10px] text-indigo-600 mb-2.5">আমাদের সাপোর্ট টিম ২৪/৭ আপনার পাশে আছে।</p>
-        <a href="https://t.me/your_telegram_channel" target="_blank" class="inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold px-4 py-2 rounded-xl transition shadow-sm">
-            <i class="fa-brands fa-telegram"></i> টেলিগ্রাম সাপোর্টে যোগাযোগ করুন
+        <a href="https://t.me/Optiworkhelp" target="_blank" class="inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold px-4 py-2 rounded-xl transition shadow-sm">
+            <i class="fa-brands fa-telegram"></i> টেলিগ্রাম সাপোর্টে যোগাযোগ করুন (@Optiworkhelp)
         </a>
     </div>
 
