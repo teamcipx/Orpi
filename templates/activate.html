@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="space-y-4 max-w-md mx-auto pb-10">
+    
+    <!-- ১. অ্যাক্টিভেশন ফাক্ট ও রুলস কার্ড -->
+    <div class="blockio-card p-5 bg-white border border-slate-200 shadow-sm relative overflow-hidden">
+        <div class="absolute -right-8 -top-8 w-24 h-24 bg-red-500/5 rounded-full blur-2xl animate-pulse"></div>
+        <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-700 mb-3 flex items-center gap-1.5">
+            <i class="fa-solid fa-shield-halved text-[#fba82f]"></i> অ্যাকাউন্ট সচল করার নিয়মাবলী
+        </h2>
+        <div class="bg-slate-50 border border-slate-100 p-4 rounded-xl space-y-2.5 text-xs text-slate-600 leading-relaxed text-justify font-sans">
+            <p>
+                <strong>কেন নেওয়া হচ্ছে? (Security Fact):</strong> আমাদের ক্লাউড জিপিইউ কম্পিউটিং সার্ভারের ব্যান্ডউইথ প্রসেসিং সচল রাখতে, ভিপিএন বা স্ক্রিপ্ট বটের ক্ষতিকর স্প্যামিং প্রতিরোধ করতে এবং ১00% জেনুইন হিউম্যান ইউজার ভেরিফাই করতে এই ওয়ান-টাইম চার্জটি নেওয়া হয়। এটি সম্পূর্ণ একটি অলাভজনক নেটওয়ার্ক সিকিউরিটি চার্জ।
+            </p>
+            <p class="font-bold text-red-500">
+                * অ্যাকাউন্ট অ্যাক্টিভ বা সচল করা ছাড়া আপনি কোনো টাস্ক সম্পূর্ণ করতে অথবা টাকা উইথড্র করতে পারবেন না।
+            </p>
+        </div>
+    </div>
+
+    <!-- ২. অফিশিয়াল এডমিন পেমেন্ট নম্বরসমূহ -->
+    <div class="blockio-card p-5 bg-white border border-slate-200 shadow-sm space-y-3">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">রিচার্জ সেন্ড মানি নম্বর</h3>
+        <div class="space-y-2">
+            <!-- bKash -->
+            <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100">
+                <div class="flex items-center gap-2">
+                    <img src="https://images.seeklogo.com/logo-png/27/1/bkash-logo-png_seeklogo-273684.png" class="h-5 object-contain">
+                    <div class="leading-tight">
+                        <span class="text-[8px] text-slate-400 font-bold block uppercase">bKash (Personal) [৳৪০]</span>
+                        <span class="text-xs font-mono font-bold text-slate-800">01618897806</span>
+                    </div>
+                </div>
+                <button onclick="copyNumber('01618897806', 'bkash-btn')" id="bkash-btn" class="bg-black hover:opacity-90 text-white text-[9px] font-bold px-3 py-1.5 rounded-lg transition shadow-sm">Copy</button>
+            </div>
+            
+            <!-- Nagad -->
+            <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100">
+                <div class="flex items-center gap-2">
+                    <img src="https://images.seeklogo.com/logo-png/41/1/nagad-logo-png_seeklogo-411803.png" class="h-5 object-contain">
+                    <div class="leading-tight">
+                        <span class="text-[8px] text-slate-400 font-bold block uppercase">Nagad (Personal) [৳৪০]</span>
+                        <span class="text-xs font-mono font-bold text-slate-800">01912107604</span>
+                    </div>
+                </div>
+                <button onclick="copyNumber('01912107604', 'nagad-btn')" id="nagad-btn" class="bg-black hover:opacity-90 text-white text-[9px] font-bold px-3 py-1.5 rounded-lg transition shadow-sm">Copy</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ৩. পেমেন্ট প্রুফ ও অ্যাক্টিভেশন ফর্ম -->
+    <div class="blockio-card p-5 bg-white border border-slate-200 shadow-sm">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-3 border-b border-slate-50 pb-2">
+            অ্যাক্টিভেশন ফর্ম পূরণ করুন
+        </h3>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="p-2.5 mb-3 text-[10px] rounded-lg border text-center {% if category == 'success' %}bg-emerald-50 text-emerald-600 border-emerald-100{% else %}bg-red-50 text-red-600 border-red-100{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% if status == 'Pending' %}
+            <!-- পেন্ডিং রিকোয়েস্ট স্টেটাস -->
+            <div class="text-center py-6 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                <i class="fa-solid fa-hourglass-half text-yellow-500 mb-2 text-2xl block animate-pulse"></i>
+                <p class="text-xs font-bold text-slate-800">পেমেন্ট রিকোয়েস্টটি প্রক্রিয়াধীন আছে!</p>
+                <p class="text-[10px] text-slate-400 mt-1 max-w-[200px] mx-auto leading-relaxed">এডমিন আপনার ট্রানজেকশন আইডি চেক করে ৫-১০ মিনিটের মধ্যে সচল করে দেবে।</p>
+            </div>
+        {% else %}
+            
+            {% if status == 'Rejected' %}
+            <div class="bg-red-50 border border-red-100 text-red-700 p-3 mb-4 rounded-xl text-[10px] font-bold leading-relaxed">
+                 * আপনার পূর্বের পেমেন্ট তথ্যটি ভুল হওয়ায় বাতিল হয়েছে। সঠিক নিয়মে সেন্ড মানি করে আবার প্রুফ দিন।
+            </div>
+            {% endif %}
+
+            <form action="/activate" method="POST" class="space-y-3.5">
+                <!-- গেটওয়ে সিলেক্টর -->
+                <div>
+                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">পেমেন্ট মেথড</label>
+                    <select name="method" required class="minimal-select w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none">
+                        <option value="Bkash">bKash (Send Money)</option>
+                        <option value="Nagad">Nagad (Send Money)</option>
+                    </select>
+                </div>
+                <!-- মোবাইল নম্বর -->
+                <div>
+                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">মোবাইল নম্বর (যে নম্বর থেকে পাঠিয়েছেন)</label>
+                    <input type="text" name="number" required placeholder="01XXXXXXXXX" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none">
+                </div>
+                <!-- ট্রানজেকশন আইডি -->
+                <div>
+                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Transaction ID (TxID)</label>
+                    <input type="text" name="transaction_id" required placeholder="8JN4X9K3" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none font-mono">
+                </div>
+
+                <button type="submit" class="w-full bg-slate-950 hover:bg-slate-800 text-white font-extrabold text-xs py-2.5 rounded-xl transition shadow">
+                    সাবমিট করুন
+                </button>
+            </form>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// কপি নম্বর স্ক্রিপ্ট
+function copyNumber(num, btnId) {
+    navigator.clipboard.writeText(num);
+    const btn = document.getElementById(btnId);
+    
+    btn.innerText = "Copied!";
+    btn.className = "bg-emerald-500 text-white text-[9px] font-bold px-3 py-1.5 rounded-lg transition shadow-sm";
+    
+    setTimeout(() => {
+        btn.innerText = "Copy";
+        btn.className = "bg-slate-950 hover:bg-slate-800 text-white text-[9px] font-bold px-3 py-1.5 rounded-lg transition shadow-sm";
+    }, 1500);
+}
+</script>
+
+{% endblock %}
