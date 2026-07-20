@@ -301,7 +301,97 @@ def admin_dashboard():
 def page_not_found(e):
     return render_template('404.html'), 404
 
+# (অন্যান্য কোডের সাথে নিচের নতুন অ্যাকাউন্ট অ্যাক্টিভেশন রাউটগুলো যুক্ত করুন)
 
+# ১. মেম্বার প্যানেল অ্যাকাউন্ট অ্যাক্টিভেশন রাউট (/activate)
+@app.route('/activate', methods=['GET', 'POST'])
+def activate():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+        
+    user = supabase.table("users").select("*").eq("id", user_id).execute().data[0]
+    
+    # ইউজার অলরেডি এক্টিভেটেড হলে সরাসরি ড্যাশবোর্ডে রিডাইরেক্ট করবে
+    if user.get('is_activated'):
+        return redirect(url_for('dashboard'))
+        
+    if request.method == 'POST':
+        method = request.form.get('method')
+        number = request.form.get('number')
+        tx_id = request.form.get('transaction_id')
+        
+        try:
+            supabase.table("activations").insert({
+                "user_id": user_id,
+                "payment_method": method,
+                "payment_number": number,
+                "transaction_id": tx_id.strip(),
+                "status": "Pending"
+            }).execute()
+            flash("অ্যাক্টিভেশন অনুরোধ সফলভাবে জমা হয়েছে। এডমিন দ্রুত এটি সক্রিয় করে দেবে।", "success")
+            return redirect(url_for('activate'))
+        except Exception:
+            flash("এই ট্রানজেকশন আইডিটি পূর্বে ব্যবহৃত হয়েছে।", "danger")
+            
+    # পেন্ডিং বা রিজেক্টেড রিকোয়েস্টের স্ট্যাটাস ট্র্যাকিং
+    sub_query = supabase.table("activations").select("*").eq("user_id", user_id).order("created_at", desc=True).execute().data
+    status = sub_query[0]['status'] if sub_query else None
+    
+    return render_template('activate.html', user=user, status=status)
+
+
+# ২. এডমিন প্যানেল অ্যাকাউন্ট অ্যাক্টিভেশন ম্যানেজমেন্ট রাউট (/admin/activations)
+@app.route('/admin/activations')
+def admin_activations():
+    if not check_admin_auth():
+        return "Unauthorized Access", 403
+        
+    pending = supabase.table("activations") \
+        .select("*, users:user_id(username, email, uid)") \
+        .eq("status", "Pending") \
+        .order("created_at", desc=True).execute().data or []
+        
+    return render_template('admin_activations.html', pending_activations=pending)
+
+
+# ৩. এডমিন অ্যাক্টিভেশন এপ্রুভ/রিজেক্ট অ্যাকশন রাউট
+@app.route('/admin/activate-action', methods=['POST'])
+def admin_activate_action():
+    if not check_admin_auth():
+        return "Unauthorized Action", 403
+        
+    activation_id = request.form.get('activation_id')
+    action = request.form.get('action') # 'approve' or 'reject'
+    
+    act_query = supabase.table("activations").select("*").eq("id", activation_id).execute().data
+    if not act_query:
+        flash("রেকর্ড পাওয়া যায়নি।", "danger")
+        return redirect(url_for('admin_activations'))
+        
+    act = act_query[0]
+    target_user_id = act['user_id']
+    
+    if action == 'approve':
+        # ১. পেমেন্ট এপ্রুভ করা
+        supabase.table("activations").update({"status": "Approved"}).eq("id", activation_id).execute()
+        # ২. ইউজারের অ্যাকাউন্ট এক্টিভ বা ট্রু (True) করে দেওয়া
+        supabase.table("users").update({"is_activated": True}).eq("id", target_user_id).execute()
+        
+        # ৩. ৪0 টাকা এক্টিভেশন ফি লগে মাইনাস ভ্যালু আকারে সেভ করা
+        supabase.table("transactions").insert({
+            "user_id": target_user_id,
+            "title": "Account Activated Successfully (৳40 fee)",
+            "amount": -40.00
+        }).execute()
+        
+        flash("ইউজার অ্যাকাউন্ট সফলভাবে অ্যাক্টিভ বা সচল করা হয়েছে।", "success")
+    elif action == 'reject':
+        supabase.table("activations").update({"status": "Rejected"}).eq("id", activation_id).execute()
+        flash("অ্যাক্টিভেশন পেমেন্ট রিকোয়েস্ট বাতিল করা হয়েছে।", "success")
+        
+    return redirect(url_for('admin_activations'))
+    
 @app.errorhandler(500)
 def internal_server_error(e):
     return render_template('500.html'), 500
